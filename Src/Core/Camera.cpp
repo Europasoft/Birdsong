@@ -64,7 +64,7 @@ namespace EngineCore
 
 	glm::mat4 Camera::getViewMatrix() const
 	{
-		return glm::inverse(transform.mat4());
+		return glm::inverse(Transform::makeMatrixZYX(transform.rotation, transform.scale, transform.translation));
 	}
 
 	void Camera::moveInPlaneXY(const Vector2D<double>& lookInput, const float& moveFwd, const float& moveRight, 
@@ -75,12 +75,8 @@ namespace EngineCore
 		//if (extraSpeed) { moveSpeed *= 80.f; }
 		if (extraSpeed) { moveSpeed *= 100.f; }
 
-		float yawInput = lookInput.x != 0 ? lookInput.x / abs(lookInput.x) : 0.f;
-		float pitchInput = lookInput.y != 0 ? lookInput.y / abs(lookInput.y) : 0.f;
-		auto rotV = Vec{ 0.f, pitchInput, -yawInput };
-
-		if (Vec::dot(rotV, rotV) > std::numeric_limits<float>::epsilon())
-		{ transform.rotation += rotV.getNormalized() * lookSpeed * deltaTime; }
+		transform.rotation.y += (float)lookInput.y * lookSpeed * deltaTime;      // pitch
+		transform.rotation.z += (float)(-lookInput.x) * lookSpeed * deltaTime;   // yaw
 
 		// limit pitch values to exactly 85 degrees
 		transform.rotation.y = glm::clamp(transform.rotation.y, 
@@ -88,7 +84,8 @@ namespace EngineCore
 		// prevent overflow from continous yawing
 		transform.rotation.z = glm::mod(transform.rotation.z, glm::two_pi<float>());
 
-		const Vec forwardDir = transform.getForwardVector();
+		glm::vec4 fwd4 = Transform::makeMatrixZYX(transform.rotation, transform.scale, transform.translation) * glm::vec4{ 1.f, 0.f, 0.f, 0.f };
+		const Vec forwardDir = Vec{ fwd4.x, fwd4.y, fwd4.z };
 		const Vec rightDir = Vec{ forwardDir.y, -forwardDir.x, 0.f };
 		const Vec upDir{ 0.f, 0.f, 1.f };
 
