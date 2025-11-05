@@ -22,20 +22,22 @@ namespace EngineCore
 	Attachment::Attachment(EngineDevice& device, const AttachmentProperties& props, bool input, bool sampled)
 		: device{ device }, props{ props }
 	{	
-		VkImageCreateInfo imageInfo = Image::makeImageCreateInfo(props.extent.width, props.extent.height); // defaults
-		imageInfo.format = props.format;
-		imageInfo.samples = props.samples;
-		imageInfo.usage = Attachment::isColor(props.type) ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT : VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+		const auto& p = getProps();
+		
+		VkImageCreateInfo imageInfo = Image::makeImageCreateInfo(p.extent.width, p.extent.height); // defaults
+		imageInfo.format = p.format;
+		imageInfo.samples = p.samples;
+		imageInfo.usage = Attachment::isColor(p.type) ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT : VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 		imageInfo.usage |= input ? VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT : 0;
 		imageInfo.usage |= sampled ? VK_IMAGE_USAGE_SAMPLED_BIT : 0;
 		// support lazily allocated memory (device-only, incompatible with sampled usage)
 		imageInfo.usage |= !sampled ? VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT : 0;
 
-		images.reserve(props.imageCount);
-		for (uint32_t i = 0; i < props.imageCount; i++)
+		images.reserve(p.imageCount);
+		for (uint32_t i = 0; i < p.imageCount; i++)
 		{
 			images.push_back(std::make_unique<Image>(device, imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT));
-			images.back()->updateView(props.format, props.getAspectFlags(), VK_IMAGE_VIEW_TYPE_2D); // create image view
+			images.back()->updateView(p.format, p.getAspectFlags()); // create image view
 		}
 		return;
 	}
@@ -43,13 +45,20 @@ namespace EngineCore
 	Attachment::Attachment(EngineDevice& device, const AttachmentProperties& props, const std::vector<VkImage>& imagesIn)
 		: device{ device }, props{ props }
 	{
+		const auto& p = getProps();
+		
 		images.reserve(imagesIn.size());
 		for (const auto& image : imagesIn)
 		{
 			images.push_back(std::make_unique<Image>(device, image)); // copy image handle
-			images.back()->updateView(props.format, VK_IMAGE_VIEW_TYPE_2D); // create image view
+			images.back()->updateView(p.format, VK_IMAGE_ASPECT_COLOR_BIT); // create image view
 		}
 	}
+
+	//VkFormat Attachment::getFormat(const EngineSwapChain& swapchain) const
+	//{
+	//	return info().isColor() ? swapchain.getSwapChainImageFormat() : swapchain.getDepthFormat(); // defaults
+	//}
 
 	std::vector<VkImageView> Attachment::getImageViews() const 
 	{

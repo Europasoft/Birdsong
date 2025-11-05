@@ -10,9 +10,6 @@
 
 namespace EngineCore 
 {
-	/*	the renderpass creates framebuffers according to framebufferCount, 
-	* where each framebuffer refers to the attachment's
-	*/
 	Renderpass::Renderpass(EngineDevice& device, const std::vector<AttachmentUse>& attachmentUses, 
 							VkExtent2D framebufferExtent, uint32_t framebufferCount)
 		: device{ device }, attachments{ attachmentUses }, framebufferExtent{ framebufferExtent }, framebufferCount{ framebufferCount }
@@ -24,7 +21,7 @@ namespace EngineCore
 
 	Renderpass::~Renderpass() 
 	{
-		//for (auto f : framebuffers) { vkDestroyFramebuffer(device.device(), f, nullptr); }
+		for (auto f : framebuffers) { vkDestroyFramebuffer(device.device(), f, nullptr); }
 		vkDestroyRenderPass(device.device(), renderpass, nullptr);
 	}
 
@@ -140,8 +137,7 @@ namespace EngineCore
 		framebuffers.resize(framebufferCount);
 		for (size_t i = 0; i < framebufferCount; i++)
 		{
-			// for each attachment, get the image view corresponding to framebuffer index
-			// in other words, framebuffer N references image N from attachment A, N from B, etc.
+			// for each attachment, get the corresponding view
 			std::vector<VkImageView> views;
 			views.reserve(attachments.size());
 			for (auto& a : attachments) { views.push_back(a.imageViews[i]); }
@@ -160,13 +156,13 @@ namespace EngineCore
 		}
 	}
 
-	void Renderpass::begin(VkCommandBuffer cmdBuffer, uint32_t framebufferSetIndex, uint32_t framebufferIndex)
+	void Renderpass::begin(VkCommandBuffer cmdBuffer, uint32_t framebufferIndex)
 	{
 		assert(cmdBuffer != VK_NULL_HANDLE && "begin renderpass failed, no command buffer");
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = renderpass;
-		renderPassInfo.framebuffer = framebufferSets[framebufferSetIndex].getFramebuffer(framebufferIndex);
+		renderPassInfo.framebuffer = framebuffers[framebufferIndex];
 
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = framebufferExtent;
@@ -199,38 +195,6 @@ namespace EngineCore
 		VkRect2D scissor{ {0, 0}, framebufferExtent };
 		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
-	}
-
-	FramebufferSet::~FramebufferSet()
-	{
-		for (VkFramebuffer f : framebuffers) { vkDestroyFramebuffer(device.device(), f, nullptr); }
-	}
-
-	void FramebufferSet::createFramebuffers(const LightAttachment& lightAttachment)
-	{
-		framebuffers.resize(framebufferCount);
-		for (size_t i = 0; i < framebufferCount; i++)
-		{
-			// for each attachment, get the image view corresponding to framebuffer index
-			// in other words, framebuffer N references image N from attachment A, N from B, etc.
-			std::vector<VkImageView> views;
-			views.reserve(attachments.size());
-			for (auto& a : attachments) { views.push_back(a.imageViews[i]); }
-
-			VkFramebufferCreateInfo framebufferInfo = {};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = renderpass;
-			framebufferInfo.attachmentCount = static_cast<uint32_t>(views.size());
-			framebufferInfo.pAttachments = views.data();
-			framebufferInfo.width = framebufferExtent.width;
-			framebufferInfo.height = framebufferExtent.height;
-			framebufferInfo.layers = 1;
-
-			if (vkCreateFramebuffer(device.device(), &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to create framebuffer");
-			}
-		}
 	}
 
 }

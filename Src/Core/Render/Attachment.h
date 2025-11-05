@@ -29,7 +29,7 @@ namespace EngineCore
 	{
 	public:
 		Attachment(EngineDevice& device, const AttachmentProperties& props, bool input, bool sampled);
-		// create from existing images (e.g. for swapchain attachment)
+		// create from existing images(e.g. for swapchain attachment)
 		Attachment(EngineDevice& device, const AttachmentProperties& props, const std::vector<VkImage>& swapchainImages);
 		Attachment(Attachment&&) = default;
 

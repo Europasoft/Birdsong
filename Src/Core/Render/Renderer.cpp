@@ -133,8 +133,8 @@ namespace EngineCore
 
 	}
 
-	void Renderer::beginRenderpassBase(VkCommandBuffer cmdBuffer) { baseRenderpass->begin(cmdBuffer, 0, currentImageIndex); }
-	void Renderer::beginRenderpassFx(VkCommandBuffer cmdBuffer) { fxRenderpass->begin(cmdBuffer, 0, currentImageIndex); }
+	void Renderer::beginRenderpassBase(VkCommandBuffer cmdBuffer) { baseRenderpass->begin(cmdBuffer, currentImageIndex); }
+	void Renderer::beginRenderpassFx(VkCommandBuffer cmdBuffer) { fxRenderpass->begin(cmdBuffer, currentImageIndex); }
 
 	VkCommandBuffer Renderer::beginFrame() 
 	{
