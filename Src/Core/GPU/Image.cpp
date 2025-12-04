@@ -19,6 +19,7 @@ namespace EngineCore
 		loadFromDisk(path);
 		updateView(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D);
 		createSampler(sampler, device, 1.f); // TODO: need to check if device supports the anisotropy level!
+		setDebugName(path);
 	}
 
 	Image::Image(EngineDevice& device, VkImageCreateInfo info, VkMemoryPropertyFlags memProps)
@@ -244,5 +245,24 @@ namespace EngineCore
 		if (vkCreateSampler(device.device(), &info, nullptr, &samplerHandleOut) != VK_SUCCESS)
 		{ throw std::runtime_error("failed to create texture sampler"); }
 	}
+
+    void Image::setDebugName(const std::string& name)
+    {
+		if (not device.enableValidationLayers)
+			return;
+
+		debugName = name;
+		PFN_vkSetDebugUtilsObjectNameEXT pfnSetDebugUtilsObjectNameEXT = 
+				(PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(device.getVulkanInstance(), "vkSetDebugUtilsObjectNameEXT");
+		const VkDebugUtilsObjectNameInfoEXT imageNameInfo =
+		{
+			.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+			.pNext = NULL,
+			.objectType = VK_OBJECT_TYPE_IMAGE,
+			.objectHandle = (uint64_t)image,
+			.pObjectName = debugName.c_str(),
+		};
+		pfnSetDebugUtilsObjectNameEXT(device.device(), &imageNameInfo);
+    }
 
 }

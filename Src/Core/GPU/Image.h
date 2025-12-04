@@ -32,12 +32,15 @@ namespace EngineCore
 		static VkImageCreateInfo makeImageCreateInfo(uint32_t width, uint32_t height);
 		static void createSampler(VkSampler& samplerHandleOut, EngineDevice& device, const float& anisotropy = 0.f);
 
+		void setDebugName(const std::string& name);
+
 		VkSampler sampler = VK_NULL_HANDLE; // samplers are not connected to specific images
 	private:
 		EngineDevice& device;
 		VkImage image = VK_NULL_HANDLE;
 		VkDeviceMemory imageMemory = VK_NULL_HANDLE;
 		VkImageView imageView = VK_NULL_HANDLE; // default image view
+		std::string debugName;
 
 		void create(VkMemoryPropertyFlags memProps, VkImageCreateInfo info);
 		void loadFromDisk(const std::string& path);
@@ -45,6 +48,7 @@ namespace EngineCore
 		void copyBufferToImage(const GBuffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount);
 		void destroyView();
 		void destroyImage();
+
 	};
 }
 
