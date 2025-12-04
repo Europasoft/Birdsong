@@ -34,7 +34,7 @@ namespace EngineCore
 	{
 	public:
 
-		InterfaceDrawer(EngineDevice& device, VkRenderPass renderpass, VkSampleCountFlagBits samples);
+		InterfaceDrawer(EngineDevice& device, const RenderingFormats& formats, VkSampleCountFlagBits samples);
 		InterfaceDrawer(const InterfaceDrawer&) = delete;
 		InterfaceDrawer& operator=(const InterfaceDrawer&) = delete;
 

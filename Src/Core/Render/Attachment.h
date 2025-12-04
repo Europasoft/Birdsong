@@ -34,6 +34,7 @@ namespace EngineCore
 		Attachment(Attachment&&) = default;
 
 		std::vector<VkImageView> getImageViews() const;
+		std::vector<VkImage> getImages() const;
 		const AttachmentProperties& getProps() const { return props; }
 		bool isCompatible(const Attachment& b) const;
 		static bool isColor(AttachmentType t) { return t == AttachmentType::COLOR || t == AttachmentType::RESOLVE; }

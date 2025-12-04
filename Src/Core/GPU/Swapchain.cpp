@@ -39,7 +39,7 @@ namespace EngineCore
 		}
 
 		// cleanup synchronization objects
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
+		for (size_t i = 0; i < imageAvailableSemaphores.size(); i++) 
 		{
 			vkDestroySemaphore(device.device(), renderFinishedSemaphores[i], nullptr);
 			vkDestroySemaphore(device.device(), imageAvailableSemaphores[i], nullptr);
@@ -112,6 +112,11 @@ namespace EngineCore
 
 	Attachment& EngineSwapChain::getSwapchainAttachment() { return *swapchainAttachment.get(); }
 
+	std::vector<VkImage> EngineSwapChain::getSwapChainImages() const 
+	{ 
+		return swapchainAttachment->getImages(); 
+	}
+
 	const AttachmentProperties& EngineSwapChain::getAttachmentProperties() const
 	{
 		AttachmentProperties props(AttachmentType::COLOR);
@@ -131,13 +136,10 @@ namespace EngineCore
 
 	VkResult EngineSwapChain::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex)
 	{
-		if (imagesInFlight[*imageIndex] != VK_NULL_HANDLE) 
-		{ vkWaitForFences(device.device(), 1, &imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX); }
-		imagesInFlight[*imageIndex] = inFlightFences[currentFrame];
-
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
+		// use semaphores indexed by the acquired image
 		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
@@ -166,17 +168,17 @@ namespace EngineCore
 
 		auto result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
 
-		currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+		currentFrame = (currentFrame + 1) % imageCount;
 
 		return result;
 	}
 
 	void EngineSwapChain::createSyncObjects() 
 	{
-		imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-		renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-		inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-		imagesInFlight.resize(imageCount, VK_NULL_HANDLE);
+		// use one set of sync objects per swapchain image to avoid semaphore reuse issues
+		imageAvailableSemaphores.resize(imageCount);
+		renderFinishedSemaphores.resize(imageCount);
+		inFlightFences.resize(imageCount);
 
 		VkSemaphoreCreateInfo semaphoreInfo = {};
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -185,7 +187,7 @@ namespace EngineCore
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
+		for (size_t i = 0; i < imageCount; i++) 
 		{
 			if (vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
 				vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||

@@ -85,14 +85,14 @@ namespace EngineCore
 
 	void EngineApplication::setupDrawers() 
 	{
-		auto basePass = renderer.getBaseRenderpass().getRenderpass();
-		auto fxPass = renderer.getFxRenderpass().getRenderpass();
+		const auto& baseFormats = renderer.getBasePassFormats();
+		const auto& fxFormats = renderer.getFxPassFormats();
 
 		meshDrawer = std::make_unique<MeshDrawer>(device);
-		skyDrawer = std::make_unique<SkyDrawer>(device, dset, basePass, renderSettings.sampleCountMSAA);
-		fxDrawer = std::make_unique<FxDrawer>(device, dset, fxPass, renderer.getFxPassInputImageViews(), renderer.getFxPassInputDepthImageViews());
-		uiDrawer = std::make_unique<InterfaceDrawer>(device, basePass, renderSettings.sampleCountMSAA);
-		debugDrawer = std::make_unique<DebugDrawer>(device, dset, basePass, renderSettings.sampleCountMSAA);
+		skyDrawer = std::make_unique<SkyDrawer>(device, dset, baseFormats, renderSettings.sampleCountMSAA);
+		fxDrawer = std::make_unique<FxDrawer>(device, dset, fxFormats, renderer.getFxPassInputImageViews(), renderer.getFxPassInputDepthImageViews());
+		uiDrawer = std::make_unique<InterfaceDrawer>(device, baseFormats, renderSettings.sampleCountMSAA);
+		debugDrawer = std::make_unique<DebugDrawer>(device, dset, baseFormats, renderSettings.sampleCountMSAA);
 		//debugDrawer->addDebugBox(Vec(100.f), Vec::zero(), Vec(0.f, 0.f, .8f), 0.5f);
 	}
 
@@ -258,7 +258,7 @@ namespace EngineCore
 			
 			updateDescriptors(frameIndex);
 
-			renderer.beginRenderpassBase(commandBuffer);
+			renderer.beginRenderingBase(commandBuffer); // BASE PASS (dynamic rendering)
 
 			// render sky sphere
 			skyDrawer->renderSky(commandBuffer, dset.getDescriptorSet(frameIndex), camera.transform.translation);
@@ -271,7 +271,7 @@ namespace EngineCore
 
 			//uiDrawer->render(commandBuffer, window.input.getMousePosition(), renderer.getSwapchainExtent());  // render test UI
 
-			renderer.endRenderpass();
+			renderer.endRendering(commandBuffer);
 
 			fxDrawer->render(commandBuffer, renderer);
 

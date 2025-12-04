@@ -22,12 +22,12 @@ namespace EngineCore
 				(cursor.y <= position.y + size.y/2) && (cursor.y >= position.y);
 	}
 
-	InterfaceDrawer::InterfaceDrawer(EngineDevice& device, VkRenderPass renderpass, VkSampleCountFlagBits samples) 
+	InterfaceDrawer::InterfaceDrawer(EngineDevice& device, const RenderingFormats& formats, VkSampleCountFlagBits samples) 
 		: device{ device }
 	{
 		// create default UI material
 		ShaderFilePaths shaderPaths(makePath("Shaders/ui_test.vert.spv"), makePath("Shaders/ui_test.frag.spv"));
-		MaterialCreateInfo materialInfo(shaderPaths, {}, samples, renderpass, sizeof(ShaderPushConstants::InterfaceElementPushConstants));
+		MaterialCreateInfo materialInfo(shaderPaths, {}, samples, formats, sizeof(ShaderPushConstants::InterfaceElementPushConstants));
 		materialInfo.shadingProperties.useVertexInput = false;
 		materialInfo.shadingProperties.enableDepth = false;
 		materialInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;

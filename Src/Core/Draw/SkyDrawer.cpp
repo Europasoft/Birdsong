@@ -6,7 +6,7 @@
 
 namespace EngineCore
 {
-	SkyDrawer::SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, VkRenderPass renderpass, VkSampleCountFlagBits samples)
+	SkyDrawer::SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 	{
 		// TODO: hardcoded paths
 		const std::string meshPath = makePath("Meshes/skysphere.obj");
@@ -20,7 +20,7 @@ namespace EngineCore
 
 		// create unique material for sky, set to render backfaces, since it will be viewed from inside
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };
-		MaterialCreateInfo matInfo(skyShaders, layouts, samples, renderpass, sizeof(ShaderPushConstants::MeshPushConstants));
+		MaterialCreateInfo matInfo(skyShaders, layouts, samples, formats, sizeof(ShaderPushConstants::MeshPushConstants));
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		skyMesh->setMaterial(matInfo);
 	}

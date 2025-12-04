@@ -14,7 +14,10 @@ namespace EngineCore
 	Material::Material(const MaterialCreateInfo& matInfo, EngineDevice& device)
 		: materialCreateInfo{ matInfo }, device{ device }
 	{
-		if (matInfo.renderpass == VK_NULL_HANDLE) { throw std::runtime_error("material error, material must be assigned a valid renderpass"); }
+		if (matInfo.renderingFormats.colorFormats.empty()) 
+		{ 
+			throw std::runtime_error("material error, material must have at least one color format"); 
+		}
 		createPipelineLayout();
 		createPipeline();
 	}
@@ -187,12 +190,10 @@ namespace EngineCore
 		getDefaultPipelineConfig(cfg);
 		// modify config with material shading properties
 		applyMatPropsToPipelineConfig(matInfo.shadingProperties, cfg);
-		cfg.renderPass = materialCreateInfo.renderpass;
 		cfg.pipelineLayout = pipelineLayout;
 		cfg.multisampleInfo.rasterizationSamples = matInfo.samples; // set the pipeline's multisample count
 
 		// these vertex bindings are to be used whenever rendering from a vertex buffer
-
 		auto vertexAttributes = Primitive::Vertex::getAttributeDescriptions();
 		auto vertexBindings = Primitive::Vertex::getBindingDescriptions();
 		if (matInfo.shadingProperties.useVertexInput)
@@ -204,7 +205,6 @@ namespace EngineCore
 		}
 
 		assert(cfg.pipelineLayout != VK_NULL_HANDLE && "pipeline creation error, null pipelineLayout");
-		assert(cfg.renderPass != VK_NULL_HANDLE && "pipeline creation error, null renderPass");
 
 		// load shaders
 		createShaderModule(matInfo.shaderPaths.vertPath, &vertexShaderModule); 
@@ -228,8 +228,17 @@ namespace EngineCore
 		shaderStages[1].pNext = nullptr;
 		shaderStages[1].pSpecializationInfo = nullptr;
 
+		// VK_KHR_dynamic_rendering: specify formats instead of VkRenderPass
+		VkPipelineRenderingCreateInfo pipelineRenderingInfo{};
+		pipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+		pipelineRenderingInfo.colorAttachmentCount = static_cast<uint32_t>(matInfo.renderingFormats.colorFormats.size());
+		pipelineRenderingInfo.pColorAttachmentFormats = matInfo.renderingFormats.colorFormats.data();
+		pipelineRenderingInfo.depthAttachmentFormat = matInfo.renderingFormats.depthFormat;
+		pipelineRenderingInfo.stencilAttachmentFormat = matInfo.renderingFormats.stencilFormat;
+
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineInfo.pNext = &pipelineRenderingInfo; // chain dynamic rendering info
 		pipelineInfo.stageCount = 2;
 		pipelineInfo.pStages = shaderStages;
 		pipelineInfo.pVertexInputState = &cfg.vertexInputInfo;
@@ -242,12 +251,11 @@ namespace EngineCore
 		pipelineInfo.pDynamicState = &cfg.dynamicStateInfo;
 
 		pipelineInfo.layout = cfg.pipelineLayout;
-		pipelineInfo.renderPass = cfg.renderPass;
-		pipelineInfo.subpass = cfg.subpass;
+		pipelineInfo.renderPass = VK_NULL_HANDLE; // not using VkRenderPass with dynamic rendering
+		pipelineInfo.subpass = 0;
 
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-
 
 		// create vulkan pipeline object
 		if (vkCreateGraphicsPipelines(device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)

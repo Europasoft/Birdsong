@@ -21,8 +21,8 @@ namespace EngineCore
 		Image(const Image&) = delete;
 		Image& operator=(const Image&) = delete;
 
-		VkImage getImage() { return image; }
-		VkImageView getView() { return imageView; }
+		VkImage getImage() const { return image; }
+		VkImageView getView() const { return imageView; }
 		VkDeviceMemory getMemory() { return imageMemory; }
 
 		void updateView(VkFormat format, VkImageAspectFlags aspect, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D);

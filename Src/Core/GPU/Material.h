@@ -29,8 +29,6 @@ namespace EngineCore
 		VkPipelineDynamicStateCreateInfo dynamicStateInfo{};
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		VkPipelineLayout pipelineLayout = nullptr;
-		VkRenderPass renderPass = nullptr;
-		uint32_t subpass = 0;
 	};
 
 	struct ShaderFilePaths
@@ -52,18 +50,27 @@ namespace EngineCore
 		bool enableDepth = true; // enables reads and writes to the depth attachment
 	};
 
+	// format info for dynamic rendering (VK_KHR_dynamic_rendering)
+	struct RenderingFormats
+	{
+		std::vector<VkFormat> colorFormats;
+		VkFormat depthFormat = VK_FORMAT_UNDEFINED;
+		VkFormat stencilFormat = VK_FORMAT_UNDEFINED;
+	};
+
 	// holds all properties needed to create a material object (used to generate a pipeline config)
 	struct MaterialCreateInfo 
 	{
 		MaterialCreateInfo(const ShaderFilePaths& shadersIn, const std::vector<VkDescriptorSetLayout>& setLayoutsIn, 
-						VkSampleCountFlagBits samples, VkRenderPass rp, size_t pushConstSize)
-			: shaderPaths(shadersIn), descriptorSetLayouts(setLayoutsIn), samples{ samples }, renderpass{ rp }, pushConstSize{ pushConstSize } {};
+						VkSampleCountFlagBits samples, const RenderingFormats& formats, size_t pushConstSize)
+			: shaderPaths(shadersIn), descriptorSetLayouts(setLayoutsIn), samples{ samples }, 
+			  renderingFormats{ formats }, pushConstSize{ pushConstSize } {};
 		// the shading properties hold common settings like backface culling and polygon fill mode
 		MaterialShadingProperties shadingProperties{};
 		ShaderFilePaths shaderPaths; // SPIR-V shaders
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 		VkSampleCountFlagBits samples;
-		VkRenderPass renderpass;
+		RenderingFormats renderingFormats; // for VK_KHR_dynamic_rendering
 		size_t pushConstSize;
 	};
 

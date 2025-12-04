@@ -11,11 +11,12 @@ namespace EngineCore
 	class EngineDevice;
 	class Primitive;
 	class DescriptorSet;
+	struct RenderingFormats;
 
 	class SkyDrawer 
 	{
 	public:
-		SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, VkRenderPass renderpass, VkSampleCountFlagBits samples);
+		SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples);
 
 		void renderSky(VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, 
 						const glm::vec3& observerPosition);

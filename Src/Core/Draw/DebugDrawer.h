@@ -12,13 +12,14 @@ namespace EngineCore
 	class DescriptorSet;
 	class Primitive;
 	class Material;
+	struct RenderingFormats;
 
 	namespace ShaderPushConstants { struct DebugPrimitivePushConstants; }
 
 	class DebugDrawer
 	{
 	public:
-		DebugDrawer(EngineDevice& device, DescriptorSet& defaultSet, VkRenderPass renderpass, VkSampleCountFlagBits samples);
+		DebugDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples);
 
 		void addDebugBox(Vec dimensions, Vec location, Vec color, float opacity = 1.f);
 		void removeDebugBoxes();

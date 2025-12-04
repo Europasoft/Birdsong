@@ -25,7 +25,9 @@ namespace EngineCore
 		// public getters
 		//VkFramebuffer getFrameBuffer(int index) const { return swapChainFramebuffers[index]; }
 		class Attachment& getSwapchainAttachment();
+		std::vector<VkImage> getSwapChainImages() const;
 
+		VkFormat getSwapChainImageFormat() const { return imageFormat; }
 		VkFormat getImageFormat() const { return imageFormat; }
 		VkFormat getDepthFormat() const { return depthFormat; }
 		size_t getImageCount() const { return imageCount; }
@@ -65,7 +67,6 @@ namespace EngineCore
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;
 		std::vector<VkFence> inFlightFences;
-		std::vector<VkFence> imagesInFlight;
 		size_t currentFrame = 0;
 	};
 

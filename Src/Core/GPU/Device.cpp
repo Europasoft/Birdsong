@@ -14,7 +14,7 @@ namespace EngineCore
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData) 
 	{
-		std::cerr << "dmsg: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "\nDEBUG: " << pCallbackData->pMessage << std::endl;
 		return VK_FALSE;
 	}
 
@@ -82,7 +82,7 @@ namespace EngineCore
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "RPG Engine";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_2; // target vulkan api v1.2
+		appInfo.apiVersion = VK_API_VERSION_1_3; // target vulkan api v1.3 (required for VK_KHR_dynamic_rendering core support)
 
 		VkInstanceCreateInfo createInfo {};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -178,6 +178,14 @@ namespace EngineCore
 		deviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 		deviceFeatures12.uniformBufferStandardLayout = VK_TRUE;
 
+		// vulkan v1.3 features (includes dynamic rendering)
+		VkPhysicalDeviceVulkan13Features deviceFeatures13 = {};
+		deviceFeatures13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+		deviceFeatures13.dynamicRendering = VK_TRUE;
+		deviceFeatures13.synchronization2 = VK_TRUE;
+
+		// chain features: deviceFeatures2 -> deviceFeatures12 -> deviceFeatures13
+		deviceFeatures12.pNext = &deviceFeatures13;
 		deviceFeatures2.pNext = &deviceFeatures12;
 
 		VkDeviceCreateInfo createInfo = {};

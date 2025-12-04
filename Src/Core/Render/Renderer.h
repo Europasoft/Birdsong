@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/GPU/Swapchain.h"
-#include "Core/Render/Renderpass.h"
 #include "Core/Render/Attachment.h"
+#include "Core/GPU/Material.h" // for RenderingFormats
 
 #include <memory>
 #include <vector>
@@ -22,8 +22,9 @@ namespace EngineCore
 		Renderer(const Renderer&) = delete;
 		Renderer& operator=(const Renderer&) = delete;
 
-		Renderpass& getBaseRenderpass() { return *baseRenderpass.get(); }
-		Renderpass& getFxRenderpass() { return *fxRenderpass.get(); }
+		// rendering format info for pipeline creation (VK_KHR_dynamic_rendering)
+		const RenderingFormats& getBasePassFormats() const { return basePassFormats; }
+		const RenderingFormats& getFxPassFormats() const { return fxPassFormats; }
 
 		bool getIsFrameInProgress() const { return isFrameStarted; }
 
@@ -49,14 +50,10 @@ namespace EngineCore
 		// submit command buffer to finalize the frame
 		void endFrame();
 
-		void beginRenderpassBase(VkCommandBuffer cmdBuffer);
-		void beginRenderpassFx(VkCommandBuffer cmdBuffer);
-		
-		void endRenderpass()
-		{
-			assert(isFrameStarted && "failed to end renderpass, no frame in progress");
-			vkCmdEndRenderPass(getCurrentCommandBuffer());
-		}
+		// dynamic rendering (VK_KHR_dynamic_rendering)
+		void beginRenderingBase(VkCommandBuffer cmdBuffer);
+		void beginRenderingFx(VkCommandBuffer cmdBuffer);
+		void endRendering(VkCommandBuffer cmdBuffer);
 
 		const std::vector<VkImageView>& getFxPassInputImageViews() const { return fxPassInputImageViews; }
 		const std::vector<VkImageView>& getFxPassInputDepthImageViews() const { return fxPassInputDepthImageViews; }
@@ -67,23 +64,38 @@ namespace EngineCore
 		void createCommandBuffers();
 		void freeCommandBuffers();
 
-		// constructs a new set of renderpasses and a swapchain
+		// constructs attachments and swapchain
 		void create();
 		
 		void createSwapchain();
-		void createRenderpasses();
+		void createAttachments();
 		const Attachment& addAttachment(const AttachmentProperties& p, bool inputAttachment, bool sampled) 
 		{ 
 			attachments.push_back(std::make_unique<Attachment>(device, p, inputAttachment, sampled));
 			return *attachments.back(); 
 		}
 
-		std::unique_ptr<Renderpass> baseRenderpass;
-		std::unique_ptr<Renderpass> fxRenderpass;
+		// image layout transition helper
+		void transitionImageLayout(VkCommandBuffer cmdBuffer, VkImage image, 
+									VkImageLayout oldLayout, VkImageLayout newLayout,
+									VkAccessFlags srcAccess, VkAccessFlags dstAccess,
+									VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
+									VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT);
+
 		std::vector<std::unique_ptr<Attachment>> attachments;
 		std::vector<VkImageView> fxPassInputImageViews; // view(s) to the color attachment image rendered by the first renderpass
 		std::vector<VkImageView> fxPassInputDepthImageViews;
 		
+		// rendering format info for VK_KHR_dynamic_rendering
+		RenderingFormats basePassFormats;
+		RenderingFormats fxPassFormats;
+
+		// attachment pointers for dynamic rendering (non-owning, attachments vector owns them)
+		const Attachment* colorAttachment = nullptr;
+		const Attachment* colorResolveAttachment = nullptr;
+		const Attachment* depthAttachment = nullptr;
+		const Attachment* depthResolveAttachment = nullptr;
+
 		EngineWindow& window;
 		EngineDevice& device;
 		EngineRenderSettings& renderSettings;

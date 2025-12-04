@@ -166,7 +166,7 @@ namespace WorldSystem
 		{
 			// TODO: materials should automatically include the layout of their own set (if present) on construct!!!
 			EngineCore::MaterialCreateInfo matInfo(shader, std::vector<VkDescriptorSetLayout>{ engine.getGlobalDescriptorLayout(), matSet->getLayout() },
-						engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBaseRenderpass().getRenderpass(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants));
+						engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants));
 			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 
 			sector.primitives[i]->setMaterial(matInfo);

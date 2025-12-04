@@ -11,11 +11,12 @@ namespace EngineCore
 	class DescriptorSet;
 	class Primitive;
 	class Material;
+	struct RenderingFormats;
 	
 	class FxDrawer
 	{
 	public:
-		FxDrawer(EngineDevice& device, DescriptorSet& defaultSet, VkRenderPass renderpass,
+		FxDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats,
 				const std::vector<VkImageView>& inputImageViews, const std::vector<VkImageView>& inputDepthImageViews);
 
 		void render(VkCommandBuffer cmdBuffer, Renderer& renderer);

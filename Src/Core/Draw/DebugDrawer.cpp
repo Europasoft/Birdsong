@@ -6,7 +6,7 @@
 
 namespace EngineCore
 {
-	DebugDrawer::DebugDrawer(EngineDevice& device, DescriptorSet& defaultSet, VkRenderPass renderpass, VkSampleCountFlagBits samples)
+	DebugDrawer::DebugDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 		: device{ device }, defaultSet{ defaultSet }
 	{
 		// setup box mesh
@@ -17,7 +17,7 @@ namespace EngineCore
 		// setup debug primitive material
 		auto shader = ShaderFilePaths(makePath("Shaders/debug_primitive.vert.spv"), makePath("Shaders/debug_primitive.frag.spv"));
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };
-		auto matInfo = MaterialCreateInfo(shader, layouts, samples, renderpass, sizeof(ShaderPushConstants::DebugPrimitivePushConstants));
+		auto matInfo = MaterialCreateInfo(shader, layouts, samples, formats, sizeof(ShaderPushConstants::DebugPrimitivePushConstants));
 		//matInfo.shadingProperties.enableDepth = false;
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_LINE;

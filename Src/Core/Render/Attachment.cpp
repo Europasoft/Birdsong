@@ -68,6 +68,14 @@ namespace EngineCore
 		return views;
 	}
 
+	std::vector<VkImage> Attachment::getImages() const
+	{
+		std::vector<VkImage> imgs;
+		imgs.reserve(images.size());
+		for (const auto& image : images) { imgs.push_back(image->getImage()); }
+		return imgs;
+	}
+
 	bool Attachment::isCompatible(const Attachment& b) const 
 	{
 		return (getProps().samples ==		b.getProps().samples &&
