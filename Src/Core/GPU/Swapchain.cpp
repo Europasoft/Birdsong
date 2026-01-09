@@ -39,12 +39,9 @@ namespace EngineCore
 		}
 
 		// cleanup synchronization objects
-		for (size_t i = 0; i < imageAvailableSemaphores.size(); i++) 
-		{
-			vkDestroySemaphore(device.device(), renderFinishedSemaphores[i], nullptr);
-			vkDestroySemaphore(device.device(), imageAvailableSemaphores[i], nullptr);
-			vkDestroyFence(device.device(), inFlightFences[i], nullptr);
-		}
+		for (auto semaphore : imageAvailableSemaphores) { vkDestroySemaphore(device.device(), semaphore, nullptr); }
+		for (auto semaphore : renderFinishedSemaphores) { vkDestroySemaphore(device.device(), semaphore, nullptr); }
+		for (auto fence : inFlightFences) { vkDestroyFence(device.device(), fence, nullptr); }
 	}
 
 	void EngineSwapChain::init(VkExtent2D windowExtent)
@@ -139,7 +136,7 @@ namespace EngineCore
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		// use semaphores indexed by the acquired image
+		// use semaphores indexed by the current frame in flight
 		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores[currentFrame] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
@@ -148,7 +145,8 @@ namespace EngineCore
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = buffers;
 
-		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
+		// signal the semaphore dedicated to this specific swapchain image index
+		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[*imageIndex] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -168,17 +166,16 @@ namespace EngineCore
 
 		auto result = vkQueuePresentKHR(device.presentQueue(), &presentInfo);
 
-		currentFrame = (currentFrame + 1) % imageCount;
+		currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
 		return result;
 	}
 
 	void EngineSwapChain::createSyncObjects() 
 	{
-		// use one set of sync objects per swapchain image to avoid semaphore reuse issues
-		imageAvailableSemaphores.resize(imageCount);
+		imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
 		renderFinishedSemaphores.resize(imageCount);
-		inFlightFences.resize(imageCount);
+		inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
 		VkSemaphoreCreateInfo semaphoreInfo = {};
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -187,12 +184,17 @@ namespace EngineCore
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		for (size_t i = 0; i < imageCount; i++) 
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
 		{
 			if (vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
 				vkCreateFence(device.device(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) 
 			{ throw std::runtime_error("failed to create synchronization objects for a frame"); }
+		}
+
+		for (size_t i = 0; i < imageCount; i++) 
+		{
+			if (vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS) 
+			{ throw std::runtime_error("failed to create render finished semaphore for an image"); }
 		}
 	}
 

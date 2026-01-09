@@ -41,6 +41,7 @@ namespace EngineCore
 
 	void Renderer::create()
 	{
+		currentFrameIndex = 0;
 		createSwapchain();
 		createAttachments();
 		if (swapchainCreatedCallback) { swapchainCreatedCallback(); }
