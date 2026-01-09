@@ -5,7 +5,6 @@
 #include "Core/Camera.h"
 #include "Core/Draw/DrawIncludes.h"
 #include "Core/WorldSystem/World.h"
-#include "Core/Physics/PhysicsScene.h"
 
 #include <memory>
 #include <vector>
