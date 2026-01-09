@@ -19,7 +19,7 @@ namespace EngineCore
 {
 	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
 			const float& deltaTimeSeconds, float time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
-			const glm::mat4& viewMatrix, Transform& fakeScaleOffsets) //FakeScaleTest082
+			const glm::mat4& viewMatrix) //FakeScaleTest082
 	{
 		auto& sectors = world.getLoadedSectors();
 		for (uint32_t s = 0; s < sectors.size(); s++)
@@ -99,13 +99,13 @@ namespace EngineCore
 				0, sizeof(SimplePushConstantData), &push);*/
 
 				//FakeScaleTest082
-				if (mesh->useFakeScale) 
+				/*if (mesh->useFakeScale)
 				{
 					ShaderPushConstants::MeshPushConstants push{};
 					push.transform = fakeScaleOffsets.mat4();
 					material->writePushConstants(commandBuffer, push);
 				} 
-				else 
+				else */
 				{
 					// NON-TEST CODE!
 					ShaderPushConstants::MeshPushConstants push{};

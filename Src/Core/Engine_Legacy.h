@@ -34,29 +34,40 @@ namespace EngineCore
 		EngineApplication& operator=(const EngineApplication&) = delete;
 
 		// hardcoded window size in pixels
-		static constexpr int WIDTH = 1920;
-		static constexpr int HEIGHT = 1080;
+		static constexpr int WIDTH = 1920; //1100;
+		static constexpr int HEIGHT = 1080; //720;
 
 
 		// begins the main window event loop
 		void startExecution();
+
+		// TODO: move this function somewhere else
+		// also remove temporaries, search for "FakeScaleTest082"
+		//void simulateDistanceByScale(const StaticMesh& mesh, const Transform& cameraTransform);
+		Transform simDistOffsets{};
+		//static double ddist(const Vector3D<double>& a, const Vector3D<double>& b);
+		//static Vector3D<double> ddir(const Vector3D<double>& a, const Vector3D<double>& b);
+
+		//void applyWorldOriginOffset(Transform& cameraTransform);
 
 		VkDescriptorSetLayout getGlobalDescriptorLayout() const { return dset.getLayout(); }
 		const EngineRenderSettings& getRenderSettings() const { return renderSettings; }
 		Renderer& getRenderer() { return renderer; }
 
 	private:
-		void setupDescriptors();
 		void loadDemoScene();
-		void setupDrawers();
 		void setupDefaultInputs();
-
+		void setupDescriptors();
+		void applyDemoMaterials();//moved to world/sector system
+		void setupDrawers();
 		void onSwapchainCreated();
 		void render();
 		void updateDescriptors(uint32_t frameIndex);
 		void moveCamera();
 		glm::mat4 getProjectionViewMatrix(bool inverse = false);
 
+		void testMoveObjectWithMouse();
+		glm::vec3 getMouseMove3DLocationTest_legacy(float planeDistance, float dist2 = 1.f);
 		glm::vec3 unproject(glm::vec3 point);
 
 		EngineRenderSettings renderSettings{};
