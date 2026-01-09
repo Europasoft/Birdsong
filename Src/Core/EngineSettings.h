@@ -1,11 +1,13 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include "Core/GPU/Device.h"
+#include "Core/Types/CommonTypes.h"
 
 #include <stdexcept>
 
 namespace EngineCore 
 {
+
 	struct SampleCountSetting
 	{
 		// return in vulkan-usable format
@@ -40,9 +42,22 @@ namespace EngineCore
 		VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_8_BIT; // default
 	};
 
+	struct CascadedShadowSettings
+	{
+		// resolution (width/height) shared by every cascade image
+		VkExtent2D extent = { 4096, 4096 };
+		// depth format used for the cascade attachment images
+		VkFormat depthFormat = VK_FORMAT_D32_SFLOAT;
+		// number of cascades rendered each frame (must be <= MAX_SHADOW_CASCADES)
+		uint32_t cascadeCount = 4;
+		// splits between linear (0.0) and logarithmic (1.0) distribution of cascade ranges
+		float splitLambda = 0.92f;
+	};
+
 	struct EngineRenderSettings
 	{
 		SampleCountSetting sampleCountMSAA;
+		CascadedShadowSettings cascadedShadows{};
 	};
 
 }

@@ -20,13 +20,7 @@ namespace EngineCore
 	{
 		renderer.swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
 
-		// temporary single-camera setup
-		camera = Camera(85.f, 10.f, 10000 * 100.f);
-		camera.transform.rotation = glm::vec3(0.f, 0.f, 0.f);
-		camera.transform.translation = glm::vec3(0.f, 0.f, 150.f);
-
-		setupDescriptors();
-		loadDemoScene();
+		world.loadDemoScene();
 		setupDrawers();
 		setupDefaultInputs();
 
@@ -43,39 +37,17 @@ namespace EngineCore
 		vkDeviceWaitIdle(device.device());
 	}
 
-	void EngineApplication::setupDescriptors() 
-	{
-		// demo textures
-		marsTexture = std::make_unique<Image>(device, makePath("Textures/mars6k_v2.jpg"));
-		spaceTexture = std::make_unique<Image>(device, makePath("Textures/space.png"));
-
-		UBO_Struct ubo1{};
-		ubo1.add(uelem::mat4); // MVP matrix
-		dset.addUBO(ubo1, device);
-		// as the demo textures will never be overwritten from the CPU, only one buffer is needed for each, so the view can simply be duplicated
-		ImageArrayDescriptor demoTextureArray{};
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, marsTexture->getView()));
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, spaceTexture->getView()));
-		dset.addImageArray(demoTextureArray);
-		dset.addSampler(marsTexture->sampler);
-		dset.finalize();
-	}
-
-	void EngineApplication::loadDemoScene()
-	{
-		world.createDemoSectorContent();
-	}
-
 	void EngineApplication::setupDrawers() 
 	{
 		const auto& baseFormats = renderer.getBasePassFormats();
 		const auto& fxFormats = renderer.getFxPassFormats();
 
+		auto& sceneGlobalDescriptorSet = world.getScene().getSceneGlobalDescriptorSet();
 		meshDrawer = std::make_unique<MeshDrawer>(device);
-		skyDrawer = std::make_unique<SkyDrawer>(device, dset, baseFormats, renderSettings.sampleCountMSAA);
-		fxDrawer = std::make_unique<FxDrawer>(device, dset, fxFormats, renderer.getFxPassInputImageViews(), renderer.getFxPassInputDepthImageViews());
+		skyDrawer = std::make_unique<SkyDrawer>(device, sceneGlobalDescriptorSet, baseFormats, renderSettings.sampleCountMSAA);
+		fxDrawer = std::make_unique<FxDrawer>(device, sceneGlobalDescriptorSet, fxFormats, renderer.getFxPassInputImageViews(), renderer.getFxPassInputDepthImageViews());
 		uiDrawer = std::make_unique<InterfaceDrawer>(device, baseFormats, renderSettings.sampleCountMSAA);
-		debugDrawer = std::make_unique<DebugDrawer>(device, dset, baseFormats, renderSettings.sampleCountMSAA);
+		debugDrawer = std::make_unique<DebugDrawer>(device, sceneGlobalDescriptorSet, baseFormats, renderSettings.sampleCountMSAA);
 	}
 
 	void EngineApplication::setupDefaultInputs()
@@ -118,22 +90,26 @@ namespace EngineCore
 			const uint32_t frameIndex = renderer.getFrameIndex(); // current framebuffer index
 			engineClock.measureFrameDelta(frameIndex);
 
-			moveCamera();
+			WorldSystem::Scene& scene = world.getScene();
+			Camera& camera = scene.getCurrentCamera();
+			moveCamera(camera);
 			camera.testValue += window.input.getAxisValue(4) * engineClock.getDelta() * 2.f;
 
-			world.sectorUpdate(camera);
+			scene.sectorUpdate(camera);
+			world.getScene().update(frameIndex, engineClock.getDelta());
+
 			debugDrawer->removeDebugBoxes();
-			debugDrawer->addDebugBox(Vec(world.getSectorSize()), world.getLocalSectorOriginAbsolute(), Vec(0.f, 0.f, .8f), 0.5f);
+			debugDrawer->addDebugBox(Vec(scene.getSectorSize()), scene.getLocalSectorOriginAbsolute(), Vec(0.f, 0.f, .8f), 0.5f);
 			
-			updateDescriptors(frameIndex);
+			//updateDescriptors(frameIndex);
 
 			renderer.beginRenderingBase(commandBuffer); // BASE PASS (dynamic rendering)
 
 			// render sky sphere
-			skyDrawer->renderSky(commandBuffer, dset.getDescriptorSet(frameIndex), camera.transform.translation);
+			skyDrawer->renderSky(commandBuffer, scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.transform.translation);
 			// render meshes
 			meshDrawer->renderMeshes(commandBuffer, world, engineClock.getDelta(), engineClock.getElapsed(), frameIndex,
-										dset.getDescriptorSet(frameIndex), getProjectionViewMatrix());
+				scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.getProjectionViewMatrix());
 
 			debugDrawer->render(commandBuffer, renderer);
 
@@ -146,27 +122,7 @@ namespace EngineCore
 		}
 	}
 
-	void EngineApplication::updateDescriptors(uint32_t frameIndex)
-	{
-		glm::mat4 pvm{ 1.f };
-		pvm = getProjectionViewMatrix();
-		dset.writeUBOMember(0, pvm, UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
-
-		// update material-specific descriptors on mesh
-		glm::vec3 camPos = camera.transform.translation;
-
-		lightPos.y -= 50.f * engineClock.getDelta();
-		float roughness = 0.15f;
-		if (world.getLoadedSectors().size() && world.getPersistentSector().primitives.size() > 0)
-		{
-			auto& meshDset = *world.getPersistentSector().primitives[0]->getMaterial()->getMaterialSpecificDescriptorSet();
-			meshDset.writeUBOMember(0, camPos, UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
-			meshDset.writeUBOMember(0, lightPos, UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
-			meshDset.writeUBOMember(0, roughness, UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);
-		}
-	}
-
-	void EngineApplication::moveCamera()
+	void EngineApplication::moveCamera(Camera& camera)
 	{
 		auto mf = window.input.getAxisValue(0);
 		auto mr = window.input.getAxisValue(1);
@@ -176,22 +132,10 @@ namespace EngineCore
 		camera.moveInPlaneXY(lookInput, mf, mr, mu, xs, engineClock.getDelta());
 	}
 
-	glm::mat4 EngineApplication::getProjectionViewMatrix(bool inverse)
-	{
-		glm::mat4 projectionMatrix = camera.getProjectionMatrix();
-		if (!inverse)
-		{
-			return projectionMatrix * camera.blenderToVulkanMatrix1 * camera.blenderToVulkanMatrix2 * camera.getViewMatrix();
-		}
-		else
-		{
-			return glm::inverse(camera.getViewMatrix()) * glm::inverse(camera.blenderToVulkanMatrix1) * glm::inverse(camera.blenderToVulkanMatrix2) * glm::inverse(projectionMatrix);
-		}
-	}
-
 	glm::vec3 EngineApplication::unproject(glm::vec3 point)
 	{
-		glm::vec4 v = getProjectionViewMatrix(true) * glm::vec4(point.x, point.y, point.z, 1);
+		const auto pvm = world.getScene().getCurrentCamera().getProjectionViewMatrix(true);
+		glm::vec4 v = pvm * glm::vec4(point.x, point.y, point.z, 1);
 		return glm::vec3(v.x, v.y, v.z) / v.w;
 	}
 

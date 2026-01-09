@@ -9,22 +9,49 @@
 namespace EngineCore 
 { 
 	class EngineDevice;
-	class Camera;
 	class EngineApplication;
+	class Image;
+	class Camera;
+	class DescriptorSet;
+	class DescriptorPool;
 }
 
 namespace WorldSystem
 {
-	class World
+	class Scene
 	{
-		static constexpr uint32_t SECTOR_SIZE = 50000; //800000;
+		static constexpr uint32_t SECTOR_SIZE = 50000;
+		EngineCore::EngineDevice& device;
+		EngineCore::EngineApplication& engine;
 	public:
-		World(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine);
+		Scene(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine);
 
-		void createDemoSectorContent();
-		// checks whether we have moved into a new sector
-		void sectorUpdate(EngineCore::Camera& camera);
+		void setupDemoScene();
 
+		void update(uint32_t frameIndex, double deltaTime);
+
+		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
+		EngineCore::Camera& getCurrentCamera() const;
+
+		// currently loaded sectors, index 0 is the persistent sector
+		std::vector<std::unique_ptr<Sector>> sectors;
+		std::unique_ptr<SectorCoord> localSectorCoord;
+
+	protected:
+		std::unique_ptr<EngineCore::DescriptorSet> sceneGlobalDescriptorSet;
+
+		std::shared_ptr<EngineCore::Camera> currentCamera;
+
+		/* temporary demo content */
+		
+		std::unique_ptr<EngineCore::Image> spaceTexture;
+		std::unique_ptr<EngineCore::Image> marsTexture;
+
+		glm::vec3 lightPos{ -20.f, 100.f, 45.f };
+
+		// sector stuff
+	public:
+		void sectorUpdate(EngineCore::Camera& camera);// checks whether we have moved into a new sector
 		const SectorCoord& getLocalSectorCoordinate() const;
 		void setLocalSectorCoordinate(const SectorCoord& coordNew);
 		static Vec sectorToAbsolute(const SectorCoord& sector, Vec offset = Vec::zero());
@@ -33,22 +60,29 @@ namespace WorldSystem
 		uint32_t getSectorSize() const { return SECTOR_SIZE; }
 		std::vector<std::unique_ptr<Sector>>& getLoadedSectors() { return sectors; }
 		Sector& getPersistentSector() { return *sectors[0].get(); }
-
-
 	private:
-		// currently loaded sectors, index 0 is the persistent sector
-		std::vector<std::unique_ptr<Sector>> sectors;
-		std::unique_ptr<SectorCoord> localSectorCoord;
-
 		bool updateSectorCoord(Vec& pos);
 		Sector* getSector(const SectorCoord& coord);
 		Sector& loadSector(const SectorCoord& sectorPosition);
 		void forgetSector(const SectorCoord& coord);
 
+	};
+
+	class World
+	{
+
+	public:
+		World(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine);
+
+		std::unique_ptr<Scene> currentScene;
+
+		Scene& getScene() const;
+
+		void loadDemoScene();
+
 	private:
 		EngineCore::EngineDevice& device;
 		EngineCore::EngineApplication& engine;
-		
-	};
 
+	};
 }

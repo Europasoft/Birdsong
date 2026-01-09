@@ -21,7 +21,7 @@ namespace EngineCore
 			const float& deltaTimeSeconds, float time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
 			const glm::mat4& viewMatrix) //FakeScaleTest082
 	{
-		auto& sectors = world.getLoadedSectors();
+		auto& sectors = world.getScene().getLoadedSectors();
 		for (uint32_t s = 0; s < sectors.size(); s++)
 		{
 			auto& sector = sectors[s];

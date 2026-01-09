@@ -37,25 +37,19 @@ namespace EngineCore
 		static constexpr int WIDTH = 1920;
 		static constexpr int HEIGHT = 1080;
 
-
 		// begins the main window event loop
 		void startExecution();
 
-		VkDescriptorSetLayout getGlobalDescriptorLayout() const { return dset.getLayout(); }
 		const EngineRenderSettings& getRenderSettings() const { return renderSettings; }
 		Renderer& getRenderer() { return renderer; }
 
 	private:
-		void setupDescriptors();
-		void loadDemoScene();
 		void setupDrawers();
 		void setupDefaultInputs();
 
 		void onSwapchainCreated();
 		void render();
-		void updateDescriptors(uint32_t frameIndex);
-		void moveCamera();
-		glm::mat4 getProjectionViewMatrix(bool inverse = false);
+		void moveCamera(Camera& camera);
 
 		glm::vec3 unproject(glm::vec3 point);
 
@@ -72,15 +66,8 @@ namespace EngineCore
 
 		EngineClock engineClock{};
 
-		// default global descriptor set
-		DescriptorSet dset{ device }; 
 
-		std::unique_ptr<DescriptorPool> globalDescriptorPool{};
 		std::vector<std::unique_ptr<Primitive>> loadedMeshes;// moved to world/sector system
-
-		Camera camera;
-		std::unique_ptr<Image> spaceTexture;
-		std::unique_ptr<Image> marsTexture;
 
 		std::unique_ptr<MeshDrawer> meshDrawer;
 		std::unique_ptr<SkyDrawer> skyDrawer;
@@ -88,8 +75,8 @@ namespace EngineCore
 		std::unique_ptr<InterfaceDrawer> uiDrawer;
 		std::unique_ptr<DebugDrawer> debugDrawer;
 
-		// TODO: this is strictly temporary
-		glm::vec3 lightPos{ -20.f, 100.f, 45.f };
+		
+		
 
 		Vec mouseMoveObjectOriginalLocation;
 		bool movingObjectWithCursor = true;

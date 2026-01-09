@@ -203,41 +203,6 @@ namespace EngineCore
 		vkUpdateDescriptorSets(pool.device.device(), writes.size(), writes.data(), 0, nullptr);
 	}
 
-	/*
-	GlobalDescriptorSetManager::GlobalDescriptorSetManager(EngineDevice& device, const uint32_t& maxFramesInFlight)
-	{
-		sets.resize(maxFramesInFlight);
-
-		globalDescriptorPool = DescriptorPool::Builder(device)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, maxFramesInFlight)
-			.build();
-		// one buffer for each frame in flight
-		for (uint32_t i = 0; i < maxFramesInFlight; i++)
-		{
-			buffers.push_back(std::make_unique<GBuffer>(device, sizeof(SceneGlobalDataBuffer), 1,
-				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT));
-			buffers[i]->map();
-		}
-		// add uniform buffer to layout
-		layout = DescriptorSetLayout::Builder(device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.build();
-
-		for (uint32_t i = 0; i < maxFramesInFlight; i++)
-		{
-			auto bufferInfo = buffers[i]->descriptorInfo();
-			DescriptorWriter(*layout.get(), *globalDescriptorPool)
-				.writeBuffer(0, &bufferInfo)
-				.build(sets[i]);
-		}
-	}
-
-	void GlobalDescriptorSetManager::writeToSceneGlobalBuffer(const uint32_t& frameIndex, SceneGlobalDataBuffer& data, const bool& flush)
-	{
-		buffers[frameIndex]->writeToBuffer((void*)&data);
-		if (flush) { buffers[frameIndex]->flush(); }
-	}*/
-
 	//		NEW DYNAMIC UBO IMPLEMENTATION (START)
 
 	void UBO_Struct::add(uelem t, const size_t& arrayLength) { add(std::vector<uelem>{t}, arrayLength); }

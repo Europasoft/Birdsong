@@ -67,6 +67,19 @@ namespace EngineCore
 		return glm::inverse(Transform::makeMatrixZYX(transform.rotation, transform.scale, transform.translation));
 	}
 
+	glm::mat4 Camera::getProjectionViewMatrix(bool inverse)
+	{
+		glm::mat4 projectionMatrix = getProjectionMatrix();
+		if (!inverse)
+		{
+			return projectionMatrix * blenderToVulkanMatrix1 * blenderToVulkanMatrix2 * getViewMatrix();
+		}
+		else
+		{
+			return glm::inverse(getViewMatrix()) * glm::inverse(blenderToVulkanMatrix1) * glm::inverse(blenderToVulkanMatrix2) * glm::inverse(projectionMatrix);
+		}
+	}
+
 	void Camera::moveInPlaneXY(const Vector2D<double>& lookInput, const float& moveFwd, const float& moveRight, 
 								const float& moveUp, const bool& extraSpeed, const float& deltaTime)
 	{
