@@ -54,3 +54,4 @@ out/
 *.blend1
 Src/Core/Dependencies/json-rpg/json-rpg.cpp
 Src/Core/Dependencies/json-rpg/README.md
+*.code-workspace
