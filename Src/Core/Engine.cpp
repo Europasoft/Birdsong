@@ -99,7 +99,7 @@ namespace EngineCore
 			world.getScene().update(frameIndex, engineClock.getDelta());
 
 			debugDrawer->removeDebugBoxes();
-			debugDrawer->addDebugBox(Vec(scene.getSectorSize()), scene.getLocalSectorOriginAbsolute(), Vec(0.f, 0.f, .8f), 0.5f);
+			debugDrawer->addDebugBox(Vec(scene.getSectorSize()), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
 			
 			//updateDescriptors(frameIndex);
 
