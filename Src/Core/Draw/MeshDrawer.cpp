@@ -59,7 +59,7 @@ namespace EngineCore
 				}
 
 				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(),
-										0, sets.size(), sets.data(), 0, nullptr);
+					0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 
 				// spin 3D primitive - demo
 				if (s == 1 && i == 0)

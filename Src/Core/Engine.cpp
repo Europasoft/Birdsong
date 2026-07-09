@@ -93,13 +93,13 @@ namespace EngineCore
 			WorldSystem::Scene& scene = world.getScene();
 			Camera& camera = scene.getCurrentCamera();
 			moveCamera(camera);
-			camera.testValue += window.input.getAxisValue(4) * engineClock.getDelta() * 2.f;
+			camera.testValue += window.input.getAxisValue(4) * static_cast<float>(engineClock.getDelta()) * 2.f;
 
 			scene.sectorUpdate(camera);
 			world.getScene().update(frameIndex, engineClock.getDelta());
 
 			debugDrawer->removeDebugBoxes();
-			debugDrawer->addDebugBox(Vec(scene.getSectorSize()), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
+			debugDrawer->addDebugBox(Vec(static_cast<float>(scene.getSectorSize())), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
 			
 			//updateDescriptors(frameIndex);
 
@@ -108,7 +108,7 @@ namespace EngineCore
 			// render sky sphere
 			skyDrawer->renderSky(commandBuffer, scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.transform.translation);
 			// render meshes
-			meshDrawer->renderMeshes(commandBuffer, world, engineClock.getDelta(), engineClock.getElapsed(), frameIndex,
+			meshDrawer->renderMeshes(commandBuffer, world, static_cast<float>(engineClock.getDelta()), static_cast<float>(engineClock.getElapsed()), frameIndex,
 				scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.getProjectionViewMatrix());
 
 			debugDrawer->render(commandBuffer, renderer);
@@ -129,7 +129,7 @@ namespace EngineCore
 		auto mu = window.input.getAxisValue(2);
 		auto xs = window.input.getAxisValue(3) > 0 ? true : false;
 		auto lookInput = window.input.getMouseDelta();
-		camera.moveInPlaneXY(lookInput, mf, mr, mu, xs, engineClock.getDelta());
+		camera.moveInPlaneXY(lookInput, mf, mr, mu, xs, static_cast<float>(engineClock.getDelta()));
 	}
 
 	glm::vec3 EngineApplication::unproject(glm::vec3 point)

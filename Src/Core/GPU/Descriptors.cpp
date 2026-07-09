@@ -200,7 +200,7 @@ namespace EngineCore
 	void DescriptorWriter::overwrite(VkDescriptorSet& set)
 	{
 		for (auto& write : writes) { write.dstSet = set; }
-		vkUpdateDescriptorSets(pool.device.device(), writes.size(), writes.data(), 0, nullptr);
+		vkUpdateDescriptorSets(pool.device.device(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 	}
 
 	//		NEW DYNAMIC UBO IMPLEMENTATION (START)
@@ -356,7 +356,7 @@ namespace EngineCore
 	{
 		assert(!imageArray.arrays.empty() && "tried to add empty image array descriptor");
 		imageArraysInfos.push_back(imageArray);
-		numImagesTotal += imageArray.getArrayLength() * imageArray.arrays.size();
+		numImagesTotal += static_cast<uint32_t>(imageArray.getArrayLength() * imageArray.arrays.size());
 	}
 
 	void DescriptorSet::addSampler(const VkSampler& sampler)
@@ -373,10 +373,10 @@ namespace EngineCore
 		assert(framesInFlight > 0 && "descriptor set must have framesInFlight set to a valid number");
 		sets.resize(framesInFlight);
 
-		uint32_t numUBOs = ubos.size();
-		uint32_t numSamplerImages = samplerImageInfos.size();
-		uint32_t numImageArrays = imageArraysInfos.size();
-		uint32_t numSamplers = samplerInfos.size();
+		uint32_t numUBOs = static_cast<uint32_t>(ubos.size());
+		uint32_t numSamplerImages = static_cast<uint32_t>(samplerImageInfos.size());
+		uint32_t numImageArrays = static_cast<uint32_t>(imageArraysInfos.size());
+		uint32_t numSamplers = static_cast<uint32_t>(samplerInfos.size());
 		
 		DescriptorPool::Builder poolBuilder(device);
 		if (numUBOs > 0) { poolBuilder.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, framesInFlight * numUBOs); }
@@ -399,7 +399,7 @@ namespace EngineCore
 		for (uint32_t i = 0; i < numImageArrays; i++) /* image arrays after combined image samplers */
 		{
 			layoutBuilder.addBinding(i + numUBOs + numSamplerImages,
-			VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL_GRAPHICS, imageArraysInfos[i].getArrayLength());
+				VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL_GRAPHICS, static_cast<uint32_t>(imageArraysInfos[i].getArrayLength()));
 		}
 
 		// add sampler-only bindings
@@ -435,7 +435,7 @@ namespace EngineCore
 			for (uint32_t a = 0; a < numImageArrays; a++)
 			{
 				auto& infoArray = imageArraysInfos[a].arrays[f];
-				writer.writeImage(a + numUBOs + numSamplerImages, infoArray.data(), infoArray.size());
+				writer.writeImage(a + numUBOs + numSamplerImages, infoArray.data(), static_cast<uint32_t>(infoArray.size()));
 			}
 
 			// add samplers

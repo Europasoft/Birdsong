@@ -50,7 +50,7 @@ namespace EngineCore
 
 		auto sets = std::vector<VkDescriptorSet>{ defaultSet.getDescriptorSet(renderer.getFrameIndex()) };
 
-		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, sets.size(), sets.data(), 0, nullptr);
+		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 
 		for (DDPushConstant& box : boxPushConstants)
 		{

@@ -114,7 +114,7 @@ namespace WorldSystem
 		const auto& cameraSector = getLocalSectorCoordinate();
 		const float S = static_cast<float>(SECTOR_SIZE);
 
-		lightPos.y -= 50.f * deltaTime;
+		lightPos.y -= 50.f * static_cast<float>(deltaTime);
 		float roughness = 0.15f;
 		if (getLoadedSectors().size() && getPersistentSector().primitives.size() > 0)
 		{
