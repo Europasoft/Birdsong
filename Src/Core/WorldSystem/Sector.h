@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include "Core/Types/CommonTypes.h"
+
 namespace EngineCore
 {
 	class Primitive;
@@ -10,12 +12,14 @@ namespace EngineCore
 
 namespace WorldSystem
 {
+	using SectorInt = intmax_t;
+
 	class SectorCoord
 	{
 	public:
 		SectorCoord();
-		SectorCoord(intmax_t x, intmax_t y, intmax_t z);
-		intmax_t x, y, z;
+		SectorCoord(SectorInt x, SectorInt y, SectorInt z);
+		SectorInt x, y, z;
 		bool operator==(const SectorCoord& s) const { return x == s.x && y == s.y && z == s.z; } // ==
 		bool operator!=(const SectorCoord& s) const { return !(s == *this); } // !=
 		SectorCoord operator+(const SectorCoord& s) const { return SectorCoord{ x + s.x, y + s.y, z + s.z }; } // +
@@ -34,5 +38,8 @@ namespace WorldSystem
 		bool isCulled = false;
 
 	};
+
+	// transforms a position from its native local sector frame into a 3D coordinate relative to a target reference sector's origin
+	Vec calculateRelative(Vec subjectLocalCoords, SectorCoord subjectSector, SectorCoord referenceSector);
 
 }

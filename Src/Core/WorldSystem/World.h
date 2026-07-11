@@ -20,7 +20,6 @@ namespace WorldSystem
 {
 	class Scene
 	{
-		static constexpr uint32_t SECTOR_SIZE = 50000;
 		EngineCore::EngineDevice& device;
 		EngineCore::EngineApplication& engine;
 	public:
@@ -32,6 +31,8 @@ namespace WorldSystem
 
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
+
+		static constexpr uint32_t SECTOR_SIZE = 10000;
 
 		// currently loaded sectors, index 0 is the persistent sector
 		std::vector<std::unique_ptr<Sector>> sectors;

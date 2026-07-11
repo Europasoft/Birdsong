@@ -1,5 +1,6 @@
 #include "Core/GPU/Device.h"
 #include "Core/WorldSystem/World.h"
+#include "Core/WorldSystem/Sector.h"
 #include "Core/Camera.h"
 #include "Core/Primitive.h"
 #include "Core/GPU/Material.h"
@@ -118,14 +119,7 @@ namespace WorldSystem
 		float roughness = 0.15f;
 		if (getLoadedSectors().size() && getPersistentSector().primitives.size() > 0)
 		{
-			const auto& meshSector = getPersistentSector().coordinates;
-			// provide shaders with the camera position relative to the mesh, even if they are not in the same sector
-			glm::vec3 camPosRelative = {
-				cam.transform.translation.x + static_cast<float>(cameraSector.x - meshSector.x) * S,
-				cam.transform.translation.y + static_cast<float>(cameraSector.y - meshSector.y) * S,
-				cam.transform.translation.z + static_cast<float>(cameraSector.z - meshSector.z) * S
-			};
-
+			glm::vec3 camPosRelative{}; // TODO: this can be removed, now using camera-relative rendering in the shader
 			auto& meshDset = *getPersistentSector().primitives[0]->getMaterial()->getMaterialSpecificDescriptorSet();
 			meshDset.writeUBOMember(0, camPosRelative, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
@@ -150,11 +144,14 @@ namespace WorldSystem
 		const float S = static_cast<float>(SECTOR_SIZE);
 		const float halfS = S * 0.5f;
 
-		auto processAxis = [&](float& p, intmax_t& c) {
+		auto processAxis = [&](float& p, intmax_t& c) 
+		{
 			intmax_t shift = static_cast<intmax_t>(std::floor((p + halfS) / S));
-			if (shift != 0) {
+			if (shift != 0)
+			{
+				// sector boundary was crossed
 				c += shift;
-				p -= static_cast<float>(shift) * S;
+				p -= static_cast<float>(shift) * S; // wraps position back to the relative local frame
 				enteredNewSector = true;
 			}
 		};

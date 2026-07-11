@@ -3,6 +3,7 @@
 #include "Core/GPU/Device.h"
 #include "Core/Camera.h"
 #include "Core/WorldSystem/World.h"
+#include "Core/WorldSystem/Sector.h"
 
 #include <stdexcept>
 #include <array>
@@ -33,14 +34,6 @@ namespace EngineCore
 			if (sector->isCulled)
 				continue;
 
-			// this offset moves the position from sector-local to camera-local space
-			// by accounting for the distance between the camera's sector and the object's sector
-			glm::vec3 sectorOffset = {
-				static_cast<float>(sector->coordinates.x - cameraSector.x) * S,
-				static_cast<float>(sector->coordinates.y - cameraSector.y) * S,
-				static_cast<float>(sector->coordinates.z - cameraSector.z) * S
-			};
-
 			for (uint32_t i = 0; i < meshes.size(); i++)
 			{
 				auto& mesh = meshes[i];
@@ -49,8 +42,7 @@ namespace EngineCore
 				material->bindToCommandBuffer(commandBuffer); // bind material-specific shading pipeline
 
 				std::vector<VkDescriptorSet> sets;
-				// scene global descriptor set
-				sets.push_back(sceneGlobalDescriptorSet);
+				sets.push_back(sceneGlobalDescriptorSet); // scene global descriptor set
 
 				if (auto* matSet = material->getMaterialSpecificDescriptorSet())
 				{
@@ -61,31 +53,13 @@ namespace EngineCore
 				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(),
 					0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 
-				// spin 3D primitive - demo
-				if (s == 1 && i == 0)
-				{
-					float spinRate = 0.1f;
-					mesh->getTransform().rotation.z = glm::mod(mesh->getTransform().rotation.z + spinRate * deltaTimeSeconds, glm::two_pi<float>());
-					mesh->getTransform().rotation.y = glm::mod(mesh->getTransform().rotation.y + spinRate * 0.8f * deltaTimeSeconds, glm::two_pi<float>());
-					continue; // TODO: this skips rendering the first mesh!!!
-				}
-
-				// spin 3D primitive - demo
-				if (s == 1 && i == 1)
-				{
-
-					float spinRate = 0.3f;
-					mesh->getTransform().rotation.z = glm::mod(mesh->getTransform().rotation.z + spinRate * deltaTimeSeconds, glm::two_pi<float>());
-				}
-				
-				{
-					// NON-TEST CODE!
-					ShaderPushConstants::MeshPushConstants push{};
-					const auto& transform = mesh->getTransform();
-					push.transform = Transform::makeMatrix(transform.rotation, transform.scale, transform.translation + sectorOffset);
-					push.normalMatrix = glm::transpose(glm::inverse(push.transform));
-					material->writePushConstants(commandBuffer, push);
-				}
+				ShaderPushConstants::MeshPushConstants push{};
+				const auto& transform = mesh->getTransform();
+				// get the unified world space position relative to the camera's sector origin
+				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSector);
+				push.transform = Transform::makeMatrix(transform.rotation, transform.scale, meshPosRelative);
+				push.normalMatrix = glm::transpose(glm::inverse(push.transform));
+				material->writePushConstants(commandBuffer, push);
 
 				// record mesh draw command
 				mesh->bind(commandBuffer);
