@@ -1,8 +1,0 @@
-{
-    "SomeNumber" : 123,
-    "SomeString" : "abc",
-    "SomeObject" : {
-        "SomeArrayInObject": [ "ArrayElem1", "ArrayElem2", 3.0 ], 
-        "SomeObjectInsideObject" : { "SubObjectString":"xyz" }
-    }
-}
