@@ -1,5 +1,6 @@
 #include "Core/GPU/Device.h"
 #include "Core/WorldSystem/World.h"
+#include "Core/WorldSystem/Sector.h"
 #include "Core/Camera.h"
 #include "Core/Primitive.h"
 #include "Core/GPU/Material.h"
@@ -111,14 +112,16 @@ namespace WorldSystem
 		sceneGlobalDescriptorSet->writeUBOMember(0, pvm, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
 
 		// update material-specific descriptors on mesh
-		glm::vec3 camPos = cam.transform.translation;
+		const auto& cameraSector = getLocalSectorCoordinate();
+		const float S = static_cast<float>(SECTOR_SIZE);
 
-		lightPos.y -= 50.f * deltaTime;
+		lightPos.y -= 50.f * static_cast<float>(deltaTime);
 		float roughness = 0.15f;
 		if (getLoadedSectors().size() && getPersistentSector().primitives.size() > 0)
 		{
+			glm::vec3 camPosRelative{}; // TODO: this can be removed, now using camera-relative rendering in the shader
 			auto& meshDset = *getPersistentSector().primitives[0]->getMaterial()->getMaterialSpecificDescriptorSet();
-			meshDset.writeUBOMember(0, camPos, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
+			meshDset.writeUBOMember(0, camPosRelative, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, roughness, EngineCore::UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);
 		}
@@ -126,7 +129,7 @@ namespace WorldSystem
 
 	void Scene::sectorUpdate(EngineCore::Camera& camera)
 	{
-		if (updateSectorCoord(camera.transform.translation));
+		if (updateSectorCoord(camera.transform.translation))
 		{
 			// new local sector entered
 			loadSector(getLocalSectorCoordinate());
@@ -136,44 +139,31 @@ namespace WorldSystem
 	bool Scene::updateSectorCoord(Vec& pos)
 	{
 		SectorCoord coordNew = getLocalSectorCoordinate();
-		Vec newLocalPos = pos;
-		auto& S = Scene::SECTOR_SIZE;
-		if (pos.x > S)
-		{
-			coordNew.x += static_cast<intmax_t>(std::floor(pos.x / S));
-			newLocalPos.x = (S - (pos.x - S)) * -1;
-		}
-		else if (pos.x < -S)
-		{
-			coordNew.x -= static_cast<intmax_t>(std::floor(std::abs(pos.x) / S));
-			newLocalPos.x = (S - (std::abs(pos.x) - S));
-		}
+		bool enteredNewSector = false;
 
-		if (pos.y > S)
-		{
-			coordNew.y += static_cast<intmax_t>(std::floor(pos.y / S));
-			newLocalPos.y = (S - (pos.y - S)) * -1;
-		}
-		else if (pos.y < -S)
-		{
-			coordNew.y -= static_cast<intmax_t>(std::floor(std::abs(pos.y) / S));
-			newLocalPos.y = (S - (std::abs(pos.y) - S));
-		}
+		const float S = static_cast<float>(SECTOR_SIZE);
+		const float halfS = S * 0.5f;
 
-		if (pos.z > S)
+		auto processAxis = [&](float& p, intmax_t& c) 
 		{
-			coordNew.z += static_cast<intmax_t>(std::floor(pos.z / S));
-			newLocalPos.z = (S - (pos.z - S)) * -1;
-		}
-		else if (pos.z < -S)
-		{
-			coordNew.z -= static_cast<intmax_t>(std::floor(std::abs(pos.z) / S));
-			newLocalPos.z = (S - (std::abs(pos.z) - S));
-		}
+			intmax_t shift = static_cast<intmax_t>(std::floor((p + halfS) / S));
+			if (shift != 0)
+			{
+				// sector boundary was crossed
+				c += shift;
+				p -= static_cast<float>(shift) * S; // wraps position back to the relative local frame
+				enteredNewSector = true;
+			}
+		};
 
-		bool enteredNewSector = (coordNew != getLocalSectorCoordinate());
-		//pos = newLocalPos;		TODO: actually update the camera position !!!
-		setLocalSectorCoordinate(coordNew);
+		processAxis(pos.x, coordNew.x);
+		processAxis(pos.y, coordNew.y);
+		processAxis(pos.z, coordNew.z);
+
+		if (enteredNewSector)
+		{
+			setLocalSectorCoordinate(coordNew);
+		}
 		return enteredNewSector;
 	}
 

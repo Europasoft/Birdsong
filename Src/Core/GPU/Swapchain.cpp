@@ -114,7 +114,7 @@ namespace EngineCore
 		return swapchainAttachment->getImages(); 
 	}
 
-	const AttachmentProperties& EngineSwapChain::getAttachmentProperties() const
+	AttachmentProperties EngineSwapChain::getAttachmentProperties() const
 	{
 		AttachmentProperties props(AttachmentType::COLOR);
 		props.extent = extent;

@@ -167,7 +167,7 @@ namespace EngineCore
 		VkPushConstantRange pushConstRange{};
 		pushConstRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstRange.offset = 0;
-		pushConstRange.size = materialCreateInfo.pushConstSize;
+		pushConstRange.size = static_cast<uint32_t>(materialCreateInfo.pushConstSize);
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

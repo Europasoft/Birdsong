@@ -36,7 +36,7 @@ namespace EngineCore
 		uint32_t height() const { return getExtent().height; }
 		float getExtentAspectRatio() const { return static_cast<float>(width()) / static_cast<float>(height()); }
 		// returns image properties matching the current swapchain state
-		const AttachmentProperties& getAttachmentProperties() const;
+		AttachmentProperties getAttachmentProperties() const;
 		bool compareSwapFormats(const EngineSwapChain& b) const { return (depthFormat == b.depthFormat) && (imageFormat == b.imageFormat); }
 
 		VkResult acquireNextImage(uint32_t* imageIndex);

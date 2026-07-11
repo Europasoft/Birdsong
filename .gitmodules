@@ -1,0 +1,3 @@
+[submodule "Src/Core/Dependencies/europasoft-json"]
+	path = Src/Core/Dependencies/europasoft-json
+	url = https://github.com/Europasoft/europasoft-json
