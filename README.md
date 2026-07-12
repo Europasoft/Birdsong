@@ -1,12 +1,17 @@
 
 ## Build configuration
 #### Headers
-Add the following as include directories:
+Add the following as include directories (example paths):
 ```
-Source files root (example path: C:/dev/vk-rpg/Src)
-Vulkan SDK (example path: C:/dev/VulkanSDK/1.2.170.0/Include)
-GLFW (example path: C:/dev/glfw-3.3.3.bin.WIN64/include)
-GLM (example path: C:/dev/glm)
+Source files root: "$(ProjectDir)/Src"
+Vulkan SDK: "C:/dev/VulkanSDK/1.2.170.0/Include"
+GLFW: "C:/dev/glfw-3.3.3.bin.WIN64/include"
+GLM: "C:/dev/glm"
+Box3D wrapper: 
+"$(ProjectDir)\Src\Core\Dependencies\box3d-cpp"
+"$(ProjectDir)\Src\Core\Dependencies\box3d-cpp\box3d\src"
+"$(ProjectDir)\Src\Core\Dependencies\box3d-cpp\box3d\include\"
+"$(ProjectDir)\Src\Core\Dependencies\box3d-cpp\box3d\include\box3d"
 ```
 #### Libraries
 Add the following as linker library directories:
