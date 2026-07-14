@@ -1,6 +1,0 @@
-[submodule "Src-old/Core/Dependencies/europasoft-json"]
-	path = Src-old/Core/Dependencies/europasoft-json
-	url = https://github.com/Europasoft/europasoft-json
-[submodule "Src-old/Core/Dependencies/box3d-cpp"]
-	path = Src-old/Core/Dependencies/box3d-cpp
-	url = https://github.com/Europasoft/box3d-cpp
