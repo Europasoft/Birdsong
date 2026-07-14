@@ -1,0 +1,6 @@
+[submodule "src/deps/box3d-cpp"]
+	path = src/deps/box3d-cpp
+	url = https://github.com/Europasoft/box3d-cpp
+[submodule "src/deps/europasoft-json"]
+	path = src/deps/europasoft-json
+	url = https://github.com/Europasoft/europasoft-json
