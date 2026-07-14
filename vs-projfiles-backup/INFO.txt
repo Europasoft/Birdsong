@@ -1,2 +1,0 @@
-backup vs project files 14 jul
-prior to source file restructure (moving files, switching to lowercase directory names)

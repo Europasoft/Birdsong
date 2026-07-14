@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{f1ef70e5-8538-437e-87e8-269b665cc7cb}</ProjectGuid>
+    <RootNamespace>Birdsong</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\core\draw\DebugDrawer.cpp" />
+    <ClCompile Include="..\..\src\core\draw\FxDrawer.cpp" />
+    <ClCompile Include="..\..\src\core\draw\InterfaceDrawer.cpp" />
+    <ClCompile Include="..\..\src\core\draw\MeshDrawer.cpp" />
+    <ClCompile Include="..\..\src\core\draw\SkyDrawer.cpp" />
+    <ClCompile Include="..\..\src\core\draw\Text.cpp" />
+    <ClCompile Include="..\..\src\core\engine\Camera.cpp" />
+    <ClCompile Include="..\..\src\core\engine\Engine.cpp" />
+    <ClCompile Include="..\..\src\core\engine\main.cpp" />
+    <ClCompile Include="..\..\src\core\engine\Primitive.cpp" />
+    <ClCompile Include="..\..\src\core\engine\Window.cpp" />
+    <ClCompile Include="..\..\src\core\gpu\Buffer.cpp" />
+    <ClCompile Include="..\..\src\core\gpu\Descriptors.cpp" />
+    <ClCompile Include="..\..\src\core\gpu\Device.cpp" />
+    <ClCompile Include="..\..\src\core\gpu\Image.cpp" />
+    <ClCompile Include="..\..\src\core\gpu\Material.cpp" />
+    <ClCompile Include="..\..\src\core\gpu\Swapchain.cpp" />
+    <ClCompile Include="..\..\src\core\input\Input.cpp" />
+    <ClCompile Include="..\..\src\core\render\Attachment.cpp" />
+    <ClCompile Include="..\..\src\core\render\Renderer.cpp" />
+    <ClCompile Include="..\..\src\core\render\Renderpass.cpp" />
+    <ClCompile Include="..\..\src\core\world\Sector.cpp" />
+    <ClCompile Include="..\..\src\core\world\World.cpp" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\aabb.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\arena_allocator.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\bitset.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\block_allocator.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\body.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\broad_phase.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\capsule.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\compound.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\constraint_graph.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\contact.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\contact_solver.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\convex_manifold.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\core.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\distance.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\distance_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\dynamic_tree.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\height_field.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\hull.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\id_pool.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\island.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\manifold.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\math_functions.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\mesh.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\mesh_contact.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\motor_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\mover.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\name_cache.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\parallel_for.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\parallel_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\physics_world.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\prismatic_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\recording.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\recording_replay.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\revolute_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\scheduler.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\sensor.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\shape.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\simd.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\solver.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\solver_set.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\sphere.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\spherical_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\table.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\timer.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\triangle_manifold.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\types.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\weld_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\wheel_joint.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\box3d\src\world_snapshot.c" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\private\b3cpp_body.cpp" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\private\b3cpp_contact.cpp" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\private\b3cpp_shape.cpp" />
+    <ClCompile Include="..\..\src\deps\box3d-cpp\private\b3cpp_world.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\core\draw\DebugDrawer.h" />
+    <ClInclude Include="..\..\src\core\draw\DrawIncludes.h" />
+    <ClInclude Include="..\..\src\core\draw\FxDrawer.h" />
+    <ClInclude Include="..\..\src\core\draw\InterfaceDrawer.h" />
+    <ClInclude Include="..\..\src\core\draw\MeshDrawer.h" />
+    <ClInclude Include="..\..\src\core\draw\SkyDrawer.h" />
+    <ClInclude Include="..\..\src\core\draw\Text.h" />
+    <ClInclude Include="..\..\src\core\engine\Camera.h" />
+    <ClInclude Include="..\..\src\core\engine\Engine.h" />
+    <ClInclude Include="..\..\src\core\engine\EngineClock.h" />
+    <ClInclude Include="..\..\src\core\engine\EngineSettings.h" />
+    <ClInclude Include="..\..\src\core\engine\Primitive.h" />
+    <ClInclude Include="..\..\src\core\engine\Renderer_legacy.h" />
+    <ClInclude Include="..\..\src\core\engine\Window.h" />
+    <ClInclude Include="..\..\src\core\gpu\Buffer.h" />
+    <ClInclude Include="..\..\src\core\gpu\Descriptors.h" />
+    <ClInclude Include="..\..\src\core\gpu\Device.h" />
+    <ClInclude Include="..\..\src\core\gpu\Image.h" />
+    <ClInclude Include="..\..\src\core\gpu\Material.h" />
+    <ClInclude Include="..\..\src\core\gpu\Swapchain.h" />
+    <ClInclude Include="..\..\src\core\input\Input.h" />
+    <ClInclude Include="..\..\src\core\render\Attachment.h" />
+    <ClInclude Include="..\..\src\core\render\Renderer.h" />
+    <ClInclude Include="..\..\src\core\render\Renderpass.h" />
+    <ClInclude Include="..\..\src\core\render\Shadowmap.h" />
+    <ClInclude Include="..\..\src\core\types\CommonTypes.h" />
+    <ClInclude Include="..\..\src\core\types\Math.h" />
+    <ClInclude Include="..\..\src\core\types\vk.h" />
+    <ClInclude Include="..\..\src\core\world\Sector.h" />
+    <ClInclude Include="..\..\src\core\world\World.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\base.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\box3d.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\collision.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\config.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\constants.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\id.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\math_functions.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\include\box3d\types.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\aabb.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\algorithm.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\arena_allocator.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\bitset.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\block_allocator.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\body.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\broad_phase.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\compound.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\constraint_graph.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\contact.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\contact_solver.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\container.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\core.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\ctz.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\hull_map.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\id_pool.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\island.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\joint.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\manifold.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\math_internal.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\name_cache.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\parallel_for.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\physics_world.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\platform.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\qsort.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\recording.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\recording_replay.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\scheduler.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\sensor.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\shape.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\simd.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\solver.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\solver_set.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\table.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\verstable.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\box3d\src\world_snapshot.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\include\b3cpp.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\include\b3cpp_base.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\include\b3cpp_body.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\include\b3cpp_contact.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\include\b3cpp_shape.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\include\b3cpp_types.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\include\b3cpp_world.h" />
+    <ClInclude Include="..\..\src\deps\box3d-cpp\private\b3cpp_utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\..\src\deps\box3d-cpp\box3d\src\box3d.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\src\deps\box3d-cpp\box3d\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\deps\box3d-cpp\box3d\src\recording_ops.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
