@@ -1,7 +1,7 @@
 #include "Core/WorldSystem/Sector.h"
 #include "Core/WorldSystem/World.h"
 #include "Core/Primitive.h"
-
+#include <iostream>
 namespace WorldSystem
 {
 	SectorCoord::SectorCoord() : x{ 0 }, y{ 0 }, z{ 0 } {};
@@ -9,7 +9,18 @@ namespace WorldSystem
 
 	Sector::Sector(const SectorCoord& coord)
 		: coordinates{ coord }
-	{}
+	{
+		physicsWorld = std::make_unique<b3cpp::World>();
+
+		b3cpp::BodyDef bodyDef;
+		bodyDef.type = b3cpp::EBodyType::DynamicBody;
+		b3cpp::Body b = physicsWorld->createBody(bodyDef);
+
+		b3cpp::SphereShape& s = b.createShape<b3cpp::SphereShape>();
+		b3cpp::ShapeDef shapeDef;
+		
+		s.activate(shapeDef);
+	}
 
 	Vec calculateRelative(Vec subjectLocalCoords, SectorCoord subjectSector, SectorCoord referenceSector)
 	{
