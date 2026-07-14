@@ -15,7 +15,7 @@ namespace EngineCore
 		boxMesh = std::make_unique<Primitive>(device, builder);
 
 		// setup debug primitive material
-		auto shader = ShaderFilePaths(makePath("Shaders/debug_primitive.vert.spv"), makePath("Shaders/debug_primitive.frag.spv"));
+		auto shader = ShaderFilePaths(makePath("shaders/debug_primitive.vert.spv"), makePath("shaders/debug_primitive.frag.spv"));
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };
 		auto matInfo = MaterialCreateInfo(shader, layouts, samples, formats, sizeof(ShaderPushConstants::DebugPrimitivePushConstants));
 		//matInfo.shadingProperties.enableDepth = false;

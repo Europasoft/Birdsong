@@ -296,5 +296,5 @@ public:
 static std::string makePath(const char* pathIn)
 {
 	// assumes the application is running from a subdirectory under the project root
-	return (std::filesystem::current_path() / "../Src/Core/DevResources" / std::filesystem::path(pathIn)).string();
+	return (std::filesystem::current_path() / "../resources" / std::filesystem::path(pathIn)).string();
 }

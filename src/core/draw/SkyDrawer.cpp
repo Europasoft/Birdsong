@@ -9,8 +9,8 @@ namespace EngineCore
 	SkyDrawer::SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 	{
 		// TODO: hardcoded paths
-		const std::string meshPath = makePath("Meshes/skysphere.obj");
-		ShaderFilePaths skyShaders(makePath("Shaders/sky.vert.spv"), makePath("Shaders/sky.frag.spv"));
+		const std::string meshPath = makePath("meshes/skysphere.obj");
+		ShaderFilePaths skyShaders(makePath("shaders/sky.vert.spv"), makePath("shaders/sky.frag.spv"));
 
 		// prepare sky mesh
 		Primitive::MeshBuilder builder{};

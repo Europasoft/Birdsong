@@ -30,7 +30,7 @@ namespace EngineCore
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout(), uboSet->getLayout(), attachmentSet->getLayout() };
 
 		// setup material for the fullscreen shaders (no mesh)
-		ShaderFilePaths fullscreenShader(makePath("Shaders/fullscreen.vert.spv"), makePath("Shaders/fullscreen.frag.spv"));
+		ShaderFilePaths fullscreenShader(makePath("shaders/fullscreen.vert.spv"), makePath("shaders/fullscreen.frag.spv"));
 		MaterialCreateInfo fullscreenInfo(fullscreenShader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, 0);
 		fullscreenInfo.shadingProperties.useVertexInput = false;
 		fullscreenInfo.shadingProperties.enableDepth = false;
@@ -39,9 +39,9 @@ namespace EngineCore
 
 		// setup mesh and material
 		Primitive::MeshBuilder builder{};
-		builder.loadFromFile(makePath("Meshes/teapot.obj"));
+		builder.loadFromFile(makePath("meshes/teapot.obj"));
 		mesh = std::make_unique<Primitive>(device, builder);
-		ShaderFilePaths shader(makePath("Shaders/fx_test.vert.spv"), makePath("Shaders/fx_test.frag.spv"));
+		ShaderFilePaths shader(makePath("shaders/fx_test.vert.spv"), makePath("shaders/fx_test.frag.spv"));
 		mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, sizeof(ShaderPushConstants::MeshPushConstants)));
 		mesh->getTransform().scale = 5.f;
 		mesh->getTransform().translation = Vec{ -80.f, 0.f, 0.f };
