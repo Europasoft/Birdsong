@@ -10,3 +10,5 @@ You will find these under "include paths" and "lib paths".
 4. Compile the demo shaders: this is done with the Python script in `Src/Core/DevResources/Shaders/CompileShaders.py` (you will need to edit the paths inside this script before running it).
 5. Launch Birdsong.exe
 
+<img width="1208" height="893" alt="Birdsong_KQpQerGNSI" src="https://github.com/user-attachments/assets/ef25b3e9-230e-44ea-b197-1aef83ea2a7b" />
+
