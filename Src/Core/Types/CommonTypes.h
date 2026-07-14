@@ -5,6 +5,7 @@
 #include "Core/Types/Math.h"
 
 #include <string>
+#include <filesystem>
 
 template<typename T = float>
 class Vector3D
@@ -294,9 +295,6 @@ public:
 
 static std::string makePath(const char* pathIn)
 {
-	// TODO: hardcoded path, subject to change  
-	std::string dir = "D:/VulkanDev/vk-rpg/Src/Core/DevResources/"; // relative: "Resources/" absolute: "D:/VulkanDev/vk-rpg/Src/Core/DevResources/"
-	std::string path = pathIn;
-	dir += path;
-	return dir;
+	// assumes the application is running from a subdirectory under the project root
+	return (std::filesystem::current_path() / "../Src/Core/DevResources" / std::filesystem::path(pathIn)).string();
 }
