@@ -1,12 +1,12 @@
-# Copyright © 2024 Simon Liimatainen
+# Copyright © 2026 Simon Liimatainen
 import os
 from subprocess import Popen, PIPE
 from sys import exit as sys_exit, argv as sys_args
 from time import sleep
 import csv
 
-DEFAULT_DIR = "D:\\VulkanDev\\vk-rpg\\Src\\Core\\DevResources\\Shaders"
-DEFAULT_COMPILER = "D:\\VulkanDev\\VulkanSDK\\1.3.246.1\\Bin\\glslc.exe"
+DEFAULT_DIR = "D:/source/repos/Birdsong/Src/Core/DevResources/Shaders"
+DEFAULT_COMPILER = "D:/VulkanDev/VulkanSDK/1.3.246.1/Bin/glslc.exe"
 
 
 def load_shader_list(filepath):
