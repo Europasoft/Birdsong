@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "Core/Types/CommonTypes.h"
+#include "Core/Dependencies/box3d-cpp/include/b3cpp.h"
 
 namespace EngineCore
 {
@@ -36,6 +37,8 @@ namespace WorldSystem
 		SectorCoord coordinates;
 		std::vector<std::unique_ptr<EngineCore::Primitive>> primitives;
 		bool isCulled = false;
+
+		std::unique_ptr<b3cpp::World> physicsWorld;
 
 	};
 
