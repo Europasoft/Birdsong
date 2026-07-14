@@ -37,7 +37,7 @@ public:
 	static auto dot(const Vector3D<T>& a, const Vector3D<T>& b) 
 		{ return (a.x * b.x) + (a.y * b.y) + (a.z * b.z); }
 	static Vector3D<T> cross(const Vector3D<T>& a, const Vector3D<T>& b) 
-		{ return ((a.y * b.z - b.y * a.z), (a.z * b.x - b.z * a.x), (a.x * b.y - b.x * a.y)); }
+		{ return Vector3D<T>((a.y * b.z - b.y * a.z), (a.z * b.x - b.z * a.x), (a.x * b.y - b.x * a.y)); }
 	Vector3D<T> getNormalized() const 
 	{ 
 		const auto sum = dot(*this, *this); // magnitude squared

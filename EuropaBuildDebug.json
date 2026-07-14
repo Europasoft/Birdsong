@@ -1,0 +1,100 @@
+[
+	{
+		"general settings": "These settings are applied to all targets in this build file.",
+		"c++ compiler args": 
+		[ 
+			"-std=c++20", 
+			"-fms-runtime-lib=dll_dbg",
+			"-O0", 
+			"-D_DEBUG", 
+			"-DUNICODE", 
+			"-D_UNICODE", 
+			"-Wall", 
+			"-pedantic", 
+			"-fexceptions"
+		],
+		"c compiler args": 
+		[ 
+			"-std=c17",
+			"-fms-runtime-lib=dll_dbg",
+			"-O0", 
+			"-D_DEBUG", 
+			"-DUNICODE", 
+			"-D_UNICODE", 
+			"-Wall", 
+			"-pedantic" 
+		],
+		"linker args":
+		[
+		]
+	},
+
+	{
+		"target": "Birdsong",
+		"type": "executable",
+		"output path": "build/",
+		"sources":
+		[
+			"Src/Core/Draw/",
+			"Src/Core/GPU/",
+			"Src/Core/Render/",
+			"Src/Core/Window/",
+			"Src/Core/WorldSystem/",
+			
+			"Src/Core/Engine.cpp",
+			"Src/Core/Camera.cpp",
+			"Src/Core/Input.cpp",
+    		"Src/Core/main.cpp",
+			"Src/Core/Primitive.cpp",
+			"Src/Core/Window.cpp"
+		],
+		"include paths":
+		[
+			"Src/",
+			"D:/VulkanDev/VulkanSDK/1.4.328.1/Include",
+			"D:/VulkanDev/glfw-3.3.8.bin.WIN64/include",
+
+			"Src/Core/Dependencies/box3d-cpp/",
+			
+			"Src/Core/ThirdParty/freetype-2.9.1/include/freetype",
+			"Src/Core/ThirdParty/freetype-2.9.1/include"
+		],
+		"dependencies":
+		[
+			"box3d-cpp"
+		],
+		"lib paths":
+		[
+			"D:/VulkanDev/glfw-3.3.8.bin.WIN64/lib-vc2022",
+			"D:/VulkanDev/VulkanSDK/1.4.328.1/Lib/"
+		],
+		"libs": 
+		[
+			"vulkan-1.lib",
+			"glfw3.lib",
+
+    		"user32.lib", 
+    		"gdi32.lib", 
+    		"shell32.lib"
+		]
+	},
+
+	{
+		"target": "box3d-cpp",
+		"type": "dependency",
+		"output path": "build/",
+		"sources":
+		[
+			"Src/Core/Dependencies/box3d-cpp/private",
+			"Src/Core/Dependencies/box3d-cpp/box3d/src"
+		],
+		"include paths":
+		[
+			"Src/Core/Dependencies/box3d-cpp/",
+			"Src/Core/Dependencies/box3d-cpp/box3d/include/",
+			"Src/Core/Dependencies/box3d-cpp/box3d/include/box3d",
+			"Src/Core/Dependencies/box3d-cpp/box3d/src"
+		],
+		"dependencies": []
+	}
+]
