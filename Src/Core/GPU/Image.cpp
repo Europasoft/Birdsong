@@ -62,7 +62,7 @@ namespace EngineCore
 		int width, height, channels;
 		stbi_uc* pixels = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		VkDeviceSize imageSize = width * height * (uint32_t)4;
-		if (!pixels) { throw std::runtime_error("failed to load image"); }
+		if (!pixels) { throw std::runtime_error("failed to load image " + path); }
 
 		// temporary image buffer
 		GBuffer stagingBuffer
