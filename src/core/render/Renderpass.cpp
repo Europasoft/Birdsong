@@ -1,8 +1,8 @@
-#include "Core/Render/Renderpass.h"
+#include "core/render/Renderpass.h"
 
-#include "Core/GPU/Device.h"
-#include "Core/Render/Renderer.h"
-#include "Core/Render/Attachment.h"
+#include "core/gpu/Device.h"
+#include "core/render/Renderer.h"
+#include "core/render/Attachment.h"
 
 #include <array>
 #include <stdexcept>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/GPU/Buffer.h"
+#include "core/gpu/Buffer.h"
 
 #include <glm/glm.hpp>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Core/GPU/Device.h"
-#include "Core/GPU/Buffer.h"
+#include "core/gpu/Device.h"
+#include "core/gpu/Buffer.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

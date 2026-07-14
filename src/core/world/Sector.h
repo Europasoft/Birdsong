@@ -3,8 +3,8 @@
 #include <vector>
 #include <memory>
 
-#include "Core/Types/CommonTypes.h"
-#include "Core/Dependencies/box3d-cpp/include/b3cpp.h"
+#include "core/types/CommonTypes.h"
+#include "deps/box3d-cpp/include/b3cpp.h"
 
 namespace EngineCore
 {

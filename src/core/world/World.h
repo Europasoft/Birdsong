@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/Types/CommonTypes.h"
-#include "Core/WorldSystem/Sector.h"
+#include "core/types/CommonTypes.h"
+#include "core/world/Sector.h"
 
 #include <stdint.h>
 #include <memory>

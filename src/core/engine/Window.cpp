@@ -1,5 +1,5 @@
-#include "Core/Window.h"
-#include "Core/Engine.h" // TODO: only used for temporary keyboard input system
+#include "core/engine/Window.h"
+#include "core/engine/Engine.h" // TODO: only used for temporary keyboard input system
 #include <stdexcept>
 
 namespace EngineCore

@@ -1,11 +1,11 @@
-#include "Core/Primitive.h"
-#include "Core/GPU/Material.h"
+#include "core/engine/Primitive.h"
+#include "core/gpu/Material.h"
 
 #include <cassert>
 #include <cstring>
 
 #define TINYOBJLOADER_IMPLEMENTATION // mesh file loader
-#include "Core/ThirdParty/tiny_obj_loader.h"
+#include "thirdparty/tiny_obj_loader.h"
 
 namespace EngineCore
 {

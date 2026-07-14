@@ -1,4 +1,4 @@
-#include "Core/GPU/Device.h"
+#include "core/gpu/Device.h"
 #include <cstring>
 #include <iostream>
 #include <set>

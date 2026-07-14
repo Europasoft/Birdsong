@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/Types/vk.h"
-#include "Core/Render/Attachment.h"
+#include "core/types/vk.h"
+#include "core/render/Attachment.h"
 
 #include <vector>
 #include <memory>

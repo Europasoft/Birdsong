@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include <glm/glm.hpp>
-#include "Core/Types/Math.h"
+#include "core/types/Math.h"
 
 #include <string>
 #include <filesystem>

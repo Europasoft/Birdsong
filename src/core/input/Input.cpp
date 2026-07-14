@@ -1,5 +1,5 @@
-#include "Core/Input.h"
-#include "Core/Window.h"
+#include "core/input/Input.h"
+#include "core/engine/Window.h"
 
 #include <cassert>
 

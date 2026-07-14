@@ -1,9 +1,9 @@
-#include "Core/Draw/FxDrawer.h"
-#include "Core/Primitive.h"
-#include "Core/Types/CommonTypes.h"
-#include "Core/GPU/Descriptors.h"
-#include "Core/GPU/Material.h"
-#include "Core/Render/Renderer.h"
+#include "core/draw/FxDrawer.h"
+#include "core/engine/Primitive.h"
+#include "core/types/CommonTypes.h"
+#include "core/gpu/Descriptors.h"
+#include "core/gpu/Material.h"
+#include "core/render/Renderer.h"
 
 namespace EngineCore
 {

@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <string>
-#include "Core/Types/CommonTypes.h"
+#include "core/types/CommonTypes.h"
 
 struct GLFWwindow;
 

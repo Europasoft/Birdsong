@@ -1,20 +1,20 @@
 #pragma once
-#include "Core/Window.h"
-#include "Core/GPU/Device.h"
-#include "Core/Render/Renderer.h"
-#include "Core/Camera.h"
-#include "Core/Draw/DrawIncludes.h"
-#include "Core/WorldSystem/World.h"
+#include "core/engine/Window.h"
+#include "core/gpu/Device.h"
+#include "core/render/Renderer.h"
+#include "core/engine/Camera.h"
+#include "core/draw/DrawIncludes.h"
+#include "core/world/World.h"
 
 #include <memory>
 #include <vector>
 #include <chrono> // timing
 #include <algorithm> // min()
 
-#include "Core/Types/CommonTypes.h"
-#include "Core/GPU/Descriptors.h"
-#include "Core/EngineSettings.h"
-#include "Core/EngineClock.h"
+#include "core/types/CommonTypes.h"
+#include "core/gpu/Descriptors.h"
+#include "core/engine/EngineSettings.h"
+#include "core/engine/EngineClock.h"
 
 class SharedMaterialsPool;
 

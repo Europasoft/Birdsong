@@ -1,4 +1,4 @@
-#include "Core/Camera.h"
+#include "core/engine/Camera.h"
 
 #include <glm/gtc/constants.hpp>
 #include <iostream>

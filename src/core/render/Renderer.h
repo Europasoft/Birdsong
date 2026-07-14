@@ -1,7 +1,7 @@
 #pragma once
-#include "Core/GPU/Swapchain.h"
-#include "Core/Render/Attachment.h"
-#include "Core/GPU/Material.h" // for RenderingFormats
+#include "core/gpu/Swapchain.h"
+#include "core/render/Attachment.h"
+#include "core/gpu/Material.h" // for RenderingFormats
 
 #include <memory>
 #include <vector>

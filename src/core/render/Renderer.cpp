@@ -1,8 +1,8 @@
-#include "Core/Render/Renderer.h"
+#include "core/render/Renderer.h"
 
-#include "Core/Window.h"
-#include "Core/GPU/Device.h"
-#include "Core/EngineSettings.h"
+#include "core/engine/Window.h"
+#include "core/gpu/Device.h"
+#include "core/engine/EngineSettings.h"
 
 #include <stdexcept>
 #include <array>

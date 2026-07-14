@@ -1,8 +1,8 @@
-#include "Core/Draw/SkyDrawer.h"
-#include "Core/Primitive.h"
-#include "Core/GPU/Device.h"
-#include "Core/Types/CommonTypes.h"
-#include "Core/GPU/Material.h"
+#include "core/draw/SkyDrawer.h"
+#include "core/engine/Primitive.h"
+#include "core/gpu/Device.h"
+#include "core/types/CommonTypes.h"
+#include "core/gpu/Material.h"
 
 namespace EngineCore
 {

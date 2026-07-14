@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/Draw/MeshDrawer.h"
-#include "Core/Draw/SkyDrawer.h"
-#include "Core/Draw/FxDrawer.h"
-#include "Core/Draw/InterfaceDrawer.h"
-#include "Core/Draw/DebugDrawer.h"
+#include "core/draw/MeshDrawer.h"
+#include "core/draw/SkyDrawer.h"
+#include "core/draw/FxDrawer.h"
+#include "core/draw/InterfaceDrawer.h"
+#include "core/draw/DebugDrawer.h"

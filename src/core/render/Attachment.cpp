@@ -1,5 +1,5 @@
-#include "Core/Render/Attachment.h"
-#include "Core/GPU/Device.h"
+#include "core/render/Attachment.h"
+#include "core/gpu/Device.h"
 
 #include <stdexcept>
 

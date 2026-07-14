@@ -1,12 +1,12 @@
-#include "Core/GPU/Image.h"
-#include "Core/GPU/Device.h"
-#include "Core/GPU/Buffer.h"
+#include "core/gpu/Image.h"
+#include "core/gpu/Device.h"
+#include "core/gpu/Buffer.h"
 #include <cassert>
 #include <stdexcept>
 
 // image importer, can only be defined in one (source) file
 #define STB_IMAGE_IMPLEMENTATION
-#include "Core/ThirdParty/stb_image.h"
+#include "thirdparty/stb_image.h"
 
 namespace EngineCore
 {

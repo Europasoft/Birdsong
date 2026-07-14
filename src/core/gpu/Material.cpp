@@ -1,5 +1,5 @@
-#include "Core/GPU/Material.h"
-#include "Core/Primitive.h"
+#include "core/gpu/Material.h"
+#include "core/engine/Primitive.h"
 
 #include <fstream>
 #include <iostream>

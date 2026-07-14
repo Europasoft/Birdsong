@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/GPU/Material.h"
+#include "core/gpu/Material.h"
 
 #include <glm/gtc/matrix_transform.hpp> // glm
 
@@ -8,7 +8,7 @@
 #include <cmath> // only used in perspective calculation
 
 class Camera;
-#include "Core/Primitive.h"
+#include "core/engine/Primitive.h"
 
 namespace EngineCore
 {

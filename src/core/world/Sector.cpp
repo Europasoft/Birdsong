@@ -1,6 +1,6 @@
-#include "Core/WorldSystem/Sector.h"
-#include "Core/WorldSystem/World.h"
-#include "Core/Primitive.h"
+#include "core/world/Sector.h"
+#include "core/world/World.h"
+#include "core/engine/Primitive.h"
 #include <iostream>
 namespace WorldSystem
 {

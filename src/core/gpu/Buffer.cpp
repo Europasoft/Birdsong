@@ -1,5 +1,5 @@
 
-#include "Core/GPU/Buffer.h"
+#include "core/gpu/Buffer.h"
 
 #include <cassert>
 #include <cstring>

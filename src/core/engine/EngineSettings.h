@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
-#include "Core/GPU/Device.h"
-#include "Core/Types/CommonTypes.h"
+#include "core/gpu/Device.h"
+#include "core/types/CommonTypes.h"
 
 #include <stdexcept>
 

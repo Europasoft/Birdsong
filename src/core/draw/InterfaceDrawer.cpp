@@ -1,7 +1,7 @@
-#include "Core/Draw/InterfaceDrawer.h"
+#include "core/draw/InterfaceDrawer.h"
 
-#include "Core/GPU/Device.h"
-#include "Core/Camera.h"
+#include "core/gpu/Device.h"
+#include "core/engine/Camera.h"
 
 #include <stdexcept>
 #include <array>

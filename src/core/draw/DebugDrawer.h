@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/Types/vk.h"
-#include "Core/Types/CommonTypes.h"
+#include "core/types/vk.h"
+#include "core/types/CommonTypes.h"
 #include <array>
 #include <memory>
 #include <vector>

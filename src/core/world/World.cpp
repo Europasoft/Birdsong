@@ -1,12 +1,12 @@
-#include "Core/GPU/Device.h"
-#include "Core/WorldSystem/World.h"
-#include "Core/WorldSystem/Sector.h"
-#include "Core/Camera.h"
-#include "Core/Primitive.h"
-#include "Core/GPU/Material.h"
-#include "Core/GPU/Buffer.h"
-#include "Core/GPU/Image.h"
-#include "Core/Engine.h"
+#include "core/gpu/Device.h"
+#include "core/world/World.h"
+#include "core/world/Sector.h"
+#include "core/engine/Camera.h"
+#include "core/engine/Primitive.h"
+#include "core/gpu/Material.h"
+#include "core/gpu/Buffer.h"
+#include "core/gpu/Image.h"
+#include "core/engine/Engine.h"
 
 #include <cmath>
 #include <algorithm>

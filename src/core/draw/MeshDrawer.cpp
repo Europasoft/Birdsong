@@ -1,9 +1,9 @@
 #include "MeshDrawer.h"
 
-#include "Core/GPU/Device.h"
-#include "Core/Camera.h"
-#include "Core/WorldSystem/World.h"
-#include "Core/WorldSystem/Sector.h"
+#include "core/gpu/Device.h"
+#include "core/engine/Camera.h"
+#include "core/world/World.h"
+#include "core/world/Sector.h"
 
 #include <stdexcept>
 #include <array>

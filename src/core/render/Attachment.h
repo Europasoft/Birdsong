@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/Types/vk.h"
-#include "Core/GPU/Image.h"
+#include "core/types/vk.h"
+#include "core/gpu/Image.h"
 #include <memory>
 #include <vector>
 

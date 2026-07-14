@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Core/GPU/Device.h"
-#include "Core/GPU/Descriptors.h"
-#include "Core/EngineSettings.h"
+#include "core/gpu/Device.h"
+#include "core/gpu/Descriptors.h"
+#include "core/engine/EngineSettings.h"
 
 #include <glm/glm.hpp>
 

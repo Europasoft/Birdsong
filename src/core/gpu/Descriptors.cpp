@@ -1,9 +1,9 @@
-#include "Core/GPU/Descriptors.h"
+#include "core/gpu/Descriptors.h"
 
-#include "Core/GPU/Device.h"
-#include "Core/GPU/Image.h"
-#include "Core/Types/Math.h"
-#include "Core/GPU/Swapchain.h"
+#include "core/gpu/Device.h"
+#include "core/gpu/Image.h"
+#include "core/types/Math.h"
+#include "core/gpu/Swapchain.h"
 
 #include <algorithm>
 #include <cassert>

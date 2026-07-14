@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Types/CommonTypes.h"
+#include "core/types/CommonTypes.h"
 
 namespace EngineCore
 { 

@@ -1,8 +1,8 @@
 #include "Engine.h"
 
-#include "Core/GPU/Material.h"
-#include "Core/GPU/Buffer.h"
-#include "Core/GPU/Image.h"
+#include "core/gpu/Material.h"
+#include "core/gpu/Buffer.h"
+#include "core/gpu/Image.h"
 
 #include <stdexcept>
 #include <array>

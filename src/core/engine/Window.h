@@ -6,7 +6,7 @@
 #pragma warning(pop)
 #include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 #include <string>
-#include "Core/Input.h"
+#include "core/input/Input.h"
 
 namespace EngineCore
 {

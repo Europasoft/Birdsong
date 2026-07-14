@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/GPU/Device.h"
+#include "core/gpu/Device.h"
 
 namespace EngineCore 
 {

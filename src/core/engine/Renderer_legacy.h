@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Swapchain.h"
+#include "core/Swapchain.h"
 
 #include <memory>
 #include <vector>

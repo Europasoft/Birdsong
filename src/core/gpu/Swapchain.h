@@ -1,7 +1,7 @@
 #pragma once
-#include "Core/Types/vk.h"
-#include "Core/GPU/Device.h"
-#include "Core/Render/Attachment.h"
+#include "core/types/vk.h"
+#include "core/gpu/Device.h"
+#include "core/render/Attachment.h"
 
 #include <string>
 #include <vector>
