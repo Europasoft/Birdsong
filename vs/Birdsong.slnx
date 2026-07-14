@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Birdsong.vcxproj" Id="4d317adf-d083-42c8-a3a0-faeac7421a4b" />
+</Solution>

@@ -2,25 +2,16 @@
 # Visual Studio project and build files
 x64/
 .vs/
-*.sln
-*.vcxproj
 *.filters
 *.user
 
 # Build system files
+intermediate/
 *.ninja
 .ninja_log
 build/
+x64Debug/
 *.pdb
-
-# Third-party libraries
-Src/Core/ThirdParty/
-
-Src/Core/Dependencies/**/.git/
-Src/Core/Dependencies/**/.gitignore
-Src/Core/Dependencies/**/.gitattributes
-
-# CMake output
 out/
 
 # SPIR-V compiled shaders
@@ -58,6 +49,4 @@ out/
 # Blender project files
 *.blend
 *.blend1
-Src/Core/Dependencies/json-rpg/json-rpg.cpp
-Src/Core/Dependencies/json-rpg/README.md
 *.code-workspace

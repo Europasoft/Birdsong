@@ -35,29 +35,29 @@
 		"output path": "build/",
 		"sources":
 		[
-			"Src/Core/Draw/",
-			"Src/Core/GPU/",
-			"Src/Core/Render/",
-			"Src/Core/Window/",
-			"Src/Core/WorldSystem/",
+			"src/core/engine/",
+			"src/core/draw/",
+			"src/core/gpu/",
+			"src/core/input/",
+			"src/core/render/",
+			"src/core/types/",
+			"src/core/world/",
 			
-			"Src/Core/Engine.cpp",
-			"Src/Core/Camera.cpp",
-			"Src/Core/Input.cpp",
-    		"Src/Core/main.cpp",
-			"Src/Core/Primitive.cpp",
-			"Src/Core/Window.cpp"
+			"src/core/engine/Engine.cpp",
+			"src/core/engine/Camera.cpp",
+			"src/core/input/Input.cpp",
+    		"src/core/engine/main.cpp",
+			"src/core/engine/Primitive.cpp",
+			"src/core/engine/Window.cpp"
 		],
 		"include paths":
 		[
-			"Src/",
+			"src/",
 			"D:/VulkanDev/VulkanSDK/1.4.328.1/Include",
-			"D:/VulkanDev/glfw-3.3.8.bin.WIN64/include",
-
-			"Src/Core/Dependencies/box3d-cpp/",
-			
-			"Src/Core/ThirdParty/freetype-2.9.1/include/freetype",
-			"Src/Core/ThirdParty/freetype-2.9.1/include"
+			"src/thirdparty/glfw-3.3.8.bin.WIN64/include",
+			"src/deps/box3d-cpp/",
+			"src/thirdparty/freetype-2.9.1/include/freetype",
+			"src/thirdparty/freetype-2.9.1/include"
 		],
 		"dependencies":
 		[
@@ -85,15 +85,15 @@
 		"output path": "build/",
 		"sources":
 		[
-			"Src/Core/Dependencies/box3d-cpp/private",
-			"Src/Core/Dependencies/box3d-cpp/box3d/src"
+			"src/deps/box3d-cpp/private",
+			"src/deps/box3d-cpp/box3d/src"
 		],
 		"include paths":
 		[
-			"Src/Core/Dependencies/box3d-cpp/",
-			"Src/Core/Dependencies/box3d-cpp/box3d/include/",
-			"Src/Core/Dependencies/box3d-cpp/box3d/include/box3d",
-			"Src/Core/Dependencies/box3d-cpp/box3d/src"
+			"src/deps/box3d-cpp/",
+			"src/deps/box3d-cpp/box3d/include/",
+			"src/deps/box3d-cpp/box3d/include/box3d",
+			"src/deps/box3d-cpp/box3d/src"
 		],
 		"dependencies": []
 	}
