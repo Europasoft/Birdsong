@@ -7,6 +7,12 @@ x64/
 *.filters
 *.user
 
+# Build system files
+*.ninja
+.ninja_log
+build/
+*.pdb
+
 # Third-party libraries
 Src/Core/ThirdParty/
 
