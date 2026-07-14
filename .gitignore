@@ -2,8 +2,6 @@
 # Visual Studio project and build files
 x64/
 .vs/
-*.sln
-*.vcxproj
 *.filters
 *.user
 
@@ -11,6 +9,7 @@ x64/
 *.ninja
 .ninja_log
 build/
+x64Debug/
 *.pdb
 
 # Third-party libraries
