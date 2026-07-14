@@ -24,7 +24,6 @@ out/
 *.slo
 *.lo
 *.o
-*.obj
 
 # Precompiled Headers
 *.gch
@@ -47,6 +46,5 @@ out/
 *.app
 
 # Blender project files
-*.blend
 *.blend1
 *.code-workspace
