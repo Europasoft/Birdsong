@@ -1,18 +1,21 @@
 
 # Visual Studio project and build files
 x64/
+x64Debug/
 .vs/
 *.filters
 *.user
 
 # Build system files
 intermediate/
+build/
+out/
 *.ninja
 .ninja_log
-build/
-x64Debug/
 *.pdb
-out/
+# Allow LIB and DLL files in the src directory to be tracked
+!/src/**/*.lib
+!/src/**/*.dll
 
 # SPIR-V compiled shaders
 *.spv
@@ -28,6 +31,9 @@ out/
 # Precompiled Headers
 *.gch
 *.pch
+# Allow in src directory
+!/src/**/*.gch
+!/src/**/*.pch
 
 # Compiled Dynamic libraries
 *.so
