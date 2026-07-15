@@ -1,0 +1,543 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\core\draw\DebugDrawer.cpp">
+      <Filter>core\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\draw\FxDrawer.cpp">
+      <Filter>core\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\draw\SkyDrawer.cpp">
+      <Filter>core\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\draw\InterfaceDrawer.cpp">
+      <Filter>core\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\draw\MeshDrawer.cpp">
+      <Filter>core\draw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\Camera.cpp">
+      <Filter>core\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\Engine.cpp">
+      <Filter>core\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\Primitive.cpp">
+      <Filter>core\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\Window.cpp">
+      <Filter>core\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\main.cpp">
+      <Filter>core\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\Buffer.cpp">
+      <Filter>core\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\Descriptors.cpp">
+      <Filter>core\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\Device.cpp">
+      <Filter>core\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\Image.cpp">
+      <Filter>core\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\Material.cpp">
+      <Filter>core\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\Swapchain.cpp">
+      <Filter>core\gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\input\Input.cpp">
+      <Filter>core\input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\render\Attachment.cpp">
+      <Filter>core\render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\render\Renderer.cpp">
+      <Filter>core\render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\render\Renderpass.cpp">
+      <Filter>core\render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\world\Sector.cpp">
+      <Filter>core\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\world\World.cpp">
+      <Filter>core\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_body.cpp">
+      <Filter>deps\box3d-cpp\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_contact.cpp">
+      <Filter>deps\box3d-cpp\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_shape.cpp">
+      <Filter>deps\box3d-cpp\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_world.cpp">
+      <Filter>deps\box3d-cpp\private</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\types.c">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\aabb.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\arena_allocator.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\bitset.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\block_allocator.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\body.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\broad_phase.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\capsule.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\compound.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\constraint_graph.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\contact.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\contact_solver.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\convex_manifold.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\core.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\distance.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\distance_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\dynamic_tree.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\height_field.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\hull.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\id_pool.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\island.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\manifold.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\math_functions.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\mesh.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\mesh_contact.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\motor_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\mover.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\name_cache.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\parallel_for.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\parallel_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\physics_world.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\prismatic_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\recording.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\recording_replay.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\revolute_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\scheduler.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\sensor.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\shape.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\simd.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\solver.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\solver_set.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\sphere.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\spherical_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\table.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\timer.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\triangle_manifold.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\weld_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\wheel_joint.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\world_snapshot.c">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\core\draw\DrawIncludes.h">
+      <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\DebugDrawer.h">
+      <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\FxDrawer.h">
+      <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\SkyDrawer.h">
+      <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\InterfaceDrawer.h">
+      <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\MeshDrawer.h">
+      <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\Camera.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\Engine.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\EngineClock.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\EngineSettings.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\Primitive.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\Window.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\Buffer.h">
+      <Filter>core\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\Descriptors.h">
+      <Filter>core\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\Device.h">
+      <Filter>core\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\Image.h">
+      <Filter>core\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\Material.h">
+      <Filter>core\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\Swapchain.h">
+      <Filter>core\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\input\Input.h">
+      <Filter>core\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\render\Attachment.h">
+      <Filter>core\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\render\Renderer.h">
+      <Filter>core\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\render\Renderpass.h">
+      <Filter>core\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\render\Shadowmap.h">
+      <Filter>core\render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\vk.h">
+      <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\CommonTypes.h">
+      <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\Math.h">
+      <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\world\World.h">
+      <Filter>core\world</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp.h">
+      <Filter>deps\box3d-cpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_base.h">
+      <Filter>deps\box3d-cpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_body.h">
+      <Filter>deps\box3d-cpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_contact.h">
+      <Filter>deps\box3d-cpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_shape.h">
+      <Filter>deps\box3d-cpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_types.h">
+      <Filter>deps\box3d-cpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_world.h">
+      <Filter>deps\box3d-cpp\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\private\b3cpp_utils.h">
+      <Filter>deps\box3d-cpp\private</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\base.h">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\box3d.h">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\collision.h">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\config.h">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\constants.h">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\id.h">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\math_functions.h">
+      <Filter>deps\box3d-cpp\box3d\include\box3d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\aabb.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\algorithm.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\arena_allocator.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\bitset.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\block_allocator.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\body.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\broad_phase.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\compound.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\constraint_graph.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\contact.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\contact_solver.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\container.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\core.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\ctz.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\hull_map.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\id_pool.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\island.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\joint.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\manifold.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\math_internal.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\name_cache.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\parallel_for.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\physics_world.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\platform.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\qsort.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\recording.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\recording_replay.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\scheduler.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\sensor.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\shape.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\simd.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\solver.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\solver_set.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\table.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\types.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\verstable.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\box3d-cpp\box3d\src\world_snapshot.h">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\world\Sector.h">
+      <Filter>core\world</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{005507ae-285e-46f7-9c5e-1f9d86413929}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\engine">
+      <UniqueIdentifier>{34b85b75-61ed-44e6-bf1b-f3e31e46890e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps">
+      <UniqueIdentifier>{d3738a0a-5054-4c4a-960b-57f63e360c43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\draw">
+      <UniqueIdentifier>{f85494b3-b48e-4be0-bdcf-3b44ae0a7ccc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\gpu">
+      <UniqueIdentifier>{c9a6253f-b4ad-4e61-a62b-f9a1d6409124}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\input">
+      <UniqueIdentifier>{8216b77a-f04e-47b3-b451-cbe23639ce3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\render">
+      <UniqueIdentifier>{67e49ba0-021b-4499-bb04-5326eb1b5f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\types">
+      <UniqueIdentifier>{4adf27a9-2d48-4352-991a-2f84c91b0ee1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\world">
+      <UniqueIdentifier>{d45819bd-e9e7-4670-adbb-7effa06bef75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\box3d-cpp">
+      <UniqueIdentifier>{b2d135f3-ad28-429f-be4d-238d3102707f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\europasoft-json">
+      <UniqueIdentifier>{cc0d61ae-69fa-4a6c-bf33-155b9162c28e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\box3d-cpp\box3d">
+      <UniqueIdentifier>{172cff2f-83a3-41dd-98e1-6fbad16ce82e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\box3d-cpp\include">
+      <UniqueIdentifier>{e8c26fd6-5fec-45ff-9a1b-dd5280cd9463}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\box3d-cpp\private">
+      <UniqueIdentifier>{7676b99f-822e-4f65-82a0-1875bb72140b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\box3d-cpp\box3d\include">
+      <UniqueIdentifier>{c1f3f8ae-d90e-4e42-9f60-543321d5a360}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\box3d-cpp\box3d\include\box3d">
+      <UniqueIdentifier>{f84fb4d4-bdda-47ac-9762-7c39b8356103}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps\box3d-cpp\box3d\src">
+      <UniqueIdentifier>{5d1c0d8c-2a15-4466-a78e-e821156b0a6f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\src\deps\box3d-cpp\box3d\src\box3d.natvis">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </Natvis>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\src\deps\box3d-cpp\box3d\src\CMakeLists.txt">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\deps\box3d-cpp\box3d\src\recording_ops.inl">
+      <Filter>deps\box3d-cpp\box3d\src</Filter>
+    </None>
+  </ItemGroup>
+</Project>
