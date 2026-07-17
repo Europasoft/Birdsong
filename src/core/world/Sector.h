@@ -27,6 +27,7 @@ namespace WorldSystem
 	{
 	public:
 		Sector(const SectorCoord& coord);
+		static constexpr uint32_t SECTOR_SIZE = 10000;
 
 		std::vector<Nodes::MeshNode*> getMeshNodes() const;
 

@@ -235,6 +235,9 @@
     <ClCompile Include="..\src\core\nodes\Node.cpp">
       <Filter>core\nodes</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\world\Scene.cpp">
+      <Filter>core\world</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -485,6 +488,9 @@
     </ClInclude>
     <ClInclude Include="..\src\core\nodes\Node.h">
       <Filter>core\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\world\Scene.h">
+      <Filter>core\world</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

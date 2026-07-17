@@ -3,6 +3,7 @@
 #include "core/gpu/Device.h"
 #include "core/engine/Camera.h"
 #include "core/world/World.h"
+#include "core/world/Scene.h"
 #include "core/world/Sector.h"
 #include "core/nodes/MeshNode.h"
 
