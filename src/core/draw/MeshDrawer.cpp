@@ -25,24 +25,17 @@ namespace EngineCore
 			const float& deltaTimeSeconds, float time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
 			const glm::mat4& viewMatrix) //FakeScaleTest082
 	{
-		auto& scene = world.getScene();
-		auto& sectors = scene.getLoadedSectors();
-		const auto& cameraSector = scene.getLocalSectorCoordinate();
+		using namespace WorldSystem;
+
+		Scene& scene = world.getScene();
+		const SectorCoord cameraSectorCoord = scene.getLocalSectorCoordinate();
 		const float S = static_cast<float>(scene.getSectorSize());
 
-		for (uint32_t s = 0; s < sectors.size(); s++)
+		for (Sector* sector : scene.getLoadedSectors())
 		{
-			auto& sector = sectors[s];
-			auto& meshes = sector->nodes;
-			if (sector->isCulled)
-				continue;
-
-			for (uint32_t i = 0; i < meshes.size(); i++)
+			for (const Nodes::MeshNode* meshNode : sector->getMeshNodes())
 			{
-				Nodes::MeshNode* mesh = dynamic_cast<Nodes::MeshNode*>(meshes[i].get());
-				if (!mesh) continue; // some nodes may not be mesh nodes
-
-				auto material = mesh->getMaterial();
+				auto material = meshNode->getMaterial();
 				material->bindToCommandBuffer(commandBuffer); // bind material-specific shading pipeline
 
 				std::vector<VkDescriptorSet> sets;
@@ -58,16 +51,16 @@ namespace EngineCore
 					0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 
 				ShaderPushConstants::MeshPushConstants push{};
-				const auto& transform = mesh->getTransform();
+				const auto& transform = meshNode->getTransform();
 				// get the unified world space position relative to the camera's sector origin
-				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSector);
+				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSectorCoord);
 				push.transform = Transform::makeMatrix(transform.rotation, transform.scale, meshPosRelative);
 				push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 				material->writePushConstants(commandBuffer, push);
 
 				// record mesh draw command
-				mesh->bind(commandBuffer);
-				mesh->draw(commandBuffer);
+				meshNode->bind(commandBuffer);
+				meshNode->draw(commandBuffer);
 			}
 		}
 

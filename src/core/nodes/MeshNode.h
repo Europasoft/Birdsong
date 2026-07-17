@@ -35,9 +35,9 @@ namespace Nodes
 		void build(const MeshBuilder& meshBuilder);
 		
 		// binds the primitive's vertices to a command buffer (preparation to render)
-		void bind(VkCommandBuffer commandBuffer);
+		void bind(VkCommandBuffer commandBuffer) const;
 		// records a draw call to the command buffer (final step to render mesh)
-		void draw(VkCommandBuffer commandBuffer);
+		void draw(VkCommandBuffer commandBuffer) const;
 
 		bool useFakeScale = false; //TODO: TMP - FakeScaleTest082
 

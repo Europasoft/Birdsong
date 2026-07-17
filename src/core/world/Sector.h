@@ -1,17 +1,22 @@
 #pragma once
-#include <stdint.h>
-#include <vector>
-#include <memory>
-
 #include "core/nodes/Node.h"
 #include "core/types/CommonTypes.h"
 #include "deps/box3d-cpp/include/b3cpp.h"
+
+#include <stdint.h>
+#include <vector>
+#include <memory>
 
 namespace EngineCore
 {
 	class EngineDevice;
 	class DebugDrawer;
 	class MeshDrawer;
+}
+
+namespace Nodes
+{
+	class MeshNode;
 }
 
 namespace WorldSystem
@@ -23,6 +28,8 @@ namespace WorldSystem
 	public:
 		Sector(const SectorCoord& coord);
 
+		std::vector<Nodes::MeshNode*> getMeshNodes() const;
+
 	protected:
 		friend class Scene;
 		friend class EngineCore::DebugDrawer;
@@ -30,7 +37,7 @@ namespace WorldSystem
 
 		SectorCoord coordinates;
 		std::vector<std::unique_ptr<Nodes::Node>> nodes;
-		bool isCulled = false;
+		bool isSectorCulled = false;
 
 		std::unique_ptr<b3cpp::World> physicsWorld;
 

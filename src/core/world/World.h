@@ -59,8 +59,8 @@ namespace WorldSystem
 		// returns the real physical location of the current sector center, in world units
 		Vec getLocalSectorOriginAbsolute() const;
 		uint32_t getSectorSize() const { return SECTOR_SIZE; }
-		std::vector<std::unique_ptr<Sector>>& getLoadedSectors() { return sectors; }
-		Sector& getPersistentSector() { return *sectors[0].get(); }
+		std::vector<Sector*> getLoadedSectors() const;
+		Sector& getPersistentSector() const { return *sectors[0].get(); }
 	private:
 		bool updateSectorCoord(Vec& pos);
 		Sector* getSector(const SectorCoord& coord);

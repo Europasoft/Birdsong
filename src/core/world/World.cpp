@@ -69,7 +69,7 @@ namespace WorldSystem
 		for (size_t i = 0; i < 1; i++)
 		{
 			// TODO: hardcoded path
-			MeshNode& node = sector.createNode<MeshNode>(device);
+			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
 			node.build("Meshes/teapot.obj");
 			Transform tf(Vec(17.f + (i * 17.f), 0.f, 0.f), Vec(), Vec(30.f));
 			if (i == 0) { tf.translation.x += 1500.f; } // move one of the meshes
@@ -215,6 +215,17 @@ namespace WorldSystem
 		auto it = std::find_if(sectors.begin(), sectors.end(), [coord](const std::unique_ptr<Sector>& s) { return s->coordinates == coord; });
 		if (it == sectors.end()) { return nullptr ; }
 		return it->get();
+	}
+
+	std::vector<Sector*> Scene::getLoadedSectors() const
+	{
+		std::vector<Sector*> loadedSectors;
+		loadedSectors.reserve(sectors.size());
+		for (const auto& sectorPtr : sectors)
+		{
+			if (sectorPtr && !sectorPtr->isSectorCulled) loadedSectors.push_back(sectorPtr.get());
+		}
+		return loadedSectors;
 	}
 
 	

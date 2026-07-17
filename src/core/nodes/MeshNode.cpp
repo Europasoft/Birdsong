@@ -86,7 +86,7 @@ namespace Nodes
 	//	}
 	//}
 
-	void MeshNode::bind(VkCommandBuffer commandBuffer)
+	void MeshNode::bind(VkCommandBuffer commandBuffer) const
 	{
 		VkBuffer buffers[] = { vertexBuffer->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
@@ -94,7 +94,7 @@ namespace Nodes
 		if (hasIndexBuffer) { vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32); }
 	}
 
-	void MeshNode::draw(VkCommandBuffer commandBuffer)
+	void MeshNode::draw(VkCommandBuffer commandBuffer) const
 	{
 		if (hasIndexBuffer) { vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0); }
 		else { vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0); }
