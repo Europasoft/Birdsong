@@ -1,5 +1,5 @@
 #include "core/gpu/Material.h"
-#include "core/engine/Primitive.h"
+#include "core/engine/MeshData.h"
 
 #include <fstream>
 #include <iostream>
@@ -194,8 +194,8 @@ namespace EngineCore
 		cfg.multisampleInfo.rasterizationSamples = matInfo.samples; // set the pipeline's multisample count
 
 		// these vertex bindings are to be used whenever rendering from a vertex buffer
-		auto vertexAttributes = Primitive::Vertex::getAttributeDescriptions();
-		auto vertexBindings = Primitive::Vertex::getBindingDescriptions();
+		auto vertexAttributes = Vertex::getAttributeDescriptions();
+		auto vertexBindings = Vertex::getBindingDescriptions();
 		if (matInfo.shadingProperties.useVertexInput)
 		{
 			cfg.vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexAttributes.size());

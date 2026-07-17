@@ -16,6 +16,8 @@
 
 namespace EngineCore
 {
+	InterfaceDrawer::~InterfaceDrawer() = default;
+
 	bool InterfaceElement::cursorHitTest(glm::vec2 cursor) const
 	{
 		return (cursor.x <= position.x + size.x/2) && (cursor.x >= position.x) &&

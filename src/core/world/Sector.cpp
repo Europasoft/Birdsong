@@ -1,7 +1,10 @@
 #include "core/world/Sector.h"
 #include "core/world/World.h"
-#include "core/engine/Primitive.h"
+#include "core/nodes/Node.h"
+#include "core/nodes/MeshNode.h"
+
 #include <iostream>
+
 namespace WorldSystem
 {
 	SectorCoord::SectorCoord() : x{ 0 }, y{ 0 }, z{ 0 } {};
@@ -10,6 +13,8 @@ namespace WorldSystem
 	Sector::Sector(const SectorCoord& coord)
 		: coordinates{ coord }
 	{
+		auto n = Nodes::getNodesOfType<Nodes::MeshNode>(nodes);
+
 		physicsWorld = std::make_unique<b3cpp::World>();
 
 		b3cpp::BodyDef bodyDef;
@@ -28,7 +33,7 @@ namespace WorldSystem
 		auto calculateRelativeCoord = [&](float localCoord, SectorInt localSectorCoord, SectorInt referenceSectorCoord)
 		{
 			const SectorInt sectorDelta = localSectorCoord - referenceSectorCoord; // distance measured in sectors
-			const double distanceDelta = static_cast<double>(sectorDelta) * static_cast<double>(Scene::SECTOR_SIZE); // actual world distance
+			const double distanceDelta = static_cast<double>(sectorDelta) * static_cast<double>(Sector::SECTOR_SIZE); // actual world distance
 			const double relative = static_cast<double>(localCoord) + distanceDelta;
 			return static_cast<float>(relative);
 		};
@@ -39,6 +44,16 @@ namespace WorldSystem
 				calculateRelativeCoord(subjectLocalCoords.y, subjectSector.y, referenceSector.y),
 				calculateRelativeCoord(subjectLocalCoords.z, subjectSector.z, referenceSector.z)
 			};
+	}
+
+	std::vector<Nodes::MeshNode*> Sector::getMeshNodes() const
+	{
+		std::vector<Nodes::MeshNode*> meshNodes;
+		for (const auto& mesh : Nodes::getNodesOfType<Nodes::MeshNode>(nodes)) 
+		{
+			meshNodes.push_back(const_cast<Nodes::MeshNode*>(&mesh));
+		}
+		return meshNodes;
 	}
 
 

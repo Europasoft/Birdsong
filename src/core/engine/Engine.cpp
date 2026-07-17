@@ -1,5 +1,6 @@
 #include "Engine.h"
 
+#include "core/world/Scene.h"
 #include "core/gpu/Material.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"

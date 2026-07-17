@@ -1,18 +1,24 @@
 #include "core/draw/DebugDrawer.h"
-#include "core/engine/Primitive.h"
+#include "core/nodes/MeshNode.h"
+#include "core/engine/MeshData.h"
+#include "core/world/World.h"
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Material.h"
 #include "core/render/Renderer.h"
 
 namespace EngineCore
 {
+	DebugDrawer::~DebugDrawer() = default;
+
 	DebugDrawer::DebugDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 		: device{ device }, defaultSet{ defaultSet }
 	{
 		// setup box mesh
-		Primitive::MeshBuilder builder{};
+		MeshBuilder builder{};
 		builder.makeCubeMeshWireframe();
-		boxMesh = std::make_unique<Primitive>(device, builder);
+		boxMesh = std::make_unique<Nodes::MeshNode>();
+		boxMesh->setDevice(device);
+		boxMesh->build(builder);
 
 		// setup debug primitive material
 		auto shader = ShaderFilePaths(makePath("shaders/debug_primitive.vert.spv"), makePath("shaders/debug_primitive.frag.spv"));
