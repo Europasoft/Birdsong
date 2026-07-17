@@ -156,7 +156,7 @@
     <ClInclude Include="..\src\core\engine\Engine.h" />
     <ClInclude Include="..\src\core\engine\EngineClock.h" />
     <ClInclude Include="..\src\core\engine\EngineSettings.h" />
-    <ClInclude Include="..\src\core\engine\Primitive.h" />
+    <ClInclude Include="..\src\core\engine\MeshData.h" />
     <ClInclude Include="..\src\core\engine\Window.h" />
     <ClInclude Include="..\src\core\gpu\Buffer.h" />
     <ClInclude Include="..\src\core\gpu\Descriptors.h" />
@@ -165,12 +165,15 @@
     <ClInclude Include="..\src\core\gpu\Material.h" />
     <ClInclude Include="..\src\core\gpu\Swapchain.h" />
     <ClInclude Include="..\src\core\input\Input.h" />
+    <ClInclude Include="..\src\core\nodes\MeshNode.h" />
+    <ClInclude Include="..\src\core\nodes\Node.h" />
     <ClInclude Include="..\src\core\render\Attachment.h" />
     <ClInclude Include="..\src\core\render\Renderer.h" />
     <ClInclude Include="..\src\core\render\Renderpass.h" />
     <ClInclude Include="..\src\core\render\Shadowmap.h" />
     <ClInclude Include="..\src\core\types\CommonTypes.h" />
     <ClInclude Include="..\src\core\types\Math.h" />
+    <ClInclude Include="..\src\core\types\Transform.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
     <ClInclude Include="..\src\core\world\World.h" />
@@ -236,7 +239,7 @@
     <ClCompile Include="..\src\core\engine\Camera.cpp" />
     <ClCompile Include="..\src\core\engine\Engine.cpp" />
     <ClCompile Include="..\src\core\engine\main.cpp" />
-    <ClCompile Include="..\src\core\engine\Primitive.cpp" />
+    <ClCompile Include="..\src\core\engine\MeshData.cpp" />
     <ClCompile Include="..\src\core\engine\Window.cpp" />
     <ClCompile Include="..\src\core\gpu\Buffer.cpp" />
     <ClCompile Include="..\src\core\gpu\Descriptors.cpp" />
@@ -245,6 +248,8 @@
     <ClCompile Include="..\src\core\gpu\Material.cpp" />
     <ClCompile Include="..\src\core\gpu\Swapchain.cpp" />
     <ClCompile Include="..\src\core\input\Input.cpp" />
+    <ClCompile Include="..\src\core\nodes\MeshNode.cpp" />
+    <ClCompile Include="..\src\core\nodes\Node.cpp" />
     <ClCompile Include="..\src\core\render\Attachment.cpp" />
     <ClCompile Include="..\src\core\render\Renderer.cpp" />
     <ClCompile Include="..\src\core\render\Renderpass.cpp" />

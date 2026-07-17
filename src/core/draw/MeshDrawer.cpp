@@ -4,6 +4,7 @@
 #include "core/engine/Camera.h"
 #include "core/world/World.h"
 #include "core/world/Sector.h"
+#include "core/nodes/MeshNode.h"
 
 #include <stdexcept>
 #include <array>
@@ -18,6 +19,8 @@
 
 namespace EngineCore
 {
+	MeshDrawer::~MeshDrawer() = default;
+
 	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
 			const float& deltaTimeSeconds, float time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
 			const glm::mat4& viewMatrix) //FakeScaleTest082
@@ -30,15 +33,16 @@ namespace EngineCore
 		for (uint32_t s = 0; s < sectors.size(); s++)
 		{
 			auto& sector = sectors[s];
-			auto& meshes = sector->primitives;
+			auto& meshes = sector->nodes;
 			if (sector->isCulled)
 				continue;
 
 			for (uint32_t i = 0; i < meshes.size(); i++)
 			{
-				auto& mesh = meshes[i];
-				auto material = mesh->getMaterial();
+				Nodes::MeshNode* mesh = dynamic_cast<Nodes::MeshNode*>(meshes[i].get());
+				if (!mesh) continue; // some nodes may not be mesh nodes
 
+				auto material = mesh->getMaterial();
 				material->bindToCommandBuffer(commandBuffer); // bind material-specific shading pipeline
 
 				std::vector<VkDescriptorSet> sets;

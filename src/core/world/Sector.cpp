@@ -1,7 +1,8 @@
 #include "core/world/Sector.h"
 #include "core/world/World.h"
-#include "core/engine/Primitive.h"
+#include "core/nodes/Node.h"
 #include <iostream>
+
 namespace WorldSystem
 {
 	SectorCoord::SectorCoord() : x{ 0 }, y{ 0 }, z{ 0 } {};

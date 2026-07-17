@@ -8,12 +8,10 @@
 #include <cmath> // only used in perspective calculation
 
 class Camera;
-#include "core/engine/Primitive.h"
 
 namespace EngineCore
 {
 	class EngineDevice;
-
 
 	class InterfaceElement 
 	{
@@ -36,6 +34,7 @@ namespace EngineCore
 
 		InterfaceDrawer(EngineDevice& device, const RenderingFormats& formats, VkSampleCountFlagBits samples);
 		InterfaceDrawer(const InterfaceDrawer&) = delete;
+		~InterfaceDrawer();
 		InterfaceDrawer& operator=(const InterfaceDrawer&) = delete;
 
 		void render(VkCommandBuffer cmdBuf, glm::vec2 mousePosition, VkExtent2D windowExtent);

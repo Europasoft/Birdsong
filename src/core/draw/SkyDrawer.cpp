@@ -1,11 +1,14 @@
 #include "core/draw/SkyDrawer.h"
-#include "core/engine/Primitive.h"
+#include "core/nodes/MeshNode.h"
+#include "core/engine/MeshData.h"
 #include "core/gpu/Device.h"
 #include "core/types/CommonTypes.h"
 #include "core/gpu/Material.h"
 
 namespace EngineCore
 {
+	SkyDrawer::~SkyDrawer() = default;
+
 	SkyDrawer::SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 	{
 		// TODO: hardcoded paths
@@ -13,10 +16,14 @@ namespace EngineCore
 		ShaderFilePaths skyShaders(makePath("shaders/sky.vert.spv"), makePath("shaders/sky.frag.spv"));
 
 		// prepare sky mesh
-		Primitive::MeshBuilder builder{};
+		MeshBuilder builder{};
 		builder.loadFromFile(meshPath);
-		skyMesh = std::make_unique<Primitive>(device, builder);
-		skyMesh->getTransform().scale = 50.f;
+		skyMesh = std::make_unique<Nodes::MeshNode>();
+		skyMesh->setDevice(device);
+		skyMesh->build(builder);
+		auto tf = skyMesh->getTransform();
+		tf.scale = { 50.f };
+		skyMesh->setTransform(tf);
 
 		// create unique material for sky, set to render backfaces, since it will be viewed from inside
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };

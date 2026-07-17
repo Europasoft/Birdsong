@@ -1,4 +1,5 @@
 #include "core/engine/Camera.h"
+#include "core/types/Transform.h"
 
 #include <glm/gtc/constants.hpp>
 #include <iostream>

@@ -2,7 +2,7 @@
 #include "core/world/World.h"
 #include "core/world/Sector.h"
 #include "core/engine/Camera.h"
-#include "core/engine/Primitive.h"
+#include "core/nodes/MeshNode.h"
 #include "core/gpu/Material.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
@@ -40,6 +40,7 @@ namespace WorldSystem
 	void Scene::setupDemoScene()
 	{
 		using namespace EngineCore;
+		using namespace Nodes;
 		// create a basic camera
 		currentCamera = std::make_shared<EngineCore::Camera>(85.f, 10.f, 10000 * 100.f);
 		currentCamera->transform.rotation = glm::vec3(0.f, 0.f, 0.f);
@@ -67,17 +68,12 @@ namespace WorldSystem
 		// create 3D primitive(s)
 		for (size_t i = 0; i < 1; i++)
 		{
-			EngineCore::Primitive::MeshBuilder builder{};
-			builder.loadFromFile(makePath("Meshes/teapot.obj")); // TODO: hardcoded path
-			sector.primitives.push_back(std::make_unique<EngineCore::Primitive>(device, builder));
-			sector.primitives.back()->getTransform().translation = Vec{ 17.f + (i * 17.f), 0.f, 0.f };
-			sector.primitives.back()->getTransform().scale = 30.f;
-			if (i == 0)
-			{
-				sector.primitives.back()->getTransform().scale *= 5.f; // scale up the second mesh
-				sector.primitives.back()->getTransform().translation.x += 1500.f;
-				sector.primitives.back()->getTransform().rotation.z += 95.f;
-			}
+			// TODO: hardcoded path
+			MeshNode& node = sector.createNode<MeshNode>(device);
+			node.build("Meshes/teapot.obj");
+			Transform tf(Vec(17.f + (i * 17.f), 0.f, 0.f), Vec(), Vec(30.f));
+			if (i == 0) { tf.translation.x += 1500.f; } // move one of the meshes
+			node.setTransform(tf);
 		}
 
 		// create material-specific descriptor set (the set must be initialized before using its layout)
@@ -91,15 +87,15 @@ namespace WorldSystem
 
 		// create demo material
 		EngineCore::ShaderFilePaths shader(makePath("Shaders/shader.vert.spv"), makePath("Shaders/pbr.frag.spv"));
-		for (size_t i = 0; i < sector.primitives.size(); i++)
+		for (size_t i = 0; i < sector.nodes.size(); i++)
 		{
 			// TODO: materials should automatically include the layout of their own set (if present) on construct!!!
 			EngineCore::MaterialCreateInfo matInfo(shader, std::vector<VkDescriptorSetLayout>{ sceneGlobalDescriptorSet->getLayout(), matSet->getLayout() },
 				engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants));
 			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 
-			sector.primitives[i]->setMaterial(matInfo);
-			sector.primitives[i]->getMaterial()->setMaterialSpecificDescriptorSet(matSet); // TODO: better way to create material-specific sets
+			sector.nodes[i]->setMaterial(matInfo);
+			sector.nodes[i]->getMaterial()->setMaterialSpecificDescriptorSet(matSet); // TODO: better way to create material-specific sets
 		}
 	}
 
@@ -117,10 +113,10 @@ namespace WorldSystem
 
 		lightPos.y -= 50.f * static_cast<float>(deltaTime);
 		float roughness = 0.15f;
-		if (getLoadedSectors().size() && getPersistentSector().primitives.size() > 0)
+		if (getLoadedSectors().size() && getPersistentSector().nodes.size() > 0)
 		{
 			glm::vec3 camPosRelative{}; // TODO: this can be removed, now using camera-relative rendering in the shader
-			auto& meshDset = *getPersistentSector().primitives[0]->getMaterial()->getMaterialSpecificDescriptorSet();
+			auto& meshDset = *getPersistentSector().nodes[0]->getMaterial()->getMaterialSpecificDescriptorSet();
 			meshDset.writeUBOMember(0, camPosRelative, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, roughness, EngineCore::UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);

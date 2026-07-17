@@ -1,5 +1,6 @@
 #include "core/draw/FxDrawer.h"
-#include "core/engine/Primitive.h"
+#include "core/nodes/MeshNode.h"
+#include "core/engine/MeshData.h"
 #include "core/types/CommonTypes.h"
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Material.h"
@@ -7,6 +8,8 @@
 
 namespace EngineCore
 {
+	FxDrawer::~FxDrawer() = default;
+
 	FxDrawer::FxDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats,
 						const std::vector<VkImageView>& inputImageViews, 
 						const std::vector<VkImageView>& inputDepthImageViews)
@@ -38,14 +41,15 @@ namespace EngineCore
 		fullscreenMaterial = std::make_unique<Material>(fullscreenInfo, device);
 
 		// setup mesh and material
-		Primitive::MeshBuilder builder{};
+		MeshBuilder builder{};
 		builder.loadFromFile(makePath("meshes/teapot.obj"));
-		mesh = std::make_unique<Primitive>(device, builder);
+		mesh = std::make_unique<Nodes::MeshNode>();
+		mesh->setDevice(device);
+		mesh->build(builder);
 		ShaderFilePaths shader(makePath("shaders/fx_test.vert.spv"), makePath("shaders/fx_test.frag.spv"));
 		mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, sizeof(ShaderPushConstants::MeshPushConstants)));
-		mesh->getTransform().scale = 5.f;
-		mesh->getTransform().translation = Vec{ -80.f, 0.f, 0.f };
-		
+		Transform tf(Vec(-80.f, 0.f, 0.f), Vec(), Vec(5.f));
+		mesh->setTransform(tf);
 	}
 
 	void FxDrawer::render(VkCommandBuffer cmdBuffer, Renderer& renderer)

@@ -22,9 +22,6 @@
     <ClCompile Include="..\src\core\engine\Engine.cpp">
       <Filter>core\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\engine\Primitive.cpp">
-      <Filter>core\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\engine\Window.cpp">
       <Filter>core\engine</Filter>
     </ClCompile>
@@ -229,6 +226,15 @@
     <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\world_snapshot.c">
       <Filter>deps\box3d-cpp\box3d\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\engine\MeshData.cpp">
+      <Filter>core\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\nodes\MeshNode.cpp">
+      <Filter>core\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\nodes\Node.cpp">
+      <Filter>core\nodes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -259,9 +265,6 @@
       <Filter>core\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\engine\EngineSettings.h">
-      <Filter>core\engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\engine\Primitive.h">
       <Filter>core\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\engine\Window.h">
@@ -471,6 +474,18 @@
     <ClInclude Include="..\src\core\world\Sector.h">
       <Filter>core\world</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\types\Transform.h">
+      <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\MeshData.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\nodes\MeshNode.h">
+      <Filter>core\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\nodes\Node.h">
+      <Filter>core\nodes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -523,6 +538,9 @@
     </Filter>
     <Filter Include="deps\box3d-cpp\box3d\src">
       <UniqueIdentifier>{5d1c0d8c-2a15-4466-a78e-e821156b0a6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\nodes">
+      <UniqueIdentifier>{1115a862-0359-4412-a4be-9fcb4832799d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

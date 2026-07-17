@@ -20,7 +20,6 @@ class SharedMaterialsPool;
 
 namespace EngineCore
 {
-	class Primitive;
 	class Image;
 
 	// base class for an object representing the entire engine
@@ -64,9 +63,6 @@ namespace EngineCore
 		Renderer renderer{ window, device, renderSettings };
 
 		EngineClock engineClock{};
-
-
-		std::vector<std::unique_ptr<Primitive>> loadedMeshes;// moved to world/sector system
 
 		std::unique_ptr<MeshDrawer> meshDrawer;
 		std::unique_ptr<SkyDrawer> skyDrawer;
