@@ -103,13 +103,18 @@ public:
 	VectorInt operator-(const VectorInt& other) { return VectorInt{ x - other.x, y - other.y, z - other.z }; }
 };
 
-static std::string makePath(const char* pathIn)
-{
-	// assumes the application is running from a subdirectory under the project root
-	return (std::filesystem::current_path() / "../resources" / std::filesystem::path(pathIn)).string();
-}
-
 static std::string makePath(std::filesystem::path p)
 {
-	return (std::filesystem::current_path() / "../resources" / p).string();
+	if (p.has_root_path())
+	{
+		// if the path has a leading slash, strip the root to make it relative
+		p = p.relative_path();
+	}
+	// assumes the application is running with the repository root as its working directory
+	return (std::filesystem::current_path() / "resources" / p).string();
+}
+
+static std::string makePath(const char* pathIn)
+{
+	return makePath(std::filesystem::path(pathIn));
 }

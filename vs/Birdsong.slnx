@@ -3,5 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Project Path="../Game/Game.vcxproj" Id="1d817cfa-0d8a-4132-b7ca-ff5f599bb54d" />
   <Project Path="Birdsong.vcxproj" Id="4d317adf-d083-42c8-a3a0-faeac7421a4b" />
 </Solution>

@@ -72,6 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>D:/VulkanDev/VulkanSDK/1.4.328.1/Include;$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/include;$(ProjectDir)/../src/deps/box3d-cpp;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src/include/box3d;$(ProjectDir)/../src/deps/box3d-cpp/box3d/include;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src;$(ProjectDir)/../src;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\vs_build_$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,6 +157,7 @@
     <ClInclude Include="..\src\core\engine\Engine.h" />
     <ClInclude Include="..\src\core\engine\EngineClock.h" />
     <ClInclude Include="..\src\core\engine\EngineSettings.h" />
+    <ClInclude Include="..\src\core\engine\GameLoader.h" />
     <ClInclude Include="..\src\core\engine\MeshData.h" />
     <ClInclude Include="..\src\core\engine\Window.h" />
     <ClInclude Include="..\src\core\gpu\Buffer.h" />
@@ -164,6 +166,8 @@
     <ClInclude Include="..\src\core\gpu\Image.h" />
     <ClInclude Include="..\src\core\gpu\Material.h" />
     <ClInclude Include="..\src\core\gpu\Swapchain.h" />
+    <ClInclude Include="..\src\core\include\IGame.h" />
+    <ClInclude Include="..\src\core\include\IGameMacros.h" />
     <ClInclude Include="..\src\core\input\Input.h" />
     <ClInclude Include="..\src\core\nodes\MeshNode.h" />
     <ClInclude Include="..\src\core\nodes\Node.h" />
@@ -239,6 +243,7 @@
     <ClCompile Include="..\src\core\draw\SkyDrawer.cpp" />
     <ClCompile Include="..\src\core\engine\Camera.cpp" />
     <ClCompile Include="..\src\core\engine\Engine.cpp" />
+    <ClCompile Include="..\src\core\engine\GameLoader.cpp" />
     <ClCompile Include="..\src\core\engine\main.cpp" />
     <ClCompile Include="..\src\core\engine\MeshData.cpp" />
     <ClCompile Include="..\src\core\engine\Window.cpp" />

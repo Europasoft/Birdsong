@@ -238,6 +238,9 @@
     <ClCompile Include="..\src\core\world\Scene.cpp">
       <Filter>core\world</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\engine\GameLoader.cpp">
+      <Filter>core\engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -492,6 +495,15 @@
     <ClInclude Include="..\src\core\world\Scene.h">
       <Filter>core\world</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\include\IGame.h">
+      <Filter>core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\GameLoader.h">
+      <Filter>core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\IGameMacros.h">
+      <Filter>core\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -547,6 +559,9 @@
     </Filter>
     <Filter Include="core\nodes">
       <UniqueIdentifier>{1115a862-0359-4412-a4be-9fcb4832799d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\include">
+      <UniqueIdentifier>{fe62ce6f-84f0-418f-9a6c-5c64499a48c3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
