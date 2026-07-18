@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <iostream>
 #include <string>
 
 // platform specifics
@@ -60,6 +61,7 @@ namespace EngineCore
 		// load the binary into the executable's address space
 		handle = LOAD_LIBRARY(std::string(path).c_str());
 		if (handle == nullptr) return;
+		std::cout << "Loaded DLL: '" << path << "'\n";
 
 		// find the address of the game class factory C-function in the DLL
 		CreateGameFunc createGame = (CreateGameFunc)GET_FUNCTION(handle, igameFactoryNameString);
@@ -101,6 +103,10 @@ namespace EngineCore
 		assert(game && "DLL game object was not instantiated");
 		return *game;
 	}
+
+
+	GameLoader::GameLoader() {}
+	GameLoader::~GameLoader() {}
 
 	void GameLoader::loadDll(std::string_view fileName)
 	{

@@ -4,6 +4,7 @@
 #include "core/gpu/Material.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
+#include "core/engine/GameLoader.h"
 
 #include <stdexcept>
 #include <array>
@@ -17,10 +18,16 @@
 
 namespace EngineCore
 {
+	EngineApplication::EngineApplication() {}
+	EngineApplication::~EngineApplication() {}
+
 	void EngineApplication::startExecution()
 	{
-		renderer.swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
+		std::cout << "Engine working directory: '" << std::filesystem::current_path().string() << "'\n";
+		gameLoader = std::make_unique<GameLoader>();
+		gameLoader->loadDll("Game");
 
+		renderer.swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
 		world.loadDemoScene();
 		setupDrawers();
 		setupDefaultInputs();

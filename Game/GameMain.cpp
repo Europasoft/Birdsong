@@ -3,16 +3,17 @@
 
 void Game::onLoad()
 {
-	std::cout << "DLL Loaded: Initializing game module systems!\n";
+	std::cout << "Game DLL onLoad called\n";
 }
 
 void Game::onUpdate(float deltaTime)
 {
+	std::cout << "Game DLL onUpdate called\n";
 }
 
 void Game::onUnload()
 {
-	std::cout << "DLL Unloaded: Cleaning up game module memory!\n";
+	std::cout << "Game DLL onUnload called\n";
 }
 
 void Game::release()

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <string_view>
 #include <memory>
 #include <vector>
@@ -18,6 +17,8 @@ namespace EngineCore
 	class GameLoader
 	{
 	public:
+		GameLoader();
+		~GameLoader();
 		void loadDll(std::string_view fileName);
 
 	private:
