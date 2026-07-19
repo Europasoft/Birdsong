@@ -168,6 +168,7 @@
     <ClInclude Include="..\src\core\gpu\Swapchain.h" />
     <ClInclude Include="..\src\core\include\IGame.h" />
     <ClInclude Include="..\src\core\include\IGameMacros.h" />
+    <ClInclude Include="..\src\core\include\INode.h" />
     <ClInclude Include="..\src\core\input\Input.h" />
     <ClInclude Include="..\src\core\nodes\MeshNode.h" />
     <ClInclude Include="..\src\core\nodes\Node.h" />
@@ -176,7 +177,6 @@
     <ClInclude Include="..\src\core\render\Renderpass.h" />
     <ClInclude Include="..\src\core\render\Shadowmap.h" />
     <ClInclude Include="..\src\core\types\CommonTypes.h" />
-    <ClInclude Include="..\src\core\types\Math.h" />
     <ClInclude Include="..\src\core\types\Transform.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />

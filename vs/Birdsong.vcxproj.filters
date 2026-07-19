@@ -315,9 +315,6 @@
     <ClInclude Include="..\src\core\types\CommonTypes.h">
       <Filter>core\types</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\types\Math.h">
-      <Filter>core\types</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\world\World.h">
       <Filter>core\world</Filter>
     </ClInclude>
@@ -502,6 +499,9 @@
       <Filter>core\engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\include\IGameMacros.h">
+      <Filter>core\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\INode.h">
       <Filter>core\include</Filter>
     </ClInclude>
   </ItemGroup>

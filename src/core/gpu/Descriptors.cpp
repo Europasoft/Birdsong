@@ -2,7 +2,7 @@
 
 #include "core/gpu/Device.h"
 #include "core/gpu/Image.h"
-#include "core/types/Math.h"
+#include "core/types/CommonTypes.h"
 #include "core/gpu/Swapchain.h"
 
 #include <algorithm>
