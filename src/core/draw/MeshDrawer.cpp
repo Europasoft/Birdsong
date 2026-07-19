@@ -6,6 +6,7 @@
 #include "core/world/Scene.h"
 #include "core/world/Sector.h"
 #include "core/nodes/MeshNode.h"
+#include "core/types/glm_conversions.h"
 
 #include <stdexcept>
 #include <array>
@@ -55,7 +56,7 @@ namespace EngineCore
 				const auto& transform = meshNode->getTransform();
 				// get the unified world space position relative to the camera's sector origin
 				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSectorCoord);
-				push.transform = Transform::makeMatrix(transform.rotation, transform.scale, meshPosRelative);
+				push.transform = cglm::makeMatrix(transform.rotation, transform.scale, meshPosRelative);
 				push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 				material->writePushConstants(commandBuffer, push);
 

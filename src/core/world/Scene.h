@@ -46,7 +46,7 @@ namespace WorldSystem
 		std::unique_ptr<EngineCore::Image> spaceTexture;
 		std::unique_ptr<EngineCore::Image> marsTexture;
 
-		glm::vec3 lightPos{ -20.f, 100.f, 45.f };
+		Vec lightPos{ -20.f, 100.f, 45.f };
 
 		// sector stuff
 	public:

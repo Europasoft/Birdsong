@@ -2,6 +2,7 @@
 
 #include "core/types/CommonTypes.h"
 #include "core/include/shared/Transform.h"
+#include "core/types/glm_conversions.h"
 
 namespace EngineCore
 { 
@@ -26,7 +27,7 @@ namespace EngineCore
 
 		void createConversionMatrices();
 
-		void setFieldOfView(float deg) { fov = (float)Transform::degToRad(deg); }
+		void setFieldOfView(float deg) { fov = (float)cglm::degToRad(deg); }
 		void setAspectRatio(float a) { aspectRatio = a; }
 
 		bool flip = false;

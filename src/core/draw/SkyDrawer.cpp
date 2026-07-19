@@ -4,6 +4,7 @@
 #include "core/gpu/Device.h"
 #include "core/types/CommonTypes.h"
 #include "core/gpu/Material.h"
+#include "core/types/glm_conversions.h"
 
 namespace EngineCore
 {
@@ -32,8 +33,7 @@ namespace EngineCore
 		skyMesh->setMaterial(matInfo);
 	}
 
-	void SkyDrawer::renderSky(VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, 
-									const glm::vec3& observerPosition)
+	void SkyDrawer::renderSky(VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, Vec observerPosition)
 	{
 		// aliases for convenience
 		auto& sky = *skyMesh.get(); 
@@ -50,7 +50,7 @@ namespace EngineCore
 		otf.translation = observerPosition;
 		otf.scale = { skyMeshScale, skyMeshScale, skyMeshScale };
 		ShaderPushConstants::MeshPushConstants push{};
-		push.transform = otf.mat4();
+		push.transform = cglm::transformToGLMmat4(otf);
 		skyMat->writePushConstants(commandBuffer, push);
 
 		// record draw command for sky mesh

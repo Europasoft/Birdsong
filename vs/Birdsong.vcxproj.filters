@@ -244,6 +244,9 @@
     <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp">
       <Filter>core\include\game</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\types\glm_conversions.cpp">
+      <Filter>core\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -512,6 +515,9 @@
     </ClInclude>
     <ClInclude Include="..\src\core\include\game\Game.h">
       <Filter>core\include\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\glm_conversions.h">
+      <Filter>core\types</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

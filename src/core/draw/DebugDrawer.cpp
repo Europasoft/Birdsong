@@ -5,6 +5,7 @@
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Material.h"
 #include "core/render/Renderer.h"
+#include "core/types/glm_conversions.h"
 
 namespace EngineCore
 {
@@ -35,7 +36,7 @@ namespace EngineCore
 	{
 		DDPushConstant pc;
 		Transform transform(location, Vec::zero(), dimensions);
-		pc.transform = transform.mat4();
+		pc.transform = cglm::transformToGLMmat4(transform);
 		pc.color = { color.x, color.y, color.z, opacity };
 		if (!hasPushConstantBox(pc))
 			boxPushConstants.push_back(pc);

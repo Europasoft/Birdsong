@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <glm/glm.hpp>
 
 #include <cmath>
 #include <numeric>
@@ -73,10 +72,7 @@ public:
 	Vector3D<float> operator-=(const float& f) { *this = *this - f; return *this; } // Vector -= float
 	Vector3D<float> operator*=(const float& f) { *this = *this * f; return *this; } // Vector *= float
 	
-#ifdef GLM_VERSION
-	Vector3D<T>(const glm::vec3& g) : x{ g.x }, y{ g.y }, z{ g.z } {};
-	operator glm::vec3() const { return glm::vec3( x, y, z ); }
-#endif
+
 	static auto dot(const Vector3D<T>& a, const Vector3D<T>& b) 
 		{ return (a.x * b.x) + (a.y * b.y) + (a.z * b.z); }
 	static Vector3D<T> cross(const Vector3D<T>& a, const Vector3D<T>& b) 
@@ -136,10 +132,6 @@ public:
 	Vector2D operator/(const Vector2D& other) { return Vector2D{ x / other.x, y / other.y }; }
 	friend bool operator==(const Vector2D& lh, const Vector2D& rh) { return lh.x == rh.x && lh.y == rh.y; }
 	friend bool operator!=(const Vector2D& lh, const Vector2D& rh) { return !(lh == rh); }
-#ifdef GLM_VERSION
-	Vector2D<T>(const glm::vec2& g) : x{ g.x }, y{ g.y } {};
-	operator glm::vec2() const { return glm::vec2(x, y); }
-#endif
 };
 
 class VectorInt

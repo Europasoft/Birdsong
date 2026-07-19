@@ -180,6 +180,7 @@
     <ClInclude Include="..\src\core\render\Renderpass.h" />
     <ClInclude Include="..\src\core\render\Shadowmap.h" />
     <ClInclude Include="..\src\core\types\CommonTypes.h" />
+    <ClInclude Include="..\src\core\types\glm_conversions.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
@@ -262,6 +263,7 @@
     <ClCompile Include="..\src\core\render\Attachment.cpp" />
     <ClCompile Include="..\src\core\render\Renderer.cpp" />
     <ClCompile Include="..\src\core\render\Renderpass.cpp" />
+    <ClCompile Include="..\src\core\types\glm_conversions.cpp" />
     <ClCompile Include="..\src\core\world\Scene.cpp" />
     <ClCompile Include="..\src\core\world\Sector.cpp" />
     <ClCompile Include="..\src\core\world\World.cpp" />

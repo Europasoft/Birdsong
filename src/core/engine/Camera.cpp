@@ -1,5 +1,6 @@
 #include "core/engine/Camera.h"
 #include "core/include/shared/Transform.h"
+#include "core/types/glm_conversions.h"
 
 #include <glm/gtc/constants.hpp>
 #include <iostream>
@@ -65,7 +66,7 @@ namespace EngineCore
 
 	glm::mat4 Camera::getViewMatrix() const
 	{
-		return glm::inverse(Transform::makeMatrixZYX(transform.rotation, transform.scale, transform.translation));
+		return glm::inverse(cglm::makeMatrixZYX(transform.rotation, transform.scale, transform.translation));
 	}
 
 	glm::mat4 Camera::getProjectionViewMatrix(bool inverse)
@@ -94,11 +95,11 @@ namespace EngineCore
 
 		// limit pitch values to exactly 85 degrees
 		transform.rotation.y = glm::clamp(transform.rotation.y, 
-				(float)Transform::degToRad(-85.f), (float)Transform::degToRad(85.f));
+				(float)cglm::degToRad(-85.f), (float)cglm::degToRad(85.f));
 		// prevent overflow from continous yawing
 		transform.rotation.z = glm::mod(transform.rotation.z, glm::two_pi<float>());
 
-		glm::vec4 fwd4 = Transform::makeMatrixZYX(transform.rotation, transform.scale, transform.translation) * glm::vec4{ 1.f, 0.f, 0.f, 0.f };
+		glm::vec4 fwd4 = cglm::makeMatrixZYX(transform.rotation, transform.scale, transform.translation) * glm::vec4{ 1.f, 0.f, 0.f, 0.f };
 		const Vec forwardDir = Vec{ fwd4.x, fwd4.y, fwd4.z };
 		const Vec rightDir = Vec{ forwardDir.y, -forwardDir.x, 0.f };
 		const Vec upDir{ 0.f, 0.f, 1.f };
