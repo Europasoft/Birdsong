@@ -1,4 +1,3 @@
-
 ## Building
 A build system is included, this project does not use CMake. [Read more about EuropaBuild here](https://github.com/Europasoft/EuropaBuild).<br>
 To build it using EuropaBuild, you will need [Ninja](https://ninja-build.org/) and [Clang](https://clang.llvm.org/).
@@ -38,7 +37,8 @@ src/
 ├── deps/               Git submodules of other repos required by the engine.
 └── thirdparty/         Bundled third party libraries.
 ```
-
+<img width="2055" height="820" alt="chrome_FB1lYEoXki" src="https://github.com/user-attachments/assets/9ec4f855-344c-404b-b7dc-3cfac14cd797" />
+<br>
 <img width="1208" height="893" alt="Birdsong_KQpQerGNSI" src="https://github.com/user-attachments/assets/ef25b3e9-230e-44ea-b197-1aef83ea2a7b" />
 
 
