@@ -91,6 +91,7 @@ namespace EngineCore
 		std::vector<bool> eventBindings;
 		Vector2D<double> mousePosition = { 0.f };
 		Vector2D<double> mouseDelta = { 0.f };
+		bool isFirstMouseMove = true;
 	};
 
 }

@@ -49,6 +49,15 @@ namespace EngineCore
 
 	void InputSystem::mousePosUpdatedCallback(const double& x, const double& y) 
 	{
+		if (isFirstMouseMove)
+		{
+			// prevent jump at the very first frame
+			mousePosition = { x, y };
+			mouseDelta = { 0.0, 0.0 };
+			isFirstMouseMove = false;
+			return;
+		}
+		// every other frame
 		Vector2D oldPos = mousePosition;
 		mousePosition = { x, y };
 		mouseDelta = mousePosition - oldPos;
@@ -97,9 +106,10 @@ namespace EngineCore
 	{
 		GLFWwindow* gw = parentWindow->getGLFWwindow();
 		assert(gw && "input system: could not access glfw window");
-		if (capture) 
+		if (capture)
 		{
 			// capture (disable) cursor
+			isFirstMouseMove = true;
 			glfwSetInputMode(gw, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			if (glfwRawMouseMotionSupported() == GLFW_TRUE)
 			{ glfwSetInputMode(gw, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE); }
