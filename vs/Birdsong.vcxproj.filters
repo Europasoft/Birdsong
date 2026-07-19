@@ -241,6 +241,9 @@
     <ClCompile Include="..\src\core\engine\GameLoader.cpp">
       <Filter>core\engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp">
+      <Filter>core\include\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -477,9 +480,6 @@
     <ClInclude Include="..\src\core\world\Sector.h">
       <Filter>core\world</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\types\Transform.h">
-      <Filter>core\types</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\engine\MeshData.h">
       <Filter>core\engine</Filter>
     </ClInclude>
@@ -492,17 +492,26 @@
     <ClInclude Include="..\src\core\world\Scene.h">
       <Filter>core\world</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\include\IGame.h">
-      <Filter>core\include</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\engine\GameLoader.h">
       <Filter>core\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\include\IGameMacros.h">
-      <Filter>core\include</Filter>
+    <ClInclude Include="..\src\core\include\game\Node.h">
+      <Filter>core\include\game</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\include\INode.h">
-      <Filter>core\include</Filter>
+    <ClInclude Include="..\src\core\include\shared\IGame.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\INode.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\Transform.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\BoundaryUtils.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\game\Game.h">
+      <Filter>core\include\game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -562,6 +571,12 @@
     </Filter>
     <Filter Include="core\include">
       <UniqueIdentifier>{fe62ce6f-84f0-418f-9a6c-5c64499a48c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\include\shared">
+      <UniqueIdentifier>{b5ca6883-df03-45fd-9a7c-dc916a486171}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\include\game">
+      <UniqueIdentifier>{c08423f3-8b07-4fe7-a0c4-180658e00996}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

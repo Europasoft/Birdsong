@@ -102,10 +102,18 @@ public:
 	static float distance(const Vector3D<T>& a, const Vector3D<T>& b) { return sqrt(distanceSquared(a, b)); }
 	static auto direction(Vector3D<float> a, Vector3D<float> b) { return Vector3D<float>(b - a).getNormalized(); }
 	//Vector3D<T>& zero() { x = 0; y = 0; z = 0; return *this; }
-	static Vector3D<T> zero() { return Vector3D<T>(); }
+	static Vector3D<T> zero() 
+	{ 
+		return Vector3D<T>(0);
+	}
+	static Vector3D<T> one()
+	{
+		return Vector3D<T>(1);
+	}
 };
+using VecCompT = float;
 // shorthand (alias) for a 3D float Vector, always use this unless you need double precision
-using Vec = Vector3D<float>;
+using Vec = Vector3D<VecCompT>;
 using Vec64 = Vector3D<double>;
 // additional float-Vector operators
 //Vec operator+(Vec v, float f) { return v + Vec(f, f, f); } // Vector + float

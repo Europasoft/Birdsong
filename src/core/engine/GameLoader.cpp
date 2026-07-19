@@ -1,7 +1,7 @@
 #include "core/engine/GameLoader.h"
 // engine public headers
-#include "core/include/IGame.h" 
-#include "core/include/IGameMacros.h"
+#include "core/include/shared/BoundaryUtils.h"
+#include "core/include/shared/IGame.h"
 
 #include <stdexcept>
 #include <cassert>
@@ -29,6 +29,8 @@
 
 namespace EngineCore
 {
+	using CreateGameFunc = EngineInterface::IGame* (*)(); // function pointer signature matching the exported factory function in the game DLL
+
 	// wrapper around a platform-specific DLLHandle
 	class LoadedDLL
 	{
@@ -69,7 +71,7 @@ namespace EngineCore
 		{
 			// BOUNDARY CROSSING: instantiate the game object and call onLoad
 			game = createGame();
-			game->onLoad();
+			game->onLoadCall();
 		}
 		else
 		{
@@ -123,7 +125,7 @@ namespace EngineCore
 		}
 
 		// BOUNDARY CROSSING: test update function
-		dll.getGame().onUpdate(0.016f);
+		dll.getGame().onTickCall(0.016f);
 
 	}
 }

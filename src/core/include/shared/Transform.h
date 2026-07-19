@@ -2,6 +2,7 @@
 #include "core/types/CommonTypes.h"
 
 #include <cstdint>
+#include <utility>
 
 namespace WorldSystem
 {
@@ -24,39 +25,20 @@ namespace WorldSystem
 
 struct Transform
 {
+	using SC = WorldSystem::SectorCoord;
+
 	Vec translation;
-	WorldSystem::SectorCoord sector;
 	Vec rotation;
 	Vec scale{ 1.f, 1.f, 1.f };
+	SC sector;
 
 	Transform() = default;
-	Transform(const Vec& t, const Vec& r = Vec::zero(), const Vec& s = Vec::zero(), const WorldSystem::SectorCoord& sec = WorldSystem::SectorCoord())
+	Transform(const Vec& t, const Vec& r = Vec::zero(), const Vec& s = Vec::one(), const SC& sec = SC())
 		: translation{ t }, rotation{ r }, scale{ s }, sector{ sec } {};
 
-	std::vector<uint8_t> packData(const MyData& data)
+	static constexpr uint64_t getPackedSize()
 	{
-		// Pre-calculate exact size to avoid reallocations
-		constexpr size_t bufferSize = sizeof(data.velocity) +
-			sizeof(data.acceleration) +
-			sizeof(data.timestamp) +
-			sizeof(data.id);
-
-		std::vector<uint8_t> buffer(bufferSize);
-		uint8_t* ptr = buffer.data();
-
-		// Copy elements sequentially (Tightly packed, no padding blocks)
-		std::memcpy(ptr, &data.velocity, sizeof(data.velocity));
-		ptr += sizeof(data.velocity);
-
-		std::memcpy(ptr, &data.acceleration, sizeof(data.acceleration));
-		ptr += sizeof(data.acceleration);
-
-		std::memcpy(ptr, &data.timestamp, sizeof(data.timestamp));
-		ptr += sizeof(data.timestamp);
-
-		std::memcpy(ptr, &data.id, sizeof(data.id));
-
-		return buffer;
+		return (sizeof(decltype(std::declval<Transform>().translation.x)) * 9) + (sizeof(decltype(std::declval<Transform>().sector.x)) * 3);
 	}
 
 	glm::mat4 mat4() const { return makeMatrix(rotation, scale, translation); }

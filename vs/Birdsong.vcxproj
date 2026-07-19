@@ -166,9 +166,12 @@
     <ClInclude Include="..\src\core\gpu\Image.h" />
     <ClInclude Include="..\src\core\gpu\Material.h" />
     <ClInclude Include="..\src\core\gpu\Swapchain.h" />
-    <ClInclude Include="..\src\core\include\IGame.h" />
-    <ClInclude Include="..\src\core\include\IGameMacros.h" />
-    <ClInclude Include="..\src\core\include\INode.h" />
+    <ClInclude Include="..\src\core\include\game\Game.h" />
+    <ClInclude Include="..\src\core\include\game\Node.h" />
+    <ClInclude Include="..\src\core\include\shared\BoundaryUtils.h" />
+    <ClInclude Include="..\src\core\include\shared\IGame.h" />
+    <ClInclude Include="..\src\core\include\shared\INode.h" />
+    <ClInclude Include="..\src\core\include\shared\Transform.h" />
     <ClInclude Include="..\src\core\input\Input.h" />
     <ClInclude Include="..\src\core\nodes\MeshNode.h" />
     <ClInclude Include="..\src\core\nodes\Node.h" />
@@ -177,7 +180,6 @@
     <ClInclude Include="..\src\core\render\Renderpass.h" />
     <ClInclude Include="..\src\core\render\Shadowmap.h" />
     <ClInclude Include="..\src\core\types\CommonTypes.h" />
-    <ClInclude Include="..\src\core\types\Transform.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
@@ -253,6 +255,7 @@
     <ClCompile Include="..\src\core\gpu\Image.cpp" />
     <ClCompile Include="..\src\core\gpu\Material.cpp" />
     <ClCompile Include="..\src\core\gpu\Swapchain.cpp" />
+    <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp" />
     <ClCompile Include="..\src\core\input\Input.cpp" />
     <ClCompile Include="..\src\core\nodes\MeshNode.cpp" />
     <ClCompile Include="..\src\core\nodes\Node.cpp" />

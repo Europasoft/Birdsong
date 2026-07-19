@@ -12,7 +12,6 @@ namespace EngineInterface
 namespace EngineCore
 {
 	class LoadedDLL; // forward declare to avoid DLL handle macros in header (handle type depends on platform)
-	using CreateGameFunc = EngineInterface::IGame* (*)(); // function pointer signature matching the exported factory function in the game DLL
 
 	class GameLoader
 	{

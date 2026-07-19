@@ -1,7 +1,7 @@
 #include "core/nodes/Node.h"
 #include "core/gpu/Device.h"
 #include "core/gpu/Material.h"
-#include "core/types/Transform.h"
+#include "core/include/shared/Transform.h"
 
 #include <cassert>
 
