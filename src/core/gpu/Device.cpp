@@ -78,9 +78,9 @@ namespace EngineCore
 		
 		VkApplicationInfo appInfo{};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "VulkanApplication";
+		appInfo.pApplicationName = "Birdsong";
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "RPG Engine";
+		appInfo.pEngineName = "Birdsong";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_3; // target vulkan api v1.3 (required for VK_KHR_dynamic_rendering core support)
 
