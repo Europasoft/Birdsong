@@ -5,19 +5,19 @@ Loading is done explicitly, after the engine application has already been initia
 The engine must be able to find this DLL file easily. For that reason, the working directory (folder path where the engine is started) **must** be exactly where the DLL file is located. 
 
 ### Execution flow
-```text
+<pre>
 [Engine]                       │       │   [Game]
                                │  ABI  │
 Engine starts                  │       │
 Loads the game DLL             │       │
 Retrieves factory function     │       │
 Calls factory function ────────┤───────├───▶ Creates Game object
-                           ◀───┤───────├──── Passes IGame* pointer back
+                           ◄───┤───────├──── Passes IGame* pointer back
                                │       │
 Calls OnLoad ──────────────────┤───────├───▶ OnLoad runs
                                │       │
 Passes IEngine* pointer ───────┤───────├───▶
-Some function runs ◀───────────┤───────├──── Calls some function on IEngine
+Some function runs ◄───────────┤───────├──── Calls some function on IEngine
                                │       │
 Calls some function on IGame ──┤───────├───▶ Some function runs
                                │       │
@@ -25,7 +25,7 @@ Calls tick ────────────────────┤──
 ...                            │       │
 Calls onUnload ────────────────┤───────├───▶ onUnload runs 
                                │       │     Destroys Game object
-```
+</pre>
 
 ### ABI safety
 Communication between the Engine executable and the Game DLL crosses the ABI (Application Binary Interface) **boundary**.<br> 
