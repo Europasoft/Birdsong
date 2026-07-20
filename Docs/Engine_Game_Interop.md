@@ -52,7 +52,7 @@ The derived class (where the actual function implementations live) can have a pu
 | --- | --- | --- | --- |
 | `IGame` | Engine >> Game | Game | `Game` |
 | `INode` | Engine >> Game | Game | `Node` |
-| `IEngine` | Game >> Engine | Engine | `EngineInterface` |
+| `IEngine` | Game >> Engine | Engine | `IEngineImpl` |
 
 The "implementation class" for an abstract interface is a class derived from the interface, where the pure virtual functions are actually defined.<br>
 These function definitions should be marked with `DLL_CALL` and `final override`.<br>

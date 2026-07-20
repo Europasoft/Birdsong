@@ -157,7 +157,8 @@
     <ClInclude Include="..\src\core\engine\Engine.h" />
     <ClInclude Include="..\src\core\engine\EngineClock.h" />
     <ClInclude Include="..\src\core\engine\EngineSettings.h" />
-    <ClInclude Include="..\src\core\engine\GameLoader.h" />
+    <ClInclude Include="..\src\core\engine\interop\GameLoader.h" />
+    <ClInclude Include="..\src\core\engine\interop\IEngineImpl.h" />
     <ClInclude Include="..\src\core\engine\MeshData.h" />
     <ClInclude Include="..\src\core\engine\Window.h" />
     <ClInclude Include="..\src\core\gpu\Buffer.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="..\src\core\include\game\Game.h" />
     <ClInclude Include="..\src\core\include\game\Node.h" />
     <ClInclude Include="..\src\core\include\shared\BoundaryUtils.h" />
+    <ClInclude Include="..\src\core\include\shared\IEngine.h" />
     <ClInclude Include="..\src\core\include\shared\IGame.h" />
     <ClInclude Include="..\src\core\include\shared\INode.h" />
     <ClInclude Include="..\src\core\include\shared\Transform.h" />
@@ -246,7 +248,8 @@
     <ClCompile Include="..\src\core\draw\SkyDrawer.cpp" />
     <ClCompile Include="..\src\core\engine\Camera.cpp" />
     <ClCompile Include="..\src\core\engine\Engine.cpp" />
-    <ClCompile Include="..\src\core\engine\GameLoader.cpp" />
+    <ClCompile Include="..\src\core\engine\interop\GameLoader.cpp" />
+    <ClCompile Include="..\src\core\engine\interop\IEngineImpl.cpp" />
     <ClCompile Include="..\src\core\engine\main.cpp" />
     <ClCompile Include="..\src\core\engine\MeshData.cpp" />
     <ClCompile Include="..\src\core\engine\Window.cpp" />

@@ -8,6 +8,6 @@ class DemoGame : public EngineInterface::Game
 {
 public:
 	virtual void onLoad() override;
-	virtual void tick(float dt) override;
+	virtual void tick(double dt) override;
 	virtual void onUnload() override;
 };

@@ -238,14 +238,17 @@
     <ClCompile Include="..\src\core\world\Scene.cpp">
       <Filter>core\world</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\engine\GameLoader.cpp">
-      <Filter>core\engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp">
       <Filter>core\include\game</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\types\glm_conversions.cpp">
       <Filter>core\types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\interop\GameLoader.cpp">
+      <Filter>core\engine\interop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\interop\IEngineImpl.cpp">
+      <Filter>core\engine\interop</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -495,9 +498,6 @@
     <ClInclude Include="..\src\core\world\Scene.h">
       <Filter>core\world</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\engine\GameLoader.h">
-      <Filter>core\engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\include\game\Node.h">
       <Filter>core\include\game</Filter>
     </ClInclude>
@@ -518,6 +518,15 @@
     </ClInclude>
     <ClInclude Include="..\src\core\types\glm_conversions.h">
       <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\IEngine.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\interop\GameLoader.h">
+      <Filter>core\engine\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\interop\IEngineImpl.h">
+      <Filter>core\engine\interop</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -583,6 +592,9 @@
     </Filter>
     <Filter Include="core\include\game">
       <UniqueIdentifier>{c08423f3-8b07-4fe7-a0c4-180658e00996}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\engine\interop">
+      <UniqueIdentifier>{7a165813-c6f4-48f2-b3fa-9c7c5053bcd3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

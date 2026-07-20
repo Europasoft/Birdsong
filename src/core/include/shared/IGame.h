@@ -1,5 +1,6 @@
 #pragma once
 #include "core/include/shared/BoundaryUtils.h"
+#include "core/include/shared/IEngine.h"
 
 namespace EngineInterface
 {
@@ -7,8 +8,8 @@ namespace EngineInterface
 	class IGame
 	{
 	public:
-		virtual void DLL_CALL onLoadCall() = 0;
-		virtual void DLL_CALL onTickCall(float dt) = 0;
+		virtual void DLL_CALL onLoadCall(IEngine* engineItf) = 0;
+		virtual void DLL_CALL onTickCall(double dt) = 0;
 		virtual void DLL_CALL onUnloadCall() = 0;
 		virtual void DLL_CALL release() = 0; // guarantees deletion happens inside the DLL
 

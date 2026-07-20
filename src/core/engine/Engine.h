@@ -43,6 +43,9 @@ namespace EngineCore
 		Renderer& getRenderer() { return renderer; }
 
 	private:
+		friend class GameLoader;
+		friend class IEngineImpl;
+
 		void setupDrawers();
 		void setupDefaultInputs();
 

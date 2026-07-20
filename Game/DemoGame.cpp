@@ -6,9 +6,12 @@ void DemoGame::onLoad()
 	std::cout << "Game DLL onLoad called\n";
 }
 
-void DemoGame::tick(float dt)
+void DemoGame::tick(double dt)
 {
-	std::cout << "Game DLL tick called\n";
+	double x = 0;
+	double y = 0;
+	engine->getMousePosition(x, y);
+	std::cout << "(game dll) mouse position x: " << x << " y: " << y << "\n";
 }
 
 void DemoGame::onUnload()

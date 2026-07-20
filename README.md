@@ -22,6 +22,7 @@ You will also need to install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/hom
 src/
 ├── core/
 │   ├── engine/         Engine main internals.
+│   │   └── interop/     Internal engine-game interoperability.
 │   ├── render/         Engine renderer and related files.
 │   ├── gpu/            Engine graphics internals.
 │   ├── draw/           Engine draw call dispatchers.
