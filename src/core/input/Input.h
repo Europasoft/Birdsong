@@ -2,7 +2,11 @@
 
 #include <vector>
 #include <string>
-#include "core/types/CommonTypes.h"
+#include <memory>
+//#include "core/types/CommonTypes.h"
+
+template<typename T>
+class Vector2D;
 
 namespace EngineCore 
 {
@@ -58,6 +62,7 @@ namespace EngineCore
 	{
 	public:
 		InputSystem(EngineWindow* window);
+		~InputSystem();
 
 		//void keyPressedCallback(const int& key, const int& scancode, const int& action, const int& mods);
 		void mousePosUpdatedCallback(const double& x, const double& y);
@@ -79,17 +84,16 @@ namespace EngineCore
 		// disables the system cursor, allowing for raw mouse input (use capture=false to release)
 		void captureMouseCursor(const bool& capture = true);
 
-		const Vector2D<double>& getMouseDelta() const { return mouseDelta; }
-		const Vector2D<double>& getMousePosition() const { return mousePosition; }
+		const Vector2D<double>& getMouseDelta() const;
+		const Vector2D<double>& getMousePosition() const;
 
 	private:
 		EngineWindow* parentWindow;
 		std::vector<KeyBinding> bindings;
 		std::vector<InputAxis> axisValues;
 		std::vector<bool> eventBindings;
-		Vector2D<double> mousePosition = { 0.f };
-		Vector2D<double> mouseDelta = { 0.f };
-		bool isFirstMouseMove = true;
+		struct Mouse;
+		std::unique_ptr<Mouse> mouse;
 	};
 
 }

@@ -1,5 +1,6 @@
 #include "core/input/Input.h"
 #include "core/engine/Window.h"
+#include "core/types/CommonTypes.h"
 
 #include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 
@@ -27,10 +28,27 @@ namespace EngineCore
 		context.setAxisValue(axisIndex, axisValueInfluence);	
 	}
 
-	InputSystem::InputSystem(EngineWindow* window) : parentWindow{ window }
+	struct InputSystem::Mouse
+	{
+		Vector2D<double> mousePosition{0};
+		Vector2D<double> mouseDelta{0};
+		bool isFirstMouseMove = true;
+		Mouse() = default;
+		~Mouse() = default;
+	};
+
+	InputSystem::InputSystem(EngineWindow* window) 
+		: parentWindow{window}
 	{
 		assert(parentWindow && "input system: initialized with no window reference");
+		mouse = std::make_unique<Mouse>();
+		mouse->mousePosition = { 0.f };
+		mouse->mouseDelta = { 0.f };
+		mouse->isFirstMouseMove = true;
 	}
+
+	InputSystem::~InputSystem()
+	{}
 
 	/*void InputSystem::keyPressedCallback(const int& key, const int& scancode, const int& action, const int& mods)
 	{
@@ -50,18 +68,18 @@ namespace EngineCore
 
 	void InputSystem::mousePosUpdatedCallback(const double& x, const double& y) 
 	{
-		if (isFirstMouseMove)
+		if (mouse->isFirstMouseMove)
 		{
 			// prevent jump at the very first frame
-			mousePosition = { x, y };
-			mouseDelta = { 0.0, 0.0 };
-			isFirstMouseMove = false;
+			mouse->mousePosition = { x, y };
+			mouse->mouseDelta = { 0.0, 0.0 };
+			mouse->isFirstMouseMove = false;
 			return;
 		}
 		// every other frame
-		Vector2D oldPos = mousePosition;
-		mousePosition = { x, y };
-		mouseDelta = mousePosition - oldPos;
+		Vector2D oldPos = mouse->mousePosition;
+		mouse->mousePosition = { x, y };
+		mouse->mouseDelta = mouse->mousePosition - oldPos;
 	}
 
 	uint32_t InputSystem::addBinding(KeyBinding binding, const std::string& newAxisName)
@@ -99,7 +117,7 @@ namespace EngineCore
 
 	void InputSystem::resetInputValues() 
 	{
-		mouseDelta = { 0.0 };
+		mouse->mouseDelta = { 0.0 };
 		//for (auto& axis : axisValues) { axis.value = 0.f; }
 	}
 
@@ -110,7 +128,7 @@ namespace EngineCore
 		if (capture)
 		{
 			// capture (disable) cursor
-			isFirstMouseMove = true;
+			mouse->isFirstMouseMove = true;
 			glfwSetInputMode(gw, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			if (glfwRawMouseMotionSupported() == GLFW_TRUE)
 			{ glfwSetInputMode(gw, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE); }
@@ -138,6 +156,16 @@ namespace EngineCore
 		}
 
 		for (auto& a : axisValues) { a.applyInfluences(); }
+	}
+
+	const Vector2D<double>& InputSystem::getMouseDelta() const
+	{
+		return mouse->mouseDelta;
+	}
+
+	const Vector2D<double>& InputSystem::getMousePosition() const
+	{
+		return mouse->mousePosition;
 	}
 
 }
