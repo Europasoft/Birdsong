@@ -11,19 +11,19 @@ The engine must be able to find this DLL file easily. For that reason, the worki
 Engine starts                  │       │
 Loads the game DLL             │       │
 Retrieves factory function     │       │
-Calls factory function ────────┤───────┤───▶ Creates Game object
-                           ◀───├───────├──── Passes IGame* pointer back
+Calls factory function ────────┤───────├───▶ Creates Game object
+                           ◀───┤───────├──── Passes IGame* pointer back
                                │       │
-Calls OnLoad ──────────────────┤───────┤───▶ OnLoad runs
+Calls OnLoad ──────────────────┤───────├───▶ OnLoad runs
                                │       │
-Passes IEngine* pointer ───────┤───────┤───▶
-Some function runs ◀───────────├───────├──── Calls some function on IEngine
+Passes IEngine* pointer ───────┤───────├───▶
+Some function runs ◀───────────┤───────├──── Calls some function on IEngine
                                │       │
-Calls some function on IGame ──┤───────┤───▶ Some function runs
+Calls some function on IGame ──┤───────├───▶ Some function runs
                                │       │
-Calls tick ────────────────────┤───────┤───▶ Tick runs
+Calls tick ────────────────────┤───────├───▶ Tick runs
 ...                            │       │
-Calls onUnload ────────────────┤───────┤───▶ onUnload runs 
+Calls onUnload ────────────────┤───────├───▶ onUnload runs 
                                │       │     Destroys Game object
 ```
 
