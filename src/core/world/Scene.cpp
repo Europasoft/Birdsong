@@ -7,6 +7,7 @@
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
 #include "core/engine/Engine.h"
+#include "core/types/glm_conversions.h"
 
 #include <cmath>
 #include <algorithm>
@@ -46,8 +47,8 @@ namespace WorldSystem
 		using namespace Nodes;
 		// create a basic camera
 		currentCamera = std::make_shared<EngineCore::Camera>(85.f, 10.f, 10000 * 100.f);
-		currentCamera->transform.rotation = glm::vec3(0.f, 0.f, 0.f);
-		currentCamera->transform.translation = glm::vec3(0.f, 0.f, 150.f);
+		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
+		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
 
 		// demo textures
 		marsTexture = std::make_unique<Image>(device, makePath("Textures/mars6k_v2.jpg"));

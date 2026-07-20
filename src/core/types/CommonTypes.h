@@ -1,11 +1,52 @@
 #pragma once
 
 #include <stdint.h>
-#include <glm/glm.hpp>
-#include "core/types/Math.h"
 
+#include <cmath>
+#include <numeric>
 #include <string>
 #include <filesystem>
+
+namespace Math
+{
+#define EPSILON_F std::numeric_limits<float>::epsilon()
+
+	// returns multiple of x that is closest to v
+	template<typename T = float>
+	T closestMultiple(T v, const T& x)
+	{
+		if (x > v)
+		{
+			return x;
+		}
+		v = v + (x / 2);
+		v = v - fmod(v, x);
+		return v;
+	}
+
+	// returns multiple of m that is closest to but >= v
+	template<typename T = uint32_t>
+	T roundUpToClosestMultiple(const T& v, const T& m)
+	{
+		if (m == 0)
+		{
+			return v;
+		}
+		const T remainder = v % m;
+		if (remainder == 0)
+		{
+			return v;
+		}
+		return v + m - remainder;
+	}
+
+	template<typename T = float>
+	T invSqrt(const T& v)
+	{
+		return 1.0 / sqrt(v);
+	}
+
+}
 
 template<typename T = float>
 class Vector3D
@@ -31,10 +72,7 @@ public:
 	Vector3D<float> operator-=(const float& f) { *this = *this - f; return *this; } // Vector -= float
 	Vector3D<float> operator*=(const float& f) { *this = *this * f; return *this; } // Vector *= float
 	
-#ifdef GLM_VERSION
-	Vector3D<T>(const glm::vec3& g) : x{ g.x }, y{ g.y }, z{ g.z } {};
-	operator glm::vec3() const { return glm::vec3( x, y, z ); }
-#endif
+
 	static auto dot(const Vector3D<T>& a, const Vector3D<T>& b) 
 		{ return (a.x * b.x) + (a.y * b.y) + (a.z * b.z); }
 	static Vector3D<T> cross(const Vector3D<T>& a, const Vector3D<T>& b) 
@@ -60,10 +98,18 @@ public:
 	static float distance(const Vector3D<T>& a, const Vector3D<T>& b) { return sqrt(distanceSquared(a, b)); }
 	static auto direction(Vector3D<float> a, Vector3D<float> b) { return Vector3D<float>(b - a).getNormalized(); }
 	//Vector3D<T>& zero() { x = 0; y = 0; z = 0; return *this; }
-	static Vector3D<T> zero() { return Vector3D<T>(); }
+	static Vector3D<T> zero() 
+	{ 
+		return Vector3D<T>(0);
+	}
+	static Vector3D<T> one()
+	{
+		return Vector3D<T>(1);
+	}
 };
+using VecCompT = float;
 // shorthand (alias) for a 3D float Vector, always use this unless you need double precision
-using Vec = Vector3D<float>;
+using Vec = Vector3D<VecCompT>;
 using Vec64 = Vector3D<double>;
 // additional float-Vector operators
 //Vec operator+(Vec v, float f) { return v + Vec(f, f, f); } // Vector + float
@@ -86,10 +132,6 @@ public:
 	Vector2D operator/(const Vector2D& other) { return Vector2D{ x / other.x, y / other.y }; }
 	friend bool operator==(const Vector2D& lh, const Vector2D& rh) { return lh.x == rh.x && lh.y == rh.y; }
 	friend bool operator!=(const Vector2D& lh, const Vector2D& rh) { return !(lh == rh); }
-#ifdef GLM_VERSION
-	Vector2D<T>(const glm::vec2& g) : x{ g.x }, y{ g.y } {};
-	operator glm::vec2() const { return glm::vec2(x, y); }
-#endif
 };
 
 class VectorInt
@@ -103,13 +145,18 @@ public:
 	VectorInt operator-(const VectorInt& other) { return VectorInt{ x - other.x, y - other.y, z - other.z }; }
 };
 
-static std::string makePath(const char* pathIn)
-{
-	// assumes the application is running from a subdirectory under the project root
-	return (std::filesystem::current_path() / "../resources" / std::filesystem::path(pathIn)).string();
-}
-
 static std::string makePath(std::filesystem::path p)
 {
-	return (std::filesystem::current_path() / "../resources" / p).string();
+	if (p.has_root_path())
+	{
+		// if the path has a leading slash, strip the root to make it relative
+		p = p.relative_path();
+	}
+	// assumes the application is running with the repository root as its working directory
+	return (std::filesystem::current_path() / "resources" / p).string();
+}
+
+static std::string makePath(const char* pathIn)
+{
+	return makePath(std::filesystem::path(pathIn));
 }

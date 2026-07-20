@@ -238,6 +238,18 @@
     <ClCompile Include="..\src\core\world\Scene.cpp">
       <Filter>core\world</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp">
+      <Filter>core\include\game</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\types\glm_conversions.cpp">
+      <Filter>core\types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\interop\GameLoader.cpp">
+      <Filter>core\engine\interop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\engine\interop\IEngineImpl.cpp">
+      <Filter>core\engine\interop</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -310,9 +322,6 @@
       <Filter>core\types</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\types\CommonTypes.h">
-      <Filter>core\types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\types\Math.h">
       <Filter>core\types</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\world\World.h">
@@ -477,9 +486,6 @@
     <ClInclude Include="..\src\core\world\Sector.h">
       <Filter>core\world</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\types\Transform.h">
-      <Filter>core\types</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\engine\MeshData.h">
       <Filter>core\engine</Filter>
     </ClInclude>
@@ -491,6 +497,36 @@
     </ClInclude>
     <ClInclude Include="..\src\core\world\Scene.h">
       <Filter>core\world</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\game\Node.h">
+      <Filter>core\include\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\IGame.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\INode.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\Transform.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\BoundaryUtils.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\game\Game.h">
+      <Filter>core\include\game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\glm_conversions.h">
+      <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\shared\IEngine.h">
+      <Filter>core\include\shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\interop\GameLoader.h">
+      <Filter>core\engine\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\engine\interop\IEngineImpl.h">
+      <Filter>core\engine\interop</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -547,6 +583,18 @@
     </Filter>
     <Filter Include="core\nodes">
       <UniqueIdentifier>{1115a862-0359-4412-a4be-9fcb4832799d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\include">
+      <UniqueIdentifier>{fe62ce6f-84f0-418f-9a6c-5c64499a48c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\include\shared">
+      <UniqueIdentifier>{b5ca6883-df03-45fd-9a7c-dc916a486171}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\include\game">
+      <UniqueIdentifier>{c08423f3-8b07-4fe7-a0c4-180658e00996}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\engine\interop">
+      <UniqueIdentifier>{7a165813-c6f4-48f2-b3fa-9c7c5053bcd3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

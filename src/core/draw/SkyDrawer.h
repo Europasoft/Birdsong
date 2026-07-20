@@ -1,10 +1,10 @@
 #pragma once
 #include "core/types/vk.h"
+#include "core/types/CommonTypes.h"
 
 #include <memory>
 #include <string>
 #include <vector>
-#include <glm/glm.hpp>
 
 namespace Nodes
 {
@@ -23,8 +23,7 @@ namespace EngineCore
 		SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples);
 		~SkyDrawer();
 
-		void renderSky(VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, 
-						const glm::vec3& observerPosition);
+		void renderSky(VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, Vec observerPosition);
 
 		float skyMeshScale = 1000.f * 10.f;
 

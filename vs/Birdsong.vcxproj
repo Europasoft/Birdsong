@@ -72,6 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>D:/VulkanDev/VulkanSDK/1.4.328.1/Include;$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/include;$(ProjectDir)/../src/deps/box3d-cpp;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src/include/box3d;$(ProjectDir)/../src/deps/box3d-cpp/box3d/include;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src;$(ProjectDir)/../src;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\vs_build_$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,6 +157,8 @@
     <ClInclude Include="..\src\core\engine\Engine.h" />
     <ClInclude Include="..\src\core\engine\EngineClock.h" />
     <ClInclude Include="..\src\core\engine\EngineSettings.h" />
+    <ClInclude Include="..\src\core\engine\interop\GameLoader.h" />
+    <ClInclude Include="..\src\core\engine\interop\IEngineImpl.h" />
     <ClInclude Include="..\src\core\engine\MeshData.h" />
     <ClInclude Include="..\src\core\engine\Window.h" />
     <ClInclude Include="..\src\core\gpu\Buffer.h" />
@@ -164,6 +167,13 @@
     <ClInclude Include="..\src\core\gpu\Image.h" />
     <ClInclude Include="..\src\core\gpu\Material.h" />
     <ClInclude Include="..\src\core\gpu\Swapchain.h" />
+    <ClInclude Include="..\src\core\include\game\Game.h" />
+    <ClInclude Include="..\src\core\include\game\Node.h" />
+    <ClInclude Include="..\src\core\include\shared\BoundaryUtils.h" />
+    <ClInclude Include="..\src\core\include\shared\IEngine.h" />
+    <ClInclude Include="..\src\core\include\shared\IGame.h" />
+    <ClInclude Include="..\src\core\include\shared\INode.h" />
+    <ClInclude Include="..\src\core\include\shared\Transform.h" />
     <ClInclude Include="..\src\core\input\Input.h" />
     <ClInclude Include="..\src\core\nodes\MeshNode.h" />
     <ClInclude Include="..\src\core\nodes\Node.h" />
@@ -172,8 +182,7 @@
     <ClInclude Include="..\src\core\render\Renderpass.h" />
     <ClInclude Include="..\src\core\render\Shadowmap.h" />
     <ClInclude Include="..\src\core\types\CommonTypes.h" />
-    <ClInclude Include="..\src\core\types\Math.h" />
-    <ClInclude Include="..\src\core\types\Transform.h" />
+    <ClInclude Include="..\src\core\types\glm_conversions.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
@@ -239,6 +248,8 @@
     <ClCompile Include="..\src\core\draw\SkyDrawer.cpp" />
     <ClCompile Include="..\src\core\engine\Camera.cpp" />
     <ClCompile Include="..\src\core\engine\Engine.cpp" />
+    <ClCompile Include="..\src\core\engine\interop\GameLoader.cpp" />
+    <ClCompile Include="..\src\core\engine\interop\IEngineImpl.cpp" />
     <ClCompile Include="..\src\core\engine\main.cpp" />
     <ClCompile Include="..\src\core\engine\MeshData.cpp" />
     <ClCompile Include="..\src\core\engine\Window.cpp" />
@@ -248,12 +259,14 @@
     <ClCompile Include="..\src\core\gpu\Image.cpp" />
     <ClCompile Include="..\src\core\gpu\Material.cpp" />
     <ClCompile Include="..\src\core\gpu\Swapchain.cpp" />
+    <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp" />
     <ClCompile Include="..\src\core\input\Input.cpp" />
     <ClCompile Include="..\src\core\nodes\MeshNode.cpp" />
     <ClCompile Include="..\src\core\nodes\Node.cpp" />
     <ClCompile Include="..\src\core\render\Attachment.cpp" />
     <ClCompile Include="..\src\core\render\Renderer.cpp" />
     <ClCompile Include="..\src\core\render\Renderpass.cpp" />
+    <ClCompile Include="..\src\core\types\glm_conversions.cpp" />
     <ClCompile Include="..\src\core\world\Scene.cpp" />
     <ClCompile Include="..\src\core\world\Sector.cpp" />
     <ClCompile Include="..\src\core\world\World.cpp" />

@@ -1,6 +1,8 @@
 #pragma once
 #include "core/types/CommonTypes.h"
 
+#include <cstdint>
+
 namespace WorldSystem
 {
 	using SectorInt = intmax_t;
@@ -30,6 +32,32 @@ struct Transform
 	Transform() = default;
 	Transform(const Vec& t, const Vec& r = Vec::zero(), const Vec& s = Vec::zero(), const WorldSystem::SectorCoord& sec = WorldSystem::SectorCoord())
 		: translation{ t }, rotation{ r }, scale{ s }, sector{ sec } {};
+
+	std::vector<uint8_t> packData(const MyData& data)
+	{
+		// Pre-calculate exact size to avoid reallocations
+		constexpr size_t bufferSize = sizeof(data.velocity) +
+			sizeof(data.acceleration) +
+			sizeof(data.timestamp) +
+			sizeof(data.id);
+
+		std::vector<uint8_t> buffer(bufferSize);
+		uint8_t* ptr = buffer.data();
+
+		// Copy elements sequentially (Tightly packed, no padding blocks)
+		std::memcpy(ptr, &data.velocity, sizeof(data.velocity));
+		ptr += sizeof(data.velocity);
+
+		std::memcpy(ptr, &data.acceleration, sizeof(data.acceleration));
+		ptr += sizeof(data.acceleration);
+
+		std::memcpy(ptr, &data.timestamp, sizeof(data.timestamp));
+		ptr += sizeof(data.timestamp);
+
+		std::memcpy(ptr, &data.id, sizeof(data.id));
+
+		return buffer;
+	}
 
 	glm::mat4 mat4() const { return makeMatrix(rotation, scale, translation); }
 

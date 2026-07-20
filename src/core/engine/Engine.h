@@ -21,13 +21,14 @@ class SharedMaterialsPool;
 namespace EngineCore
 {
 	class Image;
+	class GameLoader;
 
 	// base class for an object representing the entire engine
 	class EngineApplication
 	{
 	public:
-		EngineApplication() = default;
-		~EngineApplication() = default;
+		EngineApplication();
+		~EngineApplication();
 		EngineApplication(const EngineApplication&) = delete;
 		EngineApplication& operator=(const EngineApplication&) = delete;
 
@@ -42,6 +43,9 @@ namespace EngineCore
 		Renderer& getRenderer() { return renderer; }
 
 	private:
+		friend class GameLoader;
+		friend class IEngineImpl;
+
 		void setupDrawers();
 		void setupDefaultInputs();
 
@@ -70,7 +74,7 @@ namespace EngineCore
 		std::unique_ptr<InterfaceDrawer> uiDrawer;
 		std::unique_ptr<DebugDrawer> debugDrawer;
 
-		
+		std::unique_ptr<GameLoader> gameLoader;
 		
 
 		Vec mouseMoveObjectOriginalLocation;

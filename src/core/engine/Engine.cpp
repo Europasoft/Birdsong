@@ -1,9 +1,10 @@
-#include "Engine.h"
+#include "core/engine/Engine.h"
 
 #include "core/world/Scene.h"
 #include "core/gpu/Material.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
+#include "core/engine/interop/GameLoader.h"
 
 #include <stdexcept>
 #include <array>
@@ -17,10 +18,16 @@
 
 namespace EngineCore
 {
+	EngineApplication::EngineApplication() {}
+	EngineApplication::~EngineApplication() {}
+
 	void EngineApplication::startExecution()
 	{
-		renderer.swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
+		std::cout << "Engine working directory: '" << std::filesystem::current_path().string() << "'\n";
+		gameLoader = std::make_unique<GameLoader>(this);
+		gameLoader->loadDll("Game");
 
+		renderer.swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
 		world.loadDemoScene();
 		setupDrawers();
 		setupDefaultInputs();
@@ -90,14 +97,16 @@ namespace EngineCore
 		{
 			const uint32_t frameIndex = renderer.getFrameIndex(); // current framebuffer index
 			engineClock.measureFrameDelta(frameIndex);
+			const double dt = engineClock.getDelta();
 
 			WorldSystem::Scene& scene = world.getScene();
 			Camera& camera = scene.getCurrentCamera();
 			moveCamera(camera);
-			camera.testValue += window.input.getAxisValue(4) * static_cast<float>(engineClock.getDelta()) * 2.f;
+			camera.testValue += window.input.getAxisValue(4) * static_cast<float>(dt) * 2.f;
 
+			gameLoader->tick(dt);
 			scene.sectorUpdate(camera);
-			world.getScene().update(frameIndex, engineClock.getDelta());
+			world.getScene().update(frameIndex, dt);
 
 			debugDrawer->removeDebugBoxes();
 			debugDrawer->addDebugBox(Vec(static_cast<float>(scene.getSectorSize())), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
@@ -109,7 +118,7 @@ namespace EngineCore
 			// render sky sphere
 			skyDrawer->renderSky(commandBuffer, scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.transform.translation);
 			// render meshes
-			meshDrawer->renderMeshes(commandBuffer, world, static_cast<float>(engineClock.getDelta()), static_cast<float>(engineClock.getElapsed()), frameIndex,
+			meshDrawer->renderMeshes(commandBuffer, world, static_cast<float>(dt), static_cast<float>(engineClock.getElapsed()), frameIndex,
 				scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.getProjectionViewMatrix());
 
 			debugDrawer->render(commandBuffer, renderer);

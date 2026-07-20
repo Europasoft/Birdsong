@@ -5,6 +5,7 @@
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Material.h"
 #include "core/render/Renderer.h"
+#include "core/types/glm_conversions.h"
 
 namespace EngineCore
 {
@@ -74,7 +75,8 @@ namespace EngineCore
 		material->bindToCommandBuffer(cmdBuffer);
 		
 		ShaderPushConstants::MeshPushConstants push{};
-		push.transform = mesh->getTransform().mat4();
+		
+		push.transform = cglm::transformToGLMmat4(mesh->getTransform());
 		material->writePushConstants(cmdBuffer, push);
 
 		mesh->bind(cmdBuffer);

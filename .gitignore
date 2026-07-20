@@ -7,6 +7,7 @@
 *.ninja
 .ninja_log
 *.pdb
+*.exp
 intermediate/
 build/
 out/
