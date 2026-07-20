@@ -32,17 +32,51 @@ namespace EngineCore
 		setupDrawers();
 		setupDefaultInputs();
 
+		// keep running until application is closed
+		mainLoop();
+
+		// window pending close, wait for GPU
+		vkDeviceWaitIdle(device.device());
+	}
+
+	struct EngineApplication::FrameContext
+	{
+		VkCommandBuffer commandBuffer;
+		double delta;
+		uint32_t bufferIndex;
+		WorldSystem::Scene* scene;
+		Camera* camera;
+	};
+
+	void EngineApplication::mainLoop()
+	{
 		// window event loop
+		EngineApplication::FrameContext f = {};
 		while (!window.getCloseWindow())
 		{
 			window.input.resetInputValues(); // reset input values
 			window.input.updateBoundInputs(); // get new input states
 			window.pollEvents(); // process events in window queue
-			render(); // render frame
-		}
 
-		// window pending close, wait for GPU
-		vkDeviceWaitIdle(device.device());
+			f.scene = &world.getScene();
+			f.camera = &f.scene->getCurrentCamera();
+
+			// engine tick updates
+			moveCamera(*f.camera);
+			f.camera->testValue += window.input.getAxisValue(4) * static_cast<float>(f.delta) * 2.f;
+			gameLoader->tick(f.delta);
+			f.scene->sectorUpdate(*f.camera);
+
+			// render frame
+			f.commandBuffer = renderer.beginFrame();
+			if (f.commandBuffer)
+			{
+				f.bufferIndex = renderer.getFrameIndex();
+				f.delta = engineClock.measureFrameDelta(f.bufferIndex);
+				f.scene = &world.getScene();
+				render(f);
+			}
+		}
 	}
 
 	void EngineApplication::setupDrawers() 
@@ -91,45 +125,33 @@ namespace EngineCore
 		setupDrawers();
 	}
 
-	void EngineApplication::render() 
+	void EngineApplication::render(const FrameContext& f)
 	{
-		if (auto commandBuffer = renderer.beginFrame())
-		{
-			const uint32_t frameIndex = renderer.getFrameIndex(); // current framebuffer index
-			engineClock.measureFrameDelta(frameIndex);
-			const double dt = engineClock.getDelta();
+		f.scene->updateDescriptors(f.bufferIndex, f.delta);
 
-			WorldSystem::Scene& scene = world.getScene();
-			Camera& camera = scene.getCurrentCamera();
-			moveCamera(camera);
-			camera.testValue += window.input.getAxisValue(4) * static_cast<float>(dt) * 2.f;
+		debugDrawer->removeDebugBoxes();
+		debugDrawer->addDebugBox(Vec(static_cast<float>(f.scene->getSectorSize())), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
+		
+		// RENDER BASE PASS
+		renderer.beginRenderingBase(f.commandBuffer); 
 
-			gameLoader->tick(dt);
-			scene.sectorUpdate(camera);
-			world.getScene().update(frameIndex, dt);
+		// render sky sphere
+		skyDrawer->renderSky(f.commandBuffer, f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->transform.translation);
 
-			debugDrawer->removeDebugBoxes();
-			debugDrawer->addDebugBox(Vec(static_cast<float>(scene.getSectorSize())), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
-			
-			//updateDescriptors(frameIndex);
+		// render meshes
+		meshDrawer->renderMeshes(f.commandBuffer, world, f.delta, engineClock.getElapsed(), f.bufferIndex,
+			f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->getProjectionViewMatrix());
 
-			renderer.beginRenderingBase(commandBuffer); // BASE PASS (dynamic rendering)
+		debugDrawer->render(f.commandBuffer, renderer);
 
-			// render sky sphere
-			skyDrawer->renderSky(commandBuffer, scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.transform.translation);
-			// render meshes
-			meshDrawer->renderMeshes(commandBuffer, world, static_cast<float>(dt), static_cast<float>(engineClock.getElapsed()), frameIndex,
-				scene.getSceneGlobalDescriptorSet().getDescriptorSet(frameIndex), camera.getProjectionViewMatrix());
+		renderer.endRendering(f.commandBuffer);
 
-			debugDrawer->render(commandBuffer, renderer);
+		// RENDER FX PASS
+		fxDrawer->render(f.commandBuffer, renderer);
 
-			renderer.endRendering(commandBuffer);
-
-			fxDrawer->render(commandBuffer, renderer);
-
-			renderer.endFrame(); // submit command buffer
-			camera.setAspectRatio(renderer.getSwapchainAspectRatio());
-		}
+		// submit command buffer
+		renderer.endFrame(); 
+		f.camera->setAspectRatio(renderer.getSwapchainAspectRatio());
 	}
 
 	void EngineApplication::moveCamera(Camera& camera)

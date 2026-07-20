@@ -28,7 +28,7 @@ namespace EngineCore
 		MeshDrawer& operator=(const MeshDrawer&) = delete;
 
 		void renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
-						const float& deltaTimeSeconds, float time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet,
+						double deltaTimeSeconds, double time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet,
 						const glm::mat4& viewMatrix); //FakeScaleTest082 (used to take a transform param here)
 
 	private:

@@ -103,18 +103,15 @@ namespace WorldSystem
 		}
 	}
 
-	void Scene::update(uint32_t frameIndex, double deltaTime)
+	void Scene::updateDescriptors(uint32_t frameIndex, double deltaTime)
 	{
 		auto& cam = getCurrentCamera();
-
 		glm::mat4 pvm{ 1.f };
 		pvm = cam.getProjectionViewMatrix();
 		sceneGlobalDescriptorSet->writeUBOMember(0, pvm, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
 
-		// update material-specific descriptors on mesh
-		const auto& cameraSector = getLocalSectorCoordinate();
+		//const auto& cameraSector = getLocalSectorCoordinate();
 		const float S = static_cast<float>(Sector::SECTOR_SIZE);
-
 		lightPos.y -= 50.f * static_cast<float>(deltaTime);
 		float roughness = 0.15f;
 		if (getLoadedSectors().size() && getPersistentSector().nodes.size() > 0)

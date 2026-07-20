@@ -24,7 +24,7 @@ namespace EngineCore
 	MeshDrawer::~MeshDrawer() = default;
 
 	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
-			const float& deltaTimeSeconds, float time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
+			double deltaTimeSeconds, double time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
 			const glm::mat4& viewMatrix) //FakeScaleTest082
 	{
 		using namespace WorldSystem;

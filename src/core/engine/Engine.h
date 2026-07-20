@@ -17,6 +17,8 @@
 #include "core/engine/EngineClock.h"
 
 class SharedMaterialsPool;
+struct VkCommandBuffer_T;
+using VkCommandBuffer = struct VkCommandBuffer_T*;
 
 namespace EngineCore
 {
@@ -50,7 +52,10 @@ namespace EngineCore
 		void setupDefaultInputs();
 
 		void onSwapchainCreated();
-		void render();
+
+		void mainLoop();
+		struct FrameContext;
+		void render(const FrameContext& frame);
 		void moveCamera(Camera& camera);
 
 		glm::vec3 unproject(glm::vec3 point);
