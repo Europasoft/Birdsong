@@ -7,6 +7,8 @@
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
 #include "core/engine/Engine.h"
+#include "core/render/Renderer.h"
+#include "core/gpu/Swapchain.h"
 #include "core/types/glm_conversions.h"
 
 #include <cmath>

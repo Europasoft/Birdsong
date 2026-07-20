@@ -8,7 +8,7 @@ namespace EngineCore
 
 	void IEngineImpl::getMousePosition(double& x, double& y) const
 	{
-		const auto mp = engine->window.input.getMousePosition();
+		const auto mp = engine->window->input.getMousePosition();
 		x = mp.x;
 		y = mp.y;
 	}

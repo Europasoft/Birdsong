@@ -1,12 +1,10 @@
 #pragma once
-
-// warning-ignore hack only works in header
-#pragma warning(push, 0)
-#include <vulkan/vulkan.h> // include vulkan header (before GLFW)
-#pragma warning(pop)
-#include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
-#include <string>
+#include "core/types/vk.h"
 #include "core/input/Input.h"
+
+#include <string>
+
+struct GLFWwindow;
 
 namespace EngineCore
 {
@@ -24,7 +22,7 @@ namespace EngineCore
 		EngineWindow(EngineWindow&&) = delete;
 
 		// true if the window should be destroyed
-		const bool getCloseWindow() { return glfwWindowShouldClose(windowPtr); }
+		const bool getCloseWindow() const;
 
 		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
 		bool wasWindowResized() { return framebufferResized; }
@@ -33,7 +31,7 @@ namespace EngineCore
 
 		void createWindowSurface(VkInstance inst, VkSurfaceKHR* surface);
 
-		void pollEvents() { glfwPollEvents(); }
+		void pollEvents() const;
 
 		// middleman function that forwards glfw events to the input system
 		static void keypressCallbackHandler(GLFWwindow* window, int key, int scancode, int action, int mods);

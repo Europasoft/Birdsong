@@ -4,8 +4,6 @@
 #include <string>
 #include "core/types/CommonTypes.h"
 
-struct GLFWwindow;
-
 namespace EngineCore 
 {
 	class EngineWindow;

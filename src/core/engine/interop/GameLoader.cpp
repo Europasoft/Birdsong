@@ -11,7 +11,9 @@
 #include <string>
 
 // platform specifics
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(_WIN64)
+	#define WIN32_LEAN_AND_MEAN
+	#define NOMINMAX
 	#include <windows.h>
 	static constexpr auto dllPathPrefix = "";
 	static constexpr auto dllPathSuffix = ".dll";

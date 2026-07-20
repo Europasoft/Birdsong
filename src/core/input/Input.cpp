@@ -1,8 +1,9 @@
 #include "core/input/Input.h"
 #include "core/engine/Window.h"
 
-#include <cassert>
+#include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 
+#include <cassert>
 #include <iostream>
 
 namespace EngineCore
