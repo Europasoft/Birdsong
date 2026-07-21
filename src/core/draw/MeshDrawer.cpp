@@ -57,7 +57,8 @@ namespace EngineCore
 
 				// get the unified world space position relative to the camera's sector origin
 				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSectorCoord);
-				push.transform = cglm::makeMatrix(transform.rotation, transform.scale, meshPosRelative);
+				push.transform = cglm::makeMatrixQ(transform.rotation, transform.rotation_w, transform.scale, meshPosRelative);
+				std::cout << "\n rot x: " << transform.rotation.x << " w: " << transform.rotation_w;
 				push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 				material->writePushConstants(commandBuffer, push);
 

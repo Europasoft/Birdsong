@@ -55,6 +55,7 @@ namespace WorldSystem
 
 	void Sector::physicsTick()
 	{
+		static bool didExplode = false;//TMP
 		if (not physicsWorld) return;
 
 		for (Nodes::MeshNode* node : getMeshNodes())
@@ -63,6 +64,18 @@ namespace WorldSystem
 		}
 
 		physicsWorld->step();
+
+		//TMP
+		if (!didExplode)
+		{
+			b3cpp::ExplosionDef x;
+			x.falloff = 10000;
+			x.radius = 1000;
+			x.position = { 0, 400, -200 };
+			x.impulsePerArea = 100000;
+			physicsWorld->explode(x);
+			didExplode = 1;
+		}
 	}
 
 

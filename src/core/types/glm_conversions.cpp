@@ -61,12 +61,16 @@ namespace EngineCore
 	glm::mat4 cglm::makeMatrixQ(const Vec& rotation, float rotation_w, const Vec& scaleIn,
 		const Vec& translationIn)
 	{
-		// convert quaternion to a rotation matrix
-		glm::mat4 rotMat = glm::mat4_cast(glm::quat{ rotation.x, rotation.y, rotation.z, rotation_w });
-		// extract Euler angles matching your X-Y-Z (pitch, yaw, roll) matrix layout
-		glm::vec3 r;
-		glm::extractEulerAngleXYZ(rotMat, r.x, r.y, r.z);
-		return cglm::makeMatrix({r.x, r.y, r.z}, scaleIn, translationIn);
+
+		glm::quat q = {};
+		q.x = rotation.x;
+		q.y = rotation.y;
+		q.z = rotation.z;
+		q.w = rotation_w;
+		glm::mat4 rotMat = glm::mat4_cast(q);
+		glm::mat4 transMat = glm::translate(glm::mat4(1.0f), glm::vec3(translationIn.x, translationIn.y, translationIn.z));
+		glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(scaleIn.x, scaleIn.y, scaleIn.z));
+		return transMat * rotMat * scaleMat;
 	}
 
 	glm::mat4 cglm::transformToGLMmat4(const Transform& t)

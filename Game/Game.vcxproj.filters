@@ -4,27 +4,30 @@
     <Filter Include="code">
       <UniqueIdentifier>{a2889186-ed8a-45f3-b461-846b0bd803e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include">
+    <Filter Include="engine_includes">
       <UniqueIdentifier>{65f3e317-7218-4206-ac42-e4aecdef5d65}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\game">
-      <UniqueIdentifier>{c6ed765b-b22f-466d-ab1d-3ad673adea5e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DemoGame.cpp">
       <Filter>code</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\include\game\Node.cpp">
-      <Filter>include\game</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\include\game\Game.cpp">
-      <Filter>include\game</Filter>
+      <Filter>engine_includes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\include\game\Node.cpp">
+      <Filter>engine_includes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DemoGame.h">
       <Filter>code</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\game\Game.h">
+      <Filter>engine_includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\game\Node.h">
+      <Filter>engine_includes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

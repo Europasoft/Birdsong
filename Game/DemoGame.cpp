@@ -11,7 +11,7 @@ void DemoGame::tick(double dt)
 	double x = 0;
 	double y = 0;
 	engine->getMousePosition(x, y);
-	std::cout << "(game dll) mouse position x: " << x << " y: " << y << "\n";
+	//std::cout << "(game dll) mouse position x: " << x << " y: " << y << "\n";
 }
 
 void DemoGame::onUnload()

@@ -56,6 +56,7 @@ namespace Nodes
 		// TODO: make this cleaner
 		std::unique_ptr<b3cpp::Body> physicsBody = nullptr;
 		void addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w);
+		b3cpp::Body& getPhysicsBody();
 
 		void physicsTick();
 

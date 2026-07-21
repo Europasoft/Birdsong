@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <iostream>
 
 namespace Nodes
 {
@@ -37,10 +38,16 @@ namespace Nodes
 	{
 		physicsBody = w.createBody(def);
 		b3cpp::SphereShape& s = physicsBody->createShape<b3cpp::SphereShape>();
+		s.radius = 1.f;
 		b3cpp::ShapeDef shapeDef;
 		assert(physicsBody->isIdValid());
 		s.activate(shapeDef);
 	}
+
+    b3cpp::Body& MeshNode::getPhysicsBody()
+    {
+		return *physicsBody;
+    }
 
 	void MeshNode::physicsTick()
 	{
@@ -68,6 +75,15 @@ namespace Nodes
 			transform.rotation.z = rot.z;
 			transform.rotation_w = rot.w;
 		}
+
+		static bool applied = false;
+		// TEST: make it spin
+		if (!applied)
+		{
+			getPhysicsBody().applyTorque({ 10000.f, 0.f, 0.f });
+			applied = true;
+		}
+
 	}
 
 	void MeshNode::createVertexBuffers(const std::vector<EngineCore::Vertex>& vertices)
