@@ -238,9 +238,6 @@
     <ClCompile Include="..\src\core\world\Scene.cpp">
       <Filter>core\world</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp">
-      <Filter>core\include\game</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\types\glm_conversions.cpp">
       <Filter>core\types</Filter>
     </ClCompile>
@@ -498,9 +495,6 @@
     <ClInclude Include="..\src\core\world\Scene.h">
       <Filter>core\world</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\include\game\Node.h">
-      <Filter>core\include\game</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\include\shared\IGame.h">
       <Filter>core\include\shared</Filter>
     </ClInclude>
@@ -512,9 +506,6 @@
     </ClInclude>
     <ClInclude Include="..\src\core\include\shared\BoundaryUtils.h">
       <Filter>core\include\shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\include\game\Game.h">
-      <Filter>core\include\game</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\types\glm_conversions.h">
       <Filter>core\types</Filter>

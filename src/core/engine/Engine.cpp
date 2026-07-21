@@ -54,7 +54,7 @@ namespace EngineCore
 	{
 		VkCommandBuffer commandBuffer;
 		double delta;
-		uint32_t bufferIndex;
+		uint32_t bufferIndex = 0;
 		WorldSystem::Scene* scene;
 		Camera* camera;
 	};
@@ -71,19 +71,20 @@ namespace EngineCore
 
 			f.scene = &world->getScene();
 			f.camera = &f.scene->getCurrentCamera();
+			f.delta = engineClock.measureFrameDelta(f.bufferIndex);
 
 			// engine tick updates
 			moveCamera(*f.camera);
 			f.camera->testValue += window->input.getAxisValue(4) * static_cast<float>(f.delta) * 2.f;
 			gameLoader->tick(f.delta);
 			f.scene->sectorUpdate(*f.camera);
+			f.scene->physicsTick();
 
 			// render frame
 			f.commandBuffer = renderer->beginFrame();
 			if (f.commandBuffer)
 			{
 				f.bufferIndex = renderer->getFrameIndex();
-				f.delta = engineClock.measureFrameDelta(f.bufferIndex);
 				render(f);
 			}
 		}

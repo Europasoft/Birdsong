@@ -27,26 +27,12 @@ namespace EngineInterface
 
 	public:
 		// interface functions called by the engine executable, running in the DLLs memory space
-		void DLL_CALL onLoadCall(IEngine* engineItf) final override
-		{
-			engine = engineItf; // game code can use this pointer to make calls in the other direction
-			onLoad();
-		}
+		void DLL_CALL onLoadCall(IEngine* engineItf) final override;
 
-		void DLL_CALL onTickCall(double dt) final override
-		{
-			tick(dt);
-		}
+		void DLL_CALL onTickCall(double dt) final override;
 
-		void DLL_CALL onUnloadCall() final override
-		{
-			onUnload();
-			release();
-		}
+		void DLL_CALL onUnloadCall() final override;
 
-		void DLL_CALL release() final override
-		{
-			delete this;
-		}
+		void DLL_CALL release() final override;
 	};
 }

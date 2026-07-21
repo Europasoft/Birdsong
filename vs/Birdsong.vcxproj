@@ -168,8 +168,6 @@
     <ClInclude Include="..\src\core\gpu\Image.h" />
     <ClInclude Include="..\src\core\gpu\Material.h" />
     <ClInclude Include="..\src\core\gpu\Swapchain.h" />
-    <ClInclude Include="..\src\core\include\game\Game.h" />
-    <ClInclude Include="..\src\core\include\game\Node.h" />
     <ClInclude Include="..\src\core\include\shared\BoundaryUtils.h" />
     <ClInclude Include="..\src\core\include\shared\IEngine.h" />
     <ClInclude Include="..\src\core\include\shared\IGame.h" />
@@ -260,7 +258,6 @@
     <ClCompile Include="..\src\core\gpu\Image.cpp" />
     <ClCompile Include="..\src\core\gpu\Material.cpp" />
     <ClCompile Include="..\src\core\gpu\Swapchain.cpp" />
-    <ClCompile Include="..\src\core\include\game\IntelliSenseHack.cpp" />
     <ClCompile Include="..\src\core\input\Input.cpp" />
     <ClCompile Include="..\src\core\nodes\MeshNode.cpp" />
     <ClCompile Include="..\src\core\nodes\Node.cpp" />

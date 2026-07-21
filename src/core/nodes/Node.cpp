@@ -29,6 +29,7 @@ namespace Nodes
     void Node::setTransform(const Transform& t)
     {
 		transform = t;
+		teleported = true;
 	}
 
     void Node::setSectorCoord(const WorldSystem::SectorCoord& s)

@@ -54,6 +54,7 @@ namespace EngineCore
 
 				ShaderPushConstants::MeshPushConstants push{};
 				const auto& transform = meshNode->getTransform();
+
 				// get the unified world space position relative to the camera's sector origin
 				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSectorCoord);
 				push.transform = cglm::makeMatrix(transform.rotation, transform.scale, meshPosRelative);

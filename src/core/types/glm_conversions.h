@@ -12,10 +12,10 @@ namespace EngineCore
 		static glm::vec3 vectorToGLM(const Vec& v);
 		static Vec vectorFromGLM(const glm::vec3& v);
 
-		static glm::mat4 makeMatrixDef(const Vec& rotationIn, const Vec& scaleIn,
+		static glm::mat4 makeMatrix(const Vec& rotationIn, const Vec& scaleIn,
 			const Vec& translationIn = { 0.f, 0.f, 0.f });
 
-		static glm::mat4 makeMatrix(const Vec& rotationIn, const Vec& scaleIn,
+		static glm::mat4 makeMatrixQ(const Vec& rotation, float rotation_w, const Vec& scaleIn,
 			const Vec& translationIn = { 0.f, 0.f, 0.f });
 
 		static glm::mat4 transformToGLMmat4(const Transform& t);

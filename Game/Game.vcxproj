@@ -24,6 +24,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\core\include\game\Game.cpp" />
+    <ClCompile Include="..\src\core\include\game\Node.cpp" />
     <ClCompile Include="DemoGame.cpp" />
   </ItemGroup>
   <ItemGroup>

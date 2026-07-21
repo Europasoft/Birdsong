@@ -1,6 +1,14 @@
 #pragma once
 #include "core/types/glm_conversions.h"
 
+// for euler angle conversions
+#ifdef GLM_VERSION
+#define GLM_ENABLE_EXPERIMENTAL
+#endif
+
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #ifdef GLM_VERSION
 namespace EngineCore
 {
@@ -13,7 +21,7 @@ namespace EngineCore
 		return Vec(v.x, v.y, v.z);
 	}
 
-	glm::mat4 cglm::makeMatrixDef(const Vec& rotationIn, const Vec& scaleIn,
+	glm::mat4 cglm::makeMatrix(const Vec& rotationIn, const Vec& scaleIn,
 		const Vec& translationIn)
 	{
 		/* returns Translation * Rx * Ry * Rz * Scale
@@ -49,10 +57,16 @@ namespace EngineCore
 		};
 	}
 
-	glm::mat4 cglm::makeMatrix(const Vec& rotationIn, const Vec& scaleIn,
+	// TODO: this is temporary - should really always store rotations as quat
+	glm::mat4 cglm::makeMatrixQ(const Vec& rotation, float rotation_w, const Vec& scaleIn,
 		const Vec& translationIn)
 	{
-		return makeMatrixDef(rotationIn, scaleIn, translationIn);
+		// convert quaternion to a rotation matrix
+		glm::mat4 rotMat = glm::mat4_cast(glm::quat{ rotation.x, rotation.y, rotation.z, rotation_w });
+		// extract Euler angles matching your X-Y-Z (pitch, yaw, roll) matrix layout
+		glm::vec3 r;
+		glm::extractEulerAngleXYZ(rotMat, r.x, r.y, r.z);
+		return cglm::makeMatrix({r.x, r.y, r.z}, scaleIn, translationIn);
 	}
 
 	glm::mat4 cglm::transformToGLMmat4(const Transform& t)

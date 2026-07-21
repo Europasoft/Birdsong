@@ -16,30 +16,14 @@ namespace EngineInterface
 
 	public:
 		// interface functions called by the engine executable, running in the DLLs memory space
-		void DLL_CALL release() final override
-		{
-			delete this;
-		}
+		void DLL_CALL release() final override;
 
-		void DLL_CALL onSpawnCall() final override
-		{
-			onSpawn();
-		}
+		void DLL_CALL onSpawnCall() final override;
 
-		void DLL_CALL tickCall(float dt) final override
-		{
-			tick(dt);
-		}
+		void DLL_CALL tickCall(float dt) final override;
 
-		void DLL_CALL getTransform(uint8_t* buffer) const final override
-		{
-			BoundaryUtils::packTransform(transform, buffer);
-		}
+		void DLL_CALL getTransform(uint8_t* buffer) const final override;
 
-		void DLL_CALL setTransform(const uint8_t* buffer) final override
-		{
-			BoundaryUtils::unpackTransform(buffer, transform);
-		}
-	
+		void DLL_CALL setTransform(const uint8_t* buffer) final override;
 	};
 }

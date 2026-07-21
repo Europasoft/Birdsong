@@ -11,6 +11,8 @@
 #include "core/gpu/Swapchain.h"
 #include "core/types/glm_conversions.h"
 
+#include "deps/box3d-cpp/include/b3cpp.h"
+
 #include <cmath>
 #include <algorithm>
 #include <iostream>
@@ -80,6 +82,10 @@ namespace WorldSystem
 			Transform tf(Vec(17.f + (i * 17.f), 0.f, 0.f), Vec(), Vec(30.f));
 			if (i == 0) { tf.translation.x += 1500.f; } // move one of the meshes
 			node.setTransform(tf);
+			// TEST: add physics body for mesh
+			b3cpp::BodyDef bodyDef;
+			bodyDef.type = b3cpp::EBodyType::DynamicBody;
+			node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
 		}
 
 		// create material-specific descriptor set (the set must be initialized before using its layout)
@@ -123,6 +129,14 @@ namespace WorldSystem
 			meshDset.writeUBOMember(0, camPosRelative, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, roughness, EngineCore::UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);
+		}
+	}
+
+	void Scene::physicsTick()
+	{
+		for (auto& sector : sectors)
+		{
+			sector->physicsTick();
 		}
 	}
 
