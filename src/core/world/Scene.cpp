@@ -74,18 +74,46 @@ namespace WorldSystem
 		auto& sector = *sectors[0]; // get the persistent sector
 
 		// create 3D primitive(s)
-		for (size_t i = 0; i < 1; i++)
 		{
 			// TODO: hardcoded path
 			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
-			node.build("Meshes/teapot.obj");
-			Transform tf(Vec(17.f + (i * 17.f), 0.f, 0.f), Vec(), Vec(30.f));
-			if (i == 0) { tf.translation.x += 1500.f; } // move one of the meshes
+			node.build("Meshes/axis_cube.obj");
+			Transform tf(Vec(5000, 0.f, 0.f), Vec(), Vec(1000.f));
 			node.setTransform(tf);
 			// TEST: add physics body for mesh
 			b3cpp::BodyDef bodyDef;
 			bodyDef.type = b3cpp::EBodyType::DynamicBody;
-			node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
+			b3cpp::Body& body = node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
+			b3cpp::BoxHullShape& s = body.createShape<b3cpp::BoxHullShape>();
+			s.halfWidthX = 1000;
+			s.halfWidthY = 1000;
+			s.halfWidthZ = 1000;
+			b3cpp::ShapeDef shapeDef;
+			shapeDef.density = 5;
+			s.activate(shapeDef);
+			body.setAngularVelocity({ 0.08, 0.008, 0.01 });
+		}
+
+		for (size_t i = 0; i < 8; i++)
+		{
+			// TODO: hardcoded path
+			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
+			node.build("Meshes/teapot.obj");
+			Transform tf(Vec(1517 + (i * 200.f), (i * 200.f), 0.f), Vec(), Vec(30.f));
+			node.setTransform(tf);
+			// TEST: add physics body for mesh
+			b3cpp::BodyDef bodyDef;
+			bodyDef.type = b3cpp::EBodyType::DynamicBody;
+			auto& body = node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
+			b3cpp::BoxHullShape& s = body.createShape<b3cpp::BoxHullShape>();
+			s.halfWidthX = 200;
+			s.halfWidthY = 200;
+			s.halfWidthZ = 200;
+			b3cpp::ShapeDef shapeDef;
+			shapeDef.density = 5;
+			s.activate(shapeDef);
+			body.setAngularVelocity({ 0.02, 0.006, -0.003 });
+			body.setLinearVelocity({ 800, 0, (i * -80.f)});
 		}
 
 		// create material-specific descriptor set (the set must be initialized before using its layout)

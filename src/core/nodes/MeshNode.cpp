@@ -34,14 +34,10 @@ namespace Nodes
 		createIndexBuffers(meshBuilder.indices);
 	}
 
-	void MeshNode::addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w)
+	b3cpp::Body& MeshNode::addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w)
 	{
 		physicsBody = w.createBody(def);
-		b3cpp::SphereShape& s = physicsBody->createShape<b3cpp::SphereShape>();
-		s.radius = 1.f;
-		b3cpp::ShapeDef shapeDef;
-		assert(physicsBody->isIdValid());
-		s.activate(shapeDef);
+		return *physicsBody;
 	}
 
     b3cpp::Body& MeshNode::getPhysicsBody()
@@ -80,7 +76,7 @@ namespace Nodes
 		// TEST: make it spin
 		if (!applied)
 		{
-			getPhysicsBody().applyTorque({ 10000.f, 0.f, 0.f });
+			getPhysicsBody().applyTorque({ 10000.f * 100, 0.f, 0.f });
 			applied = true;
 		}
 
