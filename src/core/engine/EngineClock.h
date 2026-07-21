@@ -13,7 +13,7 @@ namespace EngineCore
 	public:
 		EngineClock() : start{ Clock::now() } {};
 
-		void measureFrameDelta(const uint32_t& currentframeIndex)
+		double measureFrameDelta(const uint32_t& currentframeIndex)
 		{
 			if (currentframeIndex != lastFrameIndex) /* new frame started? */
 			{
@@ -25,6 +25,7 @@ namespace EngineCore
 				// reset timer
 				frameDeltaStart = Clock::now();
 				lastFrameIndex = currentframeIndex;
+				return getDelta();
 			}
 		}
 		const double& getDelta() const { return frameDelta; }

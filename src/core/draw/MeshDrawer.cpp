@@ -24,7 +24,7 @@ namespace EngineCore
 	MeshDrawer::~MeshDrawer() = default;
 
 	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
-			const float& deltaTimeSeconds, float time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
+			double deltaTimeSeconds, double time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
 			const glm::mat4& viewMatrix) //FakeScaleTest082
 	{
 		using namespace WorldSystem;
@@ -54,9 +54,11 @@ namespace EngineCore
 
 				ShaderPushConstants::MeshPushConstants push{};
 				const auto& transform = meshNode->getTransform();
+
 				// get the unified world space position relative to the camera's sector origin
 				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSectorCoord);
-				push.transform = cglm::makeMatrix(transform.rotation, transform.scale, meshPosRelative);
+				push.transform = cglm::makeMatrixQ(transform.rotation, transform.rotation_w, transform.scale, meshPosRelative);
+				std::cout << "\n rot x: " << transform.rotation.x << " w: " << transform.rotation_w;
 				push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 				material->writePushConstants(commandBuffer, push);
 

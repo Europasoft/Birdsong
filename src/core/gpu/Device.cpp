@@ -1,8 +1,11 @@
 #include "core/gpu/Device.h"
+
 #include <cstring>
 #include <iostream>
 #include <set>
 #include <unordered_set>
+
+#include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 
 namespace EngineCore 
 {

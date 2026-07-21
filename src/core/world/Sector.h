@@ -1,7 +1,6 @@
 #pragma once
 #include "core/nodes/Node.h"
 #include "core/types/CommonTypes.h"
-#include "deps/box3d-cpp/include/b3cpp.h"
 
 #include <stdint.h>
 #include <vector>
@@ -13,10 +12,13 @@ namespace EngineCore
 	class DebugDrawer;
 	class MeshDrawer;
 }
-
 namespace Nodes
 {
 	class MeshNode;
+}
+namespace b3cpp
+{
+	class World;
 }
 
 namespace WorldSystem
@@ -30,6 +32,8 @@ namespace WorldSystem
 		static constexpr uint32_t SECTOR_SIZE = 10000;
 
 		std::vector<Nodes::MeshNode*> getMeshNodes() const;
+		b3cpp::World& getPhysicsWorld() const;
+		void physicsTick();
 
 	protected:
 		friend class Scene;

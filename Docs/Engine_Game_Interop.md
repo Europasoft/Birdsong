@@ -62,8 +62,10 @@ Because an implementation class contains function logic that is only safe to exe
 
 | Directory (folder) | Included by | Info |
 | --- | --- | --- |
-| src/core/include/shared/ | Game + Engine | These are shared files that both the engine and game may include. |
-| src/core/include/game/ | Game only | These files contain logic that will run inside the game DLL. Do not include these in engine code. |
-| src/core/engine/interop/ | Engine only | These files contain logic that will run directly in the engine application. Do not include these in game code. |
+| `src/core/include/shared/` | Game + Engine | These are files which both the engine and game may include. |
+| `src/core/engine/interop/` | Engine | These files contain logic that will run directly in the engine application. Do not include these in game code. |
+| `src/core/include/game/` | Game | These files contain logic that will run inside the game DLL. Do not include any headers here in engine code. The source files here are compiled ONLY into the game DLL. They are conceptually part of the engine, but they do not contribute to the final application when the engine is built. |
+
+
 
 

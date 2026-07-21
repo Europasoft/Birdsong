@@ -2,12 +2,9 @@
 
 #include "core/gpu/Buffer.h"
 
-#include <glm/glm.hpp>
-
 #include <vector>
 #include <memory>
 #include <unordered_map>
-#include <iostream>// debug only
 
 namespace EngineCore
 {

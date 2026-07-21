@@ -46,6 +46,7 @@ namespace Nodes
 		friend class Sector;
 		EngineDevice* device = nullptr;
 		Transform transform;
+		bool teleported = true; // true if setTransform was called since the last physics tick
 		std::shared_ptr<Material> material;
 
 	};

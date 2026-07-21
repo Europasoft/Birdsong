@@ -27,7 +27,9 @@ namespace WorldSystem
 
 		void setupDemoScene();
 
-		void update(uint32_t frameIndex, double deltaTime);
+		void updateDescriptors(uint32_t frameIndex, double deltaTime);
+
+		void physicsTick();
 
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;

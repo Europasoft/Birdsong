@@ -12,7 +12,7 @@ namespace Math
 #define EPSILON_F std::numeric_limits<float>::epsilon()
 
 	// returns multiple of x that is closest to v
-	template<typename T = float>
+	template<typename T>
 	T closestMultiple(T v, const T& x)
 	{
 		if (x > v)
@@ -25,7 +25,7 @@ namespace Math
 	}
 
 	// returns multiple of m that is closest to but >= v
-	template<typename T = uint32_t>
+	template<typename T>
 	T roundUpToClosestMultiple(const T& v, const T& m)
 	{
 		if (m == 0)
@@ -40,7 +40,7 @@ namespace Math
 		return v + m - remainder;
 	}
 
-	template<typename T = float>
+	template<typename T>
 	T invSqrt(const T& v)
 	{
 		return 1.0 / sqrt(v);
@@ -48,7 +48,7 @@ namespace Math
 
 }
 
-template<typename T = float>
+template<typename T>
 class Vector3D
 {
 public:
@@ -118,7 +118,7 @@ using Vec64 = Vector3D<double>;
 //Vec operator+(float f, Vec v) { return Vec(v.x + f, v.y + f, v.z + f); } // float + Vector
 //Vec operator*(float f, Vec v) { return Vec(v.x * f, v.y * f, v.z * f); } // float * Vector
 
-template<typename T = float>
+template<typename T>
 class Vector2D 
 {
 public:

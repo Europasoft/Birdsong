@@ -24,6 +24,13 @@ namespace EngineCore
 struct VkCommandBuffer_T;
 typedef struct VkCommandBuffer_T* VkCommandBuffer;
 
+namespace b3cpp
+{
+	class World;
+	class Body;
+	struct BodyDef;
+}
+
 namespace Nodes
 {
 	using namespace EngineCore;
@@ -31,6 +38,9 @@ namespace Nodes
 	class MeshNode : public Node
 	{
 	public:
+		MeshNode();
+		virtual ~MeshNode() override;
+
 		void build(const std::filesystem::path& meshFilePath);
 		void build(const MeshBuilder& meshBuilder);
 		
@@ -42,6 +52,13 @@ namespace Nodes
 		bool useFakeScale = false; //TODO: TMP - FakeScaleTest082
 
 		//bool isPointInsideOOBB(const Vec& point);
+
+		// TODO: make this cleaner
+		std::unique_ptr<b3cpp::Body> physicsBody = nullptr;
+		void addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w);
+		b3cpp::Body& getPhysicsBody();
+
+		void physicsTick();
 
 	private:
 		void createVertexBuffers(const std::vector<Vertex>& vertices);

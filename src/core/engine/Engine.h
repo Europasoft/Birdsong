@@ -1,27 +1,31 @@
 #pragma once
-#include "core/engine/Window.h"
-#include "core/gpu/Device.h"
-#include "core/render/Renderer.h"
-#include "core/engine/Camera.h"
-#include "core/draw/DrawIncludes.h"
-#include "core/world/World.h"
+#include "core/types/CommonTypes.h"
+#include "core/gpu/Descriptors.h"
+#include "core/engine/EngineSettings.h"
+#include "core/engine/EngineClock.h"
 
 #include <memory>
 #include <vector>
 #include <chrono> // timing
 #include <algorithm> // min()
 
-#include "core/types/CommonTypes.h"
-#include "core/gpu/Descriptors.h"
-#include "core/engine/EngineSettings.h"
-#include "core/engine/EngineClock.h"
-
-class SharedMaterialsPool;
+namespace WorldSystem
+{
+	class World;
+}
 
 namespace EngineCore
 {
-	class Image;
+	class EngineWindow;
+	class EngineDevice;
+	class Renderer;
+	class MeshDrawer;
+	class SkyDrawer;
+	class FxDrawer;
+	class InterfaceDrawer;
+	class DebugDrawer;
 	class GameLoader;
+	class Camera;
 
 	// base class for an object representing the entire engine
 	class EngineApplication
@@ -40,7 +44,7 @@ namespace EngineCore
 		void startExecution();
 
 		const EngineRenderSettings& getRenderSettings() const { return renderSettings; }
-		Renderer& getRenderer() { return renderer; }
+		Renderer& getRenderer();
 
 	private:
 		friend class GameLoader;
@@ -50,21 +54,22 @@ namespace EngineCore
 		void setupDefaultInputs();
 
 		void onSwapchainCreated();
-		void render();
-		void moveCamera(Camera& camera);
 
-		glm::vec3 unproject(glm::vec3 point);
+		void mainLoop();
+		struct FrameContext;
+		void render(const FrameContext& frame);
+		void moveCamera(Camera& camera);
 
 		EngineRenderSettings renderSettings{};
 
 		// engine application window (creates a window using GLFW) 
-		EngineWindow window{ WIDTH, HEIGHT, "Vulkan Window" };
+		std::unique_ptr<EngineWindow> window;
 
 		// render device (instantiates vulkan)
-		EngineDevice device{ window };
+		std::unique_ptr<EngineDevice> device;
 		
 		// the renderer manages the swapchain, renderpasses, and the vulkan command buffers
-		Renderer renderer{ window, device, renderSettings };
+		std::unique_ptr<Renderer> renderer;
 
 		EngineClock engineClock{};
 
@@ -75,12 +80,13 @@ namespace EngineCore
 		std::unique_ptr<DebugDrawer> debugDrawer;
 
 		std::unique_ptr<GameLoader> gameLoader;
+		std::unique_ptr<WorldSystem::World> world;
 		
 
 		Vec mouseMoveObjectOriginalLocation;
 		bool movingObjectWithCursor = true;
 
-		WorldSystem::World world{ device, *this };
+		
 
 	};
 

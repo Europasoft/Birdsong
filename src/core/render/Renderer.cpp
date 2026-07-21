@@ -1,8 +1,9 @@
 #include "core/render/Renderer.h"
-
 #include "core/engine/Window.h"
 #include "core/gpu/Device.h"
 #include "core/engine/EngineSettings.h"
+
+#include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 
 #include <stdexcept>
 #include <array>

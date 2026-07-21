@@ -11,8 +11,9 @@ namespace WorldSystem
 	class SectorCoord
 	{
 	public:
-		SectorCoord();
-		SectorCoord(SectorInt x, SectorInt y, SectorInt z);
+
+		SectorCoord() : x{ 0 }, y{ 0 }, z{ 0 } {};
+		SectorCoord(SectorInt x, SectorInt y, SectorInt z) : x{ x }, y{ y }, z{ z } {};
 		SectorInt x, y, z;
 		bool operator==(const SectorCoord& s) const { return x == s.x && y == s.y && z == s.z; } // ==
 		bool operator!=(const SectorCoord& s) const { return !(s == *this); } // !=
@@ -29,6 +30,7 @@ struct Transform
 
 	Vec translation;
 	Vec rotation;
+	float rotation_w = 1.f; // TODO: should store rotations properly as quat
 	Vec scale{ 1.f, 1.f, 1.f };
 	SC sector;
 

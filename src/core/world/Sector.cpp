@@ -3,28 +3,19 @@
 #include "core/nodes/Node.h"
 #include "core/nodes/MeshNode.h"
 
+#include "deps/box3d-cpp/include/b3cpp.h"
+
 #include <iostream>
 
 namespace WorldSystem
 {
-	SectorCoord::SectorCoord() : x{ 0 }, y{ 0 }, z{ 0 } {};
-	SectorCoord::SectorCoord(SectorInt x, SectorInt y, SectorInt z) : x{ x }, y{ y }, z{ z } {};
-
 	Sector::Sector(const SectorCoord& coord)
 		: coordinates{ coord }
 	{
-		auto n = Nodes::getNodesOfType<Nodes::MeshNode>(nodes);
-
-		physicsWorld = std::make_unique<b3cpp::World>();
-
-		b3cpp::BodyDef bodyDef;
-		bodyDef.type = b3cpp::EBodyType::DynamicBody;
-		b3cpp::Body b = physicsWorld->createBody(bodyDef);
-
-		b3cpp::SphereShape& s = b.createShape<b3cpp::SphereShape>();
-		b3cpp::ShapeDef shapeDef;
-		
-		s.activate(shapeDef);
+		b3cpp::WorldDef wd;
+		wd.gravity = { 0, 0, -0.1 };
+		physicsWorld = std::make_unique<b3cpp::World>(wd);
+		assert(physicsWorld->isIdValid());
 	}
 
 	Vec calculateRelative(Vec subjectLocalCoords, SectorCoord subjectSector, SectorCoord referenceSector)
@@ -49,11 +40,42 @@ namespace WorldSystem
 	std::vector<Nodes::MeshNode*> Sector::getMeshNodes() const
 	{
 		std::vector<Nodes::MeshNode*> meshNodes;
+		meshNodes.reserve(nodes.size());
 		for (const auto& mesh : Nodes::getNodesOfType<Nodes::MeshNode>(nodes)) 
 		{
 			meshNodes.push_back(const_cast<Nodes::MeshNode*>(&mesh));
 		}
 		return meshNodes;
+	}
+
+	b3cpp::World& Sector::getPhysicsWorld() const
+	{
+		return *physicsWorld.get();
+	}
+
+	void Sector::physicsTick()
+	{
+		static bool didExplode = false;//TMP
+		if (not physicsWorld) return;
+
+		for (Nodes::MeshNode* node : getMeshNodes())
+		{
+			node->physicsTick();
+		}
+
+		physicsWorld->step();
+
+		//TMP
+		if (!didExplode)
+		{
+			b3cpp::ExplosionDef x;
+			x.falloff = 10000;
+			x.radius = 1000;
+			x.position = { 0, 400, -200 };
+			x.impulsePerArea = 100000;
+			physicsWorld->explode(x);
+			didExplode = 1;
+		}
 	}
 
 

@@ -1,6 +1,9 @@
 #include "core/engine/Window.h"
-#include "core/engine/Engine.h" // TODO: only used for temporary keyboard input system
+
+#include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
+
 #include <stdexcept>
+#include <cassert>
 
 namespace EngineCore
 {
@@ -39,6 +42,16 @@ namespace EngineCore
 		{
 			throw std::runtime_error("could not create engine window surface");
 		}
+	}
+
+	void EngineWindow::pollEvents() const
+	{
+		glfwPollEvents();
+	}
+
+	const bool EngineWindow::getCloseWindow() const
+	{
+		return glfwWindowShouldClose(windowPtr);
 	}
 
 	void EngineWindow::framebufferResizedCallback(GLFWwindow* window, int width, int height) 

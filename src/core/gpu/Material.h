@@ -4,7 +4,7 @@
 #include "core/gpu/Descriptors.h"
 #include "core/engine/EngineSettings.h"
 
-#include <glm/glm.hpp>
+#include <glm/glm.hpp> // TODO: get rid of this
 
 #include <string>
 #include <vector>
