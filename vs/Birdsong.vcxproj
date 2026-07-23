@@ -183,11 +183,11 @@
     <ClInclude Include="..\src\core\render\Shadowmap.h" />
     <ClInclude Include="..\src\core\types\CommonTypes.h" />
     <ClInclude Include="..\src\core\types\glm_conversions.h" />
-    <ClInclude Include="..\src\core\types\NodeContainer.h" />
-    <ClInclude Include="..\src\core\types\SectorContainer.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
+    <ClInclude Include="..\src\core\world\NodeContainer.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
+    <ClInclude Include="..\src\core\world\SectorContainer.h" />
     <ClInclude Include="..\src\core\world\World.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\base.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\box3d.h" />
@@ -268,10 +268,10 @@
     <ClCompile Include="..\src\core\render\Renderer.cpp" />
     <ClCompile Include="..\src\core\render\Renderpass.cpp" />
     <ClCompile Include="..\src\core\types\glm_conversions.cpp" />
-    <ClCompile Include="..\src\core\types\NodeContainer.cpp" />
-    <ClCompile Include="..\src\core\types\SectorContainer.cpp" />
+    <ClCompile Include="..\src\core\world\NodeContainer.cpp" />
     <ClCompile Include="..\src\core\world\Scene.cpp" />
     <ClCompile Include="..\src\core\world\Sector.cpp" />
+    <ClCompile Include="..\src\core\world\SectorContainer.cpp" />
     <ClCompile Include="..\src\core\world\World.cpp" />
     <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\aabb.c" />
     <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\arena_allocator.c" />

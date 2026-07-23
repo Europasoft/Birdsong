@@ -1,7 +1,7 @@
 #include "core/gpu/Device.h"
 #include "core/world/Scene.h"
 #include "core/world/Sector.h"
-#include "core/types/SectorContainer.h"
+#include "core/world/SectorContainer.h"
 #include "core/engine/Camera.h"
 #include "core/nodes/MeshNode.h"
 #include "core/gpu/Material.h"
@@ -34,7 +34,7 @@ namespace WorldSystem
 		// create the persistent sector
 		// TODO: ASAP: make sure this works!
 		//sectors.push_back(std::make_unique<Sector>(SectorCoord(0, 0, 0)));
-		//localSectorCoord = std::make_unique<SectorCoord>();
+		localSectorCoord = std::make_unique<SectorCoord>();
 	}
 
 	EngineCore::DescriptorSet& Scene::getSceneGlobalDescriptorSet() const

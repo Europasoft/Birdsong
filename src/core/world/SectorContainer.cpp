@@ -1,4 +1,4 @@
-#include "core/types/SectorContainer.h"
+#include "core/world/SectorContainer.h"
 #include "core/world/Sector.h"
 
 namespace WorldSystem

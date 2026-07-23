@@ -1,4 +1,4 @@
-#include "core/types/NodeContainer.h"
+#include "core/world/NodeContainer.h"
 
 #include <cassert>
 #include <utility>

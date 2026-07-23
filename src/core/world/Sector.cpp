@@ -1,5 +1,5 @@
 #include "core/world/Sector.h"
-#include "core/types/NodeContainer.h"
+#include "core/world/NodeContainer.h"
 #include "core/world/World.h"
 #include "core/nodes/Node.h"
 #include "core/nodes/MeshNode.h"

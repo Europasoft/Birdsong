@@ -5,7 +5,7 @@
 #include "core/world/World.h"
 #include "core/world/Scene.h"
 #include "core/world/Sector.h"
-#include "core/types/NodeContainer.h"
+#include "core/world/NodeContainer.h"
 #include "core/nodes/EngineNodeData.h"
 #include "core/types/glm_conversions.h"
 

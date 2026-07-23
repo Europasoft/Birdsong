@@ -1,6 +1,6 @@
 #pragma once
 #include "core/include/shared/IEngine.h"
-#include "core/types/NodeContainer.h"
+#include "core/world/NodeContainer.h"
 #include "core/include/shared/Transform.h"
 
 namespace EngineInterface
