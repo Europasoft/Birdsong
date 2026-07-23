@@ -10,9 +10,14 @@ namespace EngineCore
 { 
 	class EngineDevice;
 	class EngineApplication;
+	
 	class Image;
 	class Camera;
 	class DescriptorSet;
+}
+namespace WorldSystem
+{
+	class SectorContainer;
 }
 
 namespace WorldSystem
@@ -34,8 +39,10 @@ namespace WorldSystem
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
 
-		// currently loaded sectors, index 0 is the persistent sector
-		std::vector<std::unique_ptr<Sector>> sectors;
+		Sector& getSector(const SectorCoord& coord) const;
+
+		// currently loaded sectors
+		std::unique_ptr<WorldSystem::SectorContainer> sectors;
 		std::unique_ptr<SectorCoord> localSectorCoord;
 
 	protected:
@@ -60,11 +67,10 @@ namespace WorldSystem
 		Vec getLocalSectorOriginAbsolute() const;
 		uint32_t getSectorSize() const;
 		std::vector<Sector*> getLoadedSectors() const;
-		Sector& getPersistentSector() const { return *sectors[0].get(); }
+		//Sector& getPersistentSector() const { return *sectors[0].get(); } TODO: ASAP
 	private:
 		bool updateSectorCoord(Vec& pos);
-		Sector* getSector(const SectorCoord& coord);
-		Sector& loadSector(const SectorCoord& sectorPosition);
+		//Sector& loadSector(const SectorCoord& sectorPosition); TODO: ASAP
 		void forgetSector(const SectorCoord& coord);
 
 	};

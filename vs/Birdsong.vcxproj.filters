@@ -247,6 +247,12 @@
     <ClCompile Include="..\src\core\engine\interop\IEngineImpl.cpp">
       <Filter>core\engine\interop</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\types\SectorContainer.cpp">
+      <Filter>core\types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\types\NodeContainer.cpp">
+      <Filter>core\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -518,6 +524,15 @@
     </ClInclude>
     <ClInclude Include="..\src\core\engine\interop\IEngineImpl.h">
       <Filter>core\engine\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\SectorContainer.h">
+      <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\NodeContainer.h">
+      <Filter>core\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\nodes\EngineNodeData.h">
+      <Filter>core\nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

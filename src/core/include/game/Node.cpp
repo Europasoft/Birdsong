@@ -1,16 +1,20 @@
 #include "core/include/game/Node.h"
+#include "shared/IEngine.h"
+#include <cassert>
 
 namespace EngineInterface
 {
-	// interface functions called by the engine executable, running in the DLLs memory space
-	void Node::release()
+	Node::Node(IEngine* enginePtr)
 	{
-		delete this;
+		engine = enginePtr;
+		engine->registerNode(this);
+		onSpawn();
 	}
 
-	void Node::onSpawnCall()
-	{
-		onSpawn();
+    Node::~Node()
+    {
+		onDestroy();
+		engine->unregisterNode(this);
 	}
 
 	void Node::tickCall(float dt)

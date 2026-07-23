@@ -26,16 +26,14 @@ namespace WorldSystem
 
 struct Transform
 {
-	using SC = WorldSystem::SectorCoord;
-
 	Vec translation;
 	Vec rotation;
 	float rotation_w = 1.f; // TODO: should store rotations properly as quat
 	Vec scale{ 1.f, 1.f, 1.f };
-	SC sector;
+	WorldSystem::SectorCoord sector;
 
 	Transform() = default;
-	Transform(const Vec& t, const Vec& r = Vec::zero(), const Vec& s = Vec::one(), const SC& sec = SC())
+	Transform(const Vec& t, const Vec& r = Vec::zero(), const Vec& s = Vec::one(), const WorldSystem::SectorCoord& sec = WorldSystem::SectorCoord())
 		: translation{ t }, rotation{ r }, scale{ s }, sector{ sec } {};
 
 	static constexpr uint64_t getPackedSize()

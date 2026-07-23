@@ -1,6 +1,7 @@
 #include "core/gpu/Device.h"
 #include "core/world/Scene.h"
 #include "core/world/Sector.h"
+#include "core/types/SectorContainer.h"
 #include "core/engine/Camera.h"
 #include "core/nodes/MeshNode.h"
 #include "core/gpu/Material.h"
@@ -31,8 +32,9 @@ namespace WorldSystem
 		sceneGlobalDescriptorSet = std::make_unique<DescriptorSet>(device);
 
 		// create the persistent sector
-		sectors.push_back(std::make_unique<Sector>(SectorCoord(0, 0, 0)));
-		localSectorCoord = std::make_unique<SectorCoord>();
+		// TODO: ASAP: make sure this works!
+		//sectors.push_back(std::make_unique<Sector>(SectorCoord(0, 0, 0)));
+		//localSectorCoord = std::make_unique<SectorCoord>();
 	}
 
 	EngineCore::DescriptorSet& Scene::getSceneGlobalDescriptorSet() const
@@ -43,6 +45,11 @@ namespace WorldSystem
 	EngineCore::Camera& Scene::getCurrentCamera() const
 	{
 		return *currentCamera.get();
+	}
+
+	Sector& Scene::getSector(const SectorCoord& coord) const
+	{
+		return sectors->getOrCreateSector(coord);
 	}
 
 	void Scene::setupDemoScene()
@@ -70,10 +77,9 @@ namespace WorldSystem
 		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
 		sceneGlobalDescriptorSet->finalize();
 
-
-		auto& sector = *sectors[0]; // get the persistent sector
-
+		/* TODO: ASAP: some of this should be handled by the game, and some in EngineNodeData_Mesh class
 		// create 3D primitive(s)
+		auto& sector = *sectors[0]; // get the persistent sector
 		{
 			// TODO: hardcoded path
 			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
@@ -136,7 +142,7 @@ namespace WorldSystem
 
 			sector.nodes[i]->setMaterial(matInfo);
 			sector.nodes[i]->getMaterial()->setMaterialSpecificDescriptorSet(matSet); // TODO: better way to create material-specific sets
-		}
+		}*/
 	}
 
 	void Scene::updateDescriptors(uint32_t frameIndex, double deltaTime)
@@ -150,6 +156,7 @@ namespace WorldSystem
 		const float S = static_cast<float>(Sector::SECTOR_SIZE);
 		lightPos.y -= 50.f * static_cast<float>(deltaTime);
 		float roughness = 0.15f;
+		/* TODO: ASAP!
 		if (getLoadedSectors().size() && getPersistentSector().nodes.size() > 0)
 		{
 			glm::vec3 camPosRelative{}; // TODO: this can be removed, now using camera-relative rendering in the shader
@@ -157,15 +164,16 @@ namespace WorldSystem
 			meshDset.writeUBOMember(0, camPosRelative, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, roughness, EngineCore::UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);
-		}
+		}*/
 	}
 
 	void Scene::physicsTick()
 	{
-		for (auto& sector : sectors)
-		{
-			sector->physicsTick();
-		}
+		// TODO: ASAP
+		//for (auto& sector : sectors)
+		//{
+		//	sector->physicsTick();
+		//}
 	}
 
 	void Scene::sectorUpdate(EngineCore::Camera& camera)
@@ -173,7 +181,8 @@ namespace WorldSystem
 		if (updateSectorCoord(camera.transform.translation))
 		{
 			// new local sector entered
-			loadSector(getLocalSectorCoordinate());
+			// TODO: ASAP - this should not be commented out
+			//loadSector(getLocalSectorCoordinate());
 		}
 	}
 
@@ -208,8 +217,10 @@ namespace WorldSystem
 		return enteredNewSector;
 	}
 
+	/* TODO: ASAP!
 	Sector& Scene::loadSector(const SectorCoord& sectorPosition)
 	{
+		
 		// TODO: allow loading arbitrary sectors from file
 		if (sectorPosition != SectorCoord(0,0,0))
 		{
@@ -222,7 +233,7 @@ namespace WorldSystem
 		}
 
 		return *sectors.back().get();
-	}
+	}*/
 
 	const SectorCoord& Scene::getLocalSectorCoordinate() const
 	{
@@ -251,21 +262,18 @@ namespace WorldSystem
 
 	void Scene::forgetSector(const SectorCoord& coord)
 	{
+		/*TODO: ASAP
 		auto it = std::remove_if(sectors.begin(), sectors.end(), [coord](const std::unique_ptr<Sector>& s) { return s->coordinates == coord; });
 		assert(it != sectors.end() && "attempted to remove an unknown world sector");
 		assert(it->get()->coordinates != getLocalSectorCoordinate() && "attempted to remove the local world sector");
 		sectors.erase(it, sectors.end());
-	}
-
-	Sector* Scene::getSector(const SectorCoord& coord)
-	{
-		auto it = std::find_if(sectors.begin(), sectors.end(), [coord](const std::unique_ptr<Sector>& s) { return s->coordinates == coord; });
-		if (it == sectors.end()) { return nullptr ; }
-		return it->get();
+		*/
 	}
 
 	std::vector<Sector*> Scene::getLoadedSectors() const
 	{
+		return {};
+		/* TODO: ASAP
 		std::vector<Sector*> loadedSectors;
 		loadedSectors.reserve(sectors.size());
 		for (const auto& sectorPtr : sectors)
@@ -273,6 +281,7 @@ namespace WorldSystem
 			if (sectorPtr && !sectorPtr->isSectorCulled) loadedSectors.push_back(sectorPtr.get());
 		}
 		return loadedSectors;
+		*/
 	}
 
 }

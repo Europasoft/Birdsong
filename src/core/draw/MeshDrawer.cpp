@@ -5,7 +5,8 @@
 #include "core/world/World.h"
 #include "core/world/Scene.h"
 #include "core/world/Sector.h"
-#include "core/nodes/MeshNode.h"
+#include "core/types/NodeContainer.h"
+#include "core/nodes/EngineNodeData.h"
 #include "core/types/glm_conversions.h"
 
 #include <stdexcept>
@@ -35,8 +36,12 @@ namespace EngineCore
 
 		for (Sector* sector : scene.getLoadedSectors())
 		{
-			for (const Nodes::MeshNode* meshNode : sector->getMeshNodes())
+			const WorldSystem::NodeContainer& nodes = sector->getNodes();
+			for (const EngineNodeData_Mesh* node : nodes.getENodes<EngineNodeData_Mesh>())
 			{
+				/*
+				* TODO: ASAP: make all this work!
+				* 
 				auto material = meshNode->getMaterial();
 				material->bindToCommandBuffer(commandBuffer); // bind material-specific shading pipeline
 
@@ -65,6 +70,7 @@ namespace EngineCore
 				// record mesh draw command
 				meshNode->bind(commandBuffer);
 				meshNode->draw(commandBuffer);
+				*/
 			}
 		}
 
