@@ -1,4 +1,6 @@
 #include "core/gpu/Material.h"
+#include "core/gpu/descriptors/DescriptorSetLayout.h"
+#include "core/gpu/descriptors/DescriptorPool.h"
 #include "core/engine/MeshData.h"
 
 #include <fstream>

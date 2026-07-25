@@ -164,6 +164,8 @@
     <ClInclude Include="..\src\core\engine\Window.h" />
     <ClInclude Include="..\src\core\gpu\Buffer.h" />
     <ClInclude Include="..\src\core\gpu\Descriptors.h" />
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorPool.h" />
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorSetLayout.h" />
     <ClInclude Include="..\src\core\gpu\Device.h" />
     <ClInclude Include="..\src\core\gpu\Image.h" />
     <ClInclude Include="..\src\core\gpu\Material.h" />
@@ -257,6 +259,8 @@
     <ClCompile Include="..\src\core\engine\Window.cpp" />
     <ClCompile Include="..\src\core\gpu\Buffer.cpp" />
     <ClCompile Include="..\src\core\gpu\Descriptors.cpp" />
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorPool.cpp" />
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorSetLayout.cpp" />
     <ClCompile Include="..\src\core\gpu\Device.cpp" />
     <ClCompile Include="..\src\core\gpu\Image.cpp" />
     <ClCompile Include="..\src\core\gpu\Material.cpp" />

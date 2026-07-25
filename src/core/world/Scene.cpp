@@ -7,6 +7,8 @@
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
 #include "core/gpu/Descriptors.h"
+#include "core/gpu/descriptors/DescriptorSetLayout.h"
+#include "core/gpu/descriptors/DescriptorPool.h"
 #include "core/engine/Engine.h"
 #include "core/render/Renderer.h"
 #include "core/gpu/Swapchain.h"

@@ -1,4 +1,6 @@
 #include "core/draw/FxDrawer.h"
+#include "core/gpu/descriptors/DescriptorSetLayout.h"
+#include "core/gpu/descriptors/DescriptorPool.h"
 #include "core/engine/MeshData.h"
 #include "core/types/CommonTypes.h"
 #include "core/gpu/Descriptors.h"

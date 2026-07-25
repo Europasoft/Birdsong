@@ -256,6 +256,12 @@
     <ClCompile Include="..\src\core\nodes\EMesh.cpp">
       <Filter>core\nodes</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorPool.cpp">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorSetLayout.cpp">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -537,6 +543,12 @@
     <ClInclude Include="..\src\core\nodes\EMesh.h">
       <Filter>core\nodes</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorPool.h">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorSetLayout.h">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -604,6 +616,9 @@
     </Filter>
     <Filter Include="core\engine\interop">
       <UniqueIdentifier>{7a165813-c6f4-48f2-b3fa-9c7c5053bcd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\gpu\descriptors">
+      <UniqueIdentifier>{1003dc91-1803-482f-8238-a2b65ca8f740}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
