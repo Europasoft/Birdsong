@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-namespace Nodes
+namespace WorldSystem
 {
-	class MeshNode;
+	class EngineNodeData;
 }
 
 namespace EngineCore
@@ -28,7 +28,7 @@ namespace EngineCore
 		float skyMeshScale = 1000.f * 10.f;
 
 	private:
-		std::unique_ptr<Nodes::MeshNode> skyMesh;
+		std::unique_ptr<WorldSystem::EngineNodeData> enodeSky;
 		
 	};
 

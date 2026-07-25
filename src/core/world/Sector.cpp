@@ -2,18 +2,18 @@
 #include "core/world/NodeContainer.h"
 #include "core/world/World.h"
 #include "core/nodes/Node.h"
-#include "core/nodes/MeshNode.h"
 
 #include "deps/box3d-cpp/include/b3cpp.h"
 
 #include <iostream>
+#include <cassert>
 
 namespace WorldSystem
 {
 	Sector::Sector(const SectorCoord& coord)
 		: coordinates{ coord }
 	{
-		nodes = std::make_unique<NodeContainer>();
+		nodesContainer = std::make_unique<NodeContainer>();
 
 		b3cpp::WorldDef wd;
 		wd.gravity = { 0, 0, -0.1 };
@@ -43,9 +43,9 @@ namespace WorldSystem
 			};
 	}
 
-	NodeContainer& Sector::getNodes() const
+	NodeContainer& Sector::nodes() const
 	{
-		return *nodes.get();
+		return *nodesContainer.get();
 	}
 
 	b3cpp::World& Sector::getPhysicsWorld() const

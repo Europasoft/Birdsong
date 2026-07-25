@@ -1,7 +1,8 @@
-#include "core/nodes/MeshNode.h"
-#include "core/engine/MeshData.h"
+#pragma once
+#include "core/nodes/EMesh.h"
 #include "core/gpu/Device.h"
 #include "core/gpu/Material.h"
+#include "core/engine/MeshData.h"
 #include "core/gpu/Buffer.h"
 
 #include "deps/box3d-cpp/include/b3cpp.h"
@@ -10,45 +11,68 @@
 #include <cstring>
 #include <iostream>
 
-namespace Nodes
+
+namespace WorldSystem
 {
-	MeshNode::MeshNode()
+	using namespace EngineCore;
+
+	Mesh::Mesh(EngineDevice& device)
+		: device(device)
 	{}
 
-	MeshNode::~MeshNode()
+	Mesh::~Mesh()
 	{}
 
-	void MeshNode::build(const std::filesystem::path& meshFilePath)
+	void Mesh::setMaterial(std::shared_ptr<Material> newMaterial)
+	{
+		material = newMaterial;
+	}
+
+	void Mesh::setMaterial(const MaterialCreateInfo& info)
+	{
+		material = std::make_shared<Material>(info, device);
+	}
+
+	std::shared_ptr<Material> Mesh::getMaterial() const
+	{
+		return material;
+	}
+
+	void Mesh::build(const std::filesystem::path& meshFilePath)
 	{
 		EngineCore::MeshBuilder builder{};
 		if (!meshFilePath.empty())
+		{
 			builder.loadFromFile(makePath(meshFilePath));
+		}
 		else
+		{
 			builder.makeCubeMesh();
+		}
 		build(builder);
 	}
 
-	void MeshNode::build(const MeshBuilder& meshBuilder)
+	void Mesh::build(const MeshBuilder& meshBuilder)
 	{
 		createVertexBuffers(meshBuilder.vertices);
 		createIndexBuffers(meshBuilder.indices);
 	}
 
-	b3cpp::Body& MeshNode::addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w)
+	b3cpp::Body& Mesh::addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w)
 	{
 		physicsBody = w.createBody(def);
 		return *physicsBody;
 	}
 
-    b3cpp::Body& MeshNode::getPhysicsBody()
-    {
+	b3cpp::Body& Mesh::getPhysicsBody()
+	{
 		return *physicsBody;
-    }
+	}
 
-	void MeshNode::physicsTick()
+	void Mesh::physicsTick()
 	{
 		if (not physicsBody) return;
-		
+		/* TODO: ASAP: physics tick/transform update has to be moved (now updating transform game->engine in renderMeshes)
 		if (teleported)
 		{
 			// the transform was manually changed, inform the physics engine
@@ -79,12 +103,11 @@ namespace Nodes
 			getPhysicsBody().applyTorque({ 10000.f * 100, 0.f, 0.f });
 			applied = true;
 		}
-
+		*/
 	}
 
-	void MeshNode::createVertexBuffers(const std::vector<EngineCore::Vertex>& vertices)
+	void Mesh::createVertexBuffers(const std::vector<EngineCore::Vertex>& vertices)
 	{
-		EngineCore::EngineDevice& device = getDevice();
 		//generateOOBB(vertices);
 		vertexCount = static_cast<uint32_t>(vertices.size());
 		assert(vertexCount >= 3 && "vertexCount cannot be below 3");
@@ -108,12 +131,14 @@ namespace Nodes
 		device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 	}
 
-	void MeshNode::createIndexBuffers(const std::vector<uint32_t>& indices)
+	void Mesh::createIndexBuffers(const std::vector<uint32_t>& indices)
 	{
-		EngineCore::EngineDevice& device = getDevice();
 		indexCount = static_cast<uint32_t>(indices.size());
 		hasIndexBuffer = indexCount > 0;
-		if (!hasIndexBuffer) { return; }
+		if (!hasIndexBuffer)
+		{
+			return;
+		}
 		VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
 		uint32_t indexSize = sizeof(indices[0]);
 		// same as for vertex buffer
@@ -133,7 +158,7 @@ namespace Nodes
 		device.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
 	}
 
-	//void MeshNode::generateOOBB(const std::vector<Vertex>& vertices)
+	//void Mesh::generateOOBB(const std::vector<Vertex>& vertices)
 	//{
 	//	for (const auto& v : vertices)
 	//	{
@@ -143,20 +168,27 @@ namespace Nodes
 	//	}
 	//}
 
-	void MeshNode::bind(VkCommandBuffer commandBuffer) const
+	void Mesh::bind(VkCommandBuffer commandBuffer) const
 	{
 		VkBuffer buffers[] = { vertexBuffer->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-		if (hasIndexBuffer) { vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32); }
+		if (hasIndexBuffer)
+		{
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		}
 	}
 
-	void MeshNode::draw(VkCommandBuffer commandBuffer) const
+	void Mesh::draw(VkCommandBuffer commandBuffer) const
 	{
-		if (hasIndexBuffer) { vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0); }
-		else { vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0); }
+		if (hasIndexBuffer)
+		{
+			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+		}
+		else
+		{
+			vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+		}
 	}
-
-	
 
 }

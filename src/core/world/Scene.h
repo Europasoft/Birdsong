@@ -15,13 +15,12 @@ namespace EngineCore
 	class Camera;
 	class DescriptorSet;
 }
-namespace WorldSystem
-{
-	class SectorContainer;
-}
 
 namespace WorldSystem
 {
+	class SectorContainer;
+	enum class ESectorLookup : int32_t;
+
 	class Scene
 	{
 		EngineCore::EngineDevice& device;
@@ -30,6 +29,7 @@ namespace WorldSystem
 		Scene(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine);
 		~Scene();
 
+		void initGlobalDescriptorSet();
 		void setupDemoScene();
 
 		void updateDescriptors(uint32_t frameIndex, double deltaTime);
@@ -39,7 +39,7 @@ namespace WorldSystem
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
 
-		Sector& getSector(const SectorCoord& coord) const;
+		Sector* getSector(const SectorCoord& coord, const ESectorLookup& mode) const;
 
 		// currently loaded sectors
 		std::unique_ptr<WorldSystem::SectorContainer> sectors;

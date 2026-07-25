@@ -83,7 +83,9 @@ namespace EngineCore
 		Material(const Material&) = delete;
 		Material& operator=(const Material&) = delete;
 
-		VkPipelineLayout getPipelineLayout() const { return pipelineLayout; }
+		void finalize(); // must be called after the material's descriptor set has been set up
+
+		VkPipelineLayout getPipelineLayout() const;
 
 		// binds this material's pipeline to the specified command buffer
 		void bindToCommandBuffer(VkCommandBuffer commandBuffer) const;
@@ -95,8 +97,9 @@ namespace EngineCore
 								sizeof(T), (void*)&data);
 		}
 
+		// TODO: remove soon, this will be obsolete, as the material should manage its own descriptor set
 		void setMaterialSpecificDescriptorSet(const std::shared_ptr<DescriptorSet>& set) { descriptorSet = set; }
-		DescriptorSet* getMaterialSpecificDescriptorSet() { return descriptorSet.get(); }
+		DescriptorSet& getDescriptorSet() { return *descriptorSet.get(); }
 
 	private:
 		MaterialCreateInfo materialCreateInfo;
@@ -108,6 +111,8 @@ namespace EngineCore
 		VkPipeline pipeline;
 
 		std::shared_ptr<DescriptorSet> descriptorSet = nullptr; // material-specific descriptor set
+
+		bool finalized = false; // catch error if we forget to call finalize() on the material before trying to render it
 
 		static void getDefaultPipelineConfig(PipelineConfig& cfg);
 		static void applyMatPropsToPipelineConfig(const MaterialShadingProperties& mp, PipelineConfig& cfg);

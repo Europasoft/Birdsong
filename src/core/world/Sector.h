@@ -26,6 +26,12 @@ namespace WorldSystem
 	class Scene;
 	class NodeContainer;
 
+	enum class ESectorLookup : int32_t
+	{
+		FIND_EXISTING = 0,
+		FIND_OR_CREATE = 1,
+	};
+
 	class Sector
 	{
 	public:
@@ -33,7 +39,7 @@ namespace WorldSystem
 		~Sector();
 		static constexpr uint32_t SECTOR_SIZE = 10000;
 
-		NodeContainer& getNodes() const;
+		NodeContainer& nodes() const;
 
 		b3cpp::World& getPhysicsWorld() const;
 		void physicsTick();
@@ -44,7 +50,7 @@ namespace WorldSystem
 		friend class EngineCore::MeshDrawer;
 
 		SectorCoord coordinates;
-		std::unique_ptr<NodeContainer> nodes;
+		std::unique_ptr<NodeContainer> nodesContainer;
 		bool isSectorCulled = false;
 
 		std::unique_ptr<b3cpp::World> physicsWorld;

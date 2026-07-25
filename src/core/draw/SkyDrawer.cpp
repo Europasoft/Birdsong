@@ -1,9 +1,10 @@
 #include "core/draw/SkyDrawer.h"
-#include "core/nodes/MeshNode.h"
 #include "core/engine/MeshData.h"
 #include "core/gpu/Device.h"
 #include "core/types/CommonTypes.h"
 #include "core/gpu/Material.h"
+#include "core/nodes/EngineNodeData.h"
+#include "core/nodes/EMesh.h"
 #include "core/types/glm_conversions.h"
 
 namespace EngineCore
@@ -13,31 +14,28 @@ namespace EngineCore
 	SkyDrawer::SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 	{
 		// TODO: hardcoded paths
-		const std::string meshPath = makePath("meshes/skysphere.obj");
 		ShaderFilePaths skyShaders(makePath("shaders/sky.vert.spv"), makePath("shaders/sky.frag.spv"));
 
 		// prepare sky mesh
-		MeshBuilder builder{};
-		builder.loadFromFile(meshPath);
-		skyMesh = std::make_unique<Nodes::MeshNode>();
-		skyMesh->setDevice(device);
-		skyMesh->build(builder);
-		auto tf = skyMesh->getTransform();
+		enodeSky = std::make_unique<WorldSystem::EngineNodeData>(nullptr, device);
+		enodeSky->mesh = std::make_unique<WorldSystem::Mesh>(device);
+		enodeSky->mesh->build("meshes/skysphere.obj");
+		Transform tf{};
 		tf.scale = { 50.f };
-		skyMesh->setTransform(tf);
+		enodeSky->engineTransform = tf;
 
 		// create unique material for sky, set to render backfaces, since it will be viewed from inside
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };
 		MaterialCreateInfo matInfo(skyShaders, layouts, samples, formats, sizeof(ShaderPushConstants::MeshPushConstants));
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
-		skyMesh->setMaterial(matInfo);
+		enodeSky->mesh->setMaterial(matInfo);
+		enodeSky->mesh->getMaterial()->finalize();
 	}
 
 	void SkyDrawer::renderSky(VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, Vec observerPosition)
 	{
 		// aliases for convenience
-		auto& sky = *skyMesh.get(); 
-		auto skyMat = sky.getMaterial();
+		auto skyMat = enodeSky->mesh->getMaterial();
 
 		skyMat->bindToCommandBuffer(commandBuffer); // bind sky shader pipeline
 
@@ -54,8 +52,8 @@ namespace EngineCore
 		skyMat->writePushConstants(commandBuffer, push);
 
 		// record draw command for sky mesh
-		sky.bind(commandBuffer);
-		sky.draw(commandBuffer);
+		enodeSky->mesh->bind(commandBuffer);
+		enodeSky->mesh->draw(commandBuffer);
 	}
 
 }

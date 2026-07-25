@@ -39,7 +39,8 @@ namespace EngineCore
 		gameLoader->loadDll("Game");
 
 		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
-		world->loadDemoScene();
+
+		world->getScene().initGlobalDescriptorSet();
 		setupDrawers();
 		setupDefaultInputs();
 

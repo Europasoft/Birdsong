@@ -1,36 +1,51 @@
 #pragma once
 #include "core/include/shared/IEngine.h"
-#include "core/world/NodeContainer.h"
 #include "core/include/shared/Transform.h"
 
 namespace EngineInterface
 {
 	class INode;
 }
+namespace WorldSystem
+{
+	class Scene;
+	class Sector;
+	class World;
+	enum class ESectorLookup : int32_t;
+}
 
 struct Transform;
 
 namespace EngineCore
 {
-	using IEngine = ::EngineInterface::IEngine;
-	using INode = ::EngineInterface::INode;
 	class EngineApplication;
+	class EngineDevice;
 
 	// engine-side implementation of IEngine
-	class IEngineImpl : public IEngine
+	class IEngineImpl : public EngineInterface::IEngine
 	{
+	public:
+		IEngineImpl(EngineApplication& engine);
+		~IEngineImpl();
 	protected:
 		// these functions can be invoked from the game DLL across the ABI boundary
-		void DLL_CALL registerNode(INode* node) final override;
-		void DLL_CALL unregisterNode(INode* node) final override;
+		void DLL_CALL registerNode(EngineInterface::INode* iNode) final override;
+		void DLL_CALL unregisterNode(EngineInterface::INode* iNode) final override;
 		void DLL_CALL getMousePosition(double& x, double& y) const final override;
+		void DLL_CALL setMeshForNode(EngineInterface::INode* iNode, const char* str, size_t size) final override;
+		void DLL_CALL setTextureForNode(EngineInterface::INode* iNode, const char* str, size_t size) final override;
 
 	private:
-		static Transform getNodeTransform(INode* node);
-
-	public:
-		~IEngineImpl();
-		EngineApplication* engine = nullptr;
-
+		EngineApplication& engine;
+		EngineDevice& device;
+		WorldSystem::World& world;
 	};
+
+}
+
+namespace EngineInteropUtil
+{
+	Transform getNodeTransform(EngineInterface::INode* iNode);
+	void setNodeTransform(EngineInterface::INode* iNode, const Transform& transform);
+	WorldSystem::Sector* getNodeSector(EngineInterface::INode* iNode, WorldSystem::Scene& scene, const WorldSystem::ESectorLookup& mode);
 }

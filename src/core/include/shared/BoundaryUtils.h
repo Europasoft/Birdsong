@@ -39,12 +39,6 @@ namespace BoundaryUtils
 		srcPtr += sizeof(T);
 	}
 
-	template <typename T>
-	static inline size_t measureValueSize(T& value)
-	{
-		return sizeof(T);
-	}
-
 	static void packTransform(const Transform& t, uint8_t* outBuffer)
 	{
 		uint8_t* dst = outBuffer;
@@ -79,22 +73,21 @@ namespace BoundaryUtils
 		unpackValue(t.sector.z, src);
 	}
 
-	static size_t getTransformDataSize(Transform& t)
+	static size_t getTransformDataSize(const Transform& t)
 	{
 		size_t size = 0;
-		size += measureValueSize(t.translation.x);
-		size += measureValueSize(t.translation.y);
-		size += measureValueSize(t.translation.z);
-		size += measureValueSize(t.rotation.x);
-		size += measureValueSize(t.rotation.y);
-		size += measureValueSize(t.rotation.z);
-		size += measureValueSize(t.scale.x);
-		size += measureValueSize(t.scale.y);
-		size += measureValueSize(t.scale.z);
-		size += measureValueSize(t.sector.x);
-		size += measureValueSize(t.sector.y);
-		size += measureValueSize(t.sector.z);
+		size += sizeof(t.translation.x);
+		size += sizeof(t.translation.y);
+		size += sizeof(t.translation.z);
+		size += sizeof(t.rotation.x);
+		size += sizeof(t.rotation.y);
+		size += sizeof(t.rotation.z);
+		size += sizeof(t.scale.x);
+		size += sizeof(t.scale.y);
+		size += sizeof(t.scale.z);
+		size += sizeof(t.sector.x);
+		size += sizeof(t.sector.y);
+		size += sizeof(t.sector.z);
 		return size;
 	}
-
 }

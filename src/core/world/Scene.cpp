@@ -3,10 +3,10 @@
 #include "core/world/Sector.h"
 #include "core/world/SectorContainer.h"
 #include "core/engine/Camera.h"
-#include "core/nodes/MeshNode.h"
 #include "core/gpu/Material.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
+#include "core/gpu/Descriptors.h"
 #include "core/engine/Engine.h"
 #include "core/render/Renderer.h"
 #include "core/gpu/Swapchain.h"
@@ -30,6 +30,7 @@ namespace WorldSystem
 	{
 		using namespace EngineCore;
 		sceneGlobalDescriptorSet = std::make_unique<DescriptorSet>(device);
+		sectors = std::make_unique<WorldSystem::SectorContainer>();
 
 		// create the persistent sector
 		// TODO: ASAP: make sure this works!
@@ -47,9 +48,36 @@ namespace WorldSystem
 		return *currentCamera.get();
 	}
 
-	Sector& Scene::getSector(const SectorCoord& coord) const
+	Sector* Scene::getSector(const SectorCoord& coord, const ESectorLookup& mode) const
 	{
-		return sectors->getOrCreateSector(coord);
+		return sectors->getOrCreateSector(coord, mode);
+	}
+
+	void Scene::initGlobalDescriptorSet()
+	{
+		using namespace EngineCore;
+		using namespace Nodes;
+
+		// create a basic camera
+		currentCamera = std::make_shared<EngineCore::Camera>(85.f, 10.f, 10000 * 100.f);
+		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
+		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
+
+		// demo textures (remove these later)
+		marsTexture = std::make_unique<Image>(device, makePath("Textures/mars6k_v2.jpg"));
+		spaceTexture = std::make_unique<Image>(device, makePath("Textures/space.png"));
+
+		// scene global descriptors
+		UBO_Struct ubo1{};
+		ubo1.add(uelem::mat4); // MVP matrix
+		sceneGlobalDescriptorSet->addUBO(ubo1, device);
+		// as the demo textures will never be overwritten from the CPU, only one buffer is needed for each, so the view can simply be duplicated
+		ImageArrayDescriptor demoTextureArray{};
+		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, marsTexture->getView()));
+		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, spaceTexture->getView()));
+		sceneGlobalDescriptorSet->addImageArray(demoTextureArray);
+		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
+		sceneGlobalDescriptorSet->finalize();
 	}
 
 	void Scene::setupDemoScene()
@@ -77,7 +105,7 @@ namespace WorldSystem
 		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
 		sceneGlobalDescriptorSet->finalize();
 
-		/* TODO: ASAP: some of this should be handled by the game, and some in EngineNodeData_Mesh class
+		/* TODO: ASAP: some of this should be handled by the game, and some in EngineNodeData class [IN PROGRESS NOW!] x)
 		// create 3D primitive(s)
 		auto& sector = *sectors[0]; // get the persistent sector
 		{
@@ -135,7 +163,7 @@ namespace WorldSystem
 		EngineCore::ShaderFilePaths shader(makePath("Shaders/shader.vert.spv"), makePath("Shaders/pbr.frag.spv"));
 		for (size_t i = 0; i < sector.nodes.size(); i++)
 		{
-			// TODO: materials should automatically include the layout of their own set (if present) on construct!!!
+			// TODO: materials should automatically include the layout of their own set (if present) on construct!!! ...note: in the process of solving this now!
 			EngineCore::MaterialCreateInfo matInfo(shader, std::vector<VkDescriptorSetLayout>{ sceneGlobalDescriptorSet->getLayout(), matSet->getLayout() },
 				engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants));
 			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
@@ -272,16 +300,8 @@ namespace WorldSystem
 
 	std::vector<Sector*> Scene::getLoadedSectors() const
 	{
-		return {};
-		/* TODO: ASAP
-		std::vector<Sector*> loadedSectors;
-		loadedSectors.reserve(sectors.size());
-		for (const auto& sectorPtr : sectors)
-		{
-			if (sectorPtr && !sectorPtr->isSectorCulled) loadedSectors.push_back(sectorPtr.get());
-		}
-		return loadedSectors;
-		*/
+		// TODO: this doesn't account for "culled" sectors
+		return sectors->getLoadedSectors();
 	}
 
 }

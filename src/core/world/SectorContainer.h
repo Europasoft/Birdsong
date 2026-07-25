@@ -4,10 +4,13 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <ranges>
+#include <cassert>
 
 namespace WorldSystem
 {
 	class Sector;
+	enum class ESectorLookup : int32_t;
 
 	// custom hash function for SectorCoord - this does not uniquely identify every possible sector, but it speeds up hash map searches
 	struct SectorCoordHash
@@ -42,11 +45,22 @@ namespace WorldSystem
 		~SectorContainer() = default;
 
 	public:
-		// get an existing sector (O(1) average lookup)
-		Sector* getSector(const SectorCoord& coord) const;
+		// get an existing sector (O(1) average lookup) or create on demand
+		Sector* getOrCreateSector(const SectorCoord& coord, const ESectorLookup& mode);
 
-		// get or create on demand
-		Sector& getOrCreateSector(const SectorCoord& coord);
+		std::vector<Sector*> getLoadedSectors() const
+		{
+			assert(sectors.empty() && "no loaded sectors!");
+			if (sectors.empty()) return {};
+			auto raw_ptrs_view = sectors
+				| std::views::values
+				| std::views::transform([](const auto& ptr)
+					{
+						return ptr.get();
+					});
+			// could optimize this
+			return std::vector<Sector*>(raw_ptrs_view.begin(), raw_ptrs_view.end());
+		}
 
 	protected:
 		using SectorMap = std::unordered_map<WorldSystem::SectorCoord, std::unique_ptr<Sector>, SectorCoordHash>;

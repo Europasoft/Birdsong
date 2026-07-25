@@ -30,22 +30,21 @@ namespace EngineInterface
 	protected:
 		IEngine* engine = nullptr;
 
+	public:
+		template <typename T, typename... Args>
+			requires std::derived_from<T, Node>
+		std::unique_ptr<T> spawnNode()
+		{
+			std::unique_ptr<T> node = std::make_unique<T>(engine, sizeof(T));
+			return node; // trusting the developer to keep this around as long as they need it
+		}
+
 	private:
 		// interface functions called by the engine executable, running in the DLLs memory space
 		void DLL_CALL onLoadCall(IEngine* engineItf) final override;
 		void DLL_CALL onTickCall(double dt) final override;
 		void DLL_CALL onUnloadCall() final override;
 		void DLL_CALL release() final override;
-
-	public:
-		template <typename T, typename... Args>
-			requires std::derived_from<T, Node>
-		std::unique_ptr<T> spawnNode()
-		{
-			std::unique_ptr<T> node = std::make_unique<T>(engine);
-			return node; // trusting the developer to keep this around as long as they need it
-		}
-
 
 	};
 }

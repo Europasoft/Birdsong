@@ -18,6 +18,9 @@
     <ClCompile Include="..\src\core\include\game\Node.cpp">
       <Filter>engine_includes</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\include\game\MeshNode.cpp">
+      <Filter>engine_includes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DemoGame.h">
@@ -27,6 +30,9 @@
       <Filter>engine_includes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\include\game\Node.h">
+      <Filter>engine_includes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\include\game\MeshNode.h">
       <Filter>engine_includes</Filter>
     </ClInclude>
   </ItemGroup>

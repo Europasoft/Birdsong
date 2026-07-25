@@ -14,6 +14,8 @@ namespace EngineInterface
 		virtual void DLL_CALL getMousePosition(double& x, double& y) const = 0;
 		virtual void DLL_CALL registerNode(INode* node) = 0;
 		virtual void DLL_CALL unregisterNode(INode* node) = 0;
+		virtual void DLL_CALL setMeshForNode(INode* iNode, const char* str, size_t size) = 0;
+		virtual void DLL_CALL setTextureForNode(INode* iNode, const char* str, size_t size) = 0;
 
 	protected:
 		// prevent the game DLL from deleting the object

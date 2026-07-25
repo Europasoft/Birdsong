@@ -3,24 +3,21 @@
 
 namespace WorldSystem
 {
-	Sector* SectorContainer::getSector(const SectorCoord& coord) const
+	Sector* SectorContainer::getOrCreateSector(const SectorCoord& coord, const ESectorLookup& mode)
 	{
 		auto it = sectors.find(coord);
 		if (it != sectors.end())
 		{
+			// found
 			return it->second.get();
 		}
-		return nullptr; // sector isn't loaded yet
-	}
-
-	Sector& SectorContainer::getOrCreateSector(const SectorCoord& coord)
-	{
-		auto& sectorPtr = sectors[coord];
-		if (!sectorPtr)
+		if (mode == ESectorLookup::FIND_OR_CREATE)
 		{
+			// did not exist, create sector on demand
+			auto& sectorPtr = sectors[coord];
 			sectorPtr = std::make_unique<Sector>(coord);
+			return sectorPtr.get();
 		}
-		return *sectorPtr;
+		return nullptr;
 	}
-
 }

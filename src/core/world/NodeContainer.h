@@ -14,6 +14,8 @@ namespace EngineInterface
 
 namespace WorldSystem
 {
+	class Mesh;
+
 	struct NodeMapEntry
 	{
 		std::unique_ptr<EngineNodeData> eNode;
@@ -46,7 +48,11 @@ namespace WorldSystem
 
 		void remove(EngineInterface::INode* iNode);
 
-		bool exists(EngineInterface::INode* iNode) const;
+		bool contains(EngineInterface::INode* iNode) const;
+
+		const NodeVectorEntry& getEntry(EngineInterface::INode* iNode) const;
+
+		EngineNodeData* getEngineNodeData(EngineInterface::INode* iNode) const;
 
 		// returns an view over every INode* in the container
 		auto getINodes()
@@ -57,39 +63,8 @@ namespace WorldSystem
 				});
 		}
 
-		// returns an view over every EngineNodeData* matching the provided subclass type
-		template <typename T>
-			requires std::derived_from<T, EngineNodeData>
-		auto getENodes()
-		{
-			return nodesVector
-				| std::views::filter([](const auto& entry)
-					{
-						return dynamic_cast<T*>(entry.eNode) != nullptr;
-					})
-				| std::views::transform([](const auto& entry) -> T*
-					{
-						return static_cast<T*>(entry.eNode);
-					});
-		}
-
-		// returns an view over every EngineNodeData* matching the provided subclass type - const
-		template <typename T>
-			requires std::derived_from<T, EngineNodeData>
-		auto getENodes() const
-		{
-			return nodesVector
-				| std::views::filter([](const auto& entry)
-					{
-						return dynamic_cast<const T*>(entry.eNode) != nullptr;
-					})
-				| std::views::transform([](const auto& entry) -> const T*
-					{
-						return static_cast<const T*>(entry.eNode);
-					});
-		}
-
-	
+		// returns the EngineNodeData for every node that has a Mesh
+		std::vector<EngineNodeData*> getMeshes() const;
 
 	};
 }

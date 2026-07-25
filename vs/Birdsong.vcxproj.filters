@@ -229,9 +229,6 @@
     <ClCompile Include="..\src\core\engine\MeshData.cpp">
       <Filter>core\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\nodes\MeshNode.cpp">
-      <Filter>core\nodes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\nodes\Node.cpp">
       <Filter>core\nodes</Filter>
     </ClCompile>
@@ -252,6 +249,12 @@
     </ClCompile>
     <ClCompile Include="..\src\core\world\NodeContainer.cpp">
       <Filter>core\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\nodes\EngineNodeData.cpp">
+      <Filter>core\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\nodes\EMesh.cpp">
+      <Filter>core\nodes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -492,9 +495,6 @@
     <ClInclude Include="..\src\core\engine\MeshData.h">
       <Filter>core\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\nodes\MeshNode.h">
-      <Filter>core\nodes</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\nodes\Node.h">
       <Filter>core\nodes</Filter>
     </ClInclude>
@@ -533,6 +533,9 @@
     </ClInclude>
     <ClInclude Include="..\src\core\world\SectorContainer.h">
       <Filter>core\world</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\nodes\EMesh.h">
+      <Filter>core\nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

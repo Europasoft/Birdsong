@@ -10,7 +10,7 @@ namespace WorldSystem
 
     void NodeContainer::add(INode* iNode, std::unique_ptr<EngineNodeData>&& eNode)
 	{
-		assert(iNode);
+		assert(iNode && "iNode was null");
 		if (!iNode) return;
 
 		// insert into map (if not already present)
@@ -35,7 +35,7 @@ namespace WorldSystem
 
 	void NodeContainer::remove(INode* iNode)
 	{
-		assert(iNode);
+		assert(iNode && "iNode was null");
 		if (!iNode) return;
 
 		NodeMapIterator it = nodes.find(iNode);
@@ -63,11 +63,40 @@ namespace WorldSystem
 		nodes.erase(it);
 	}
 
-	bool NodeContainer::exists(EngineInterface::INode* iNode) const
+	bool NodeContainer::contains(EngineInterface::INode* iNode) const
 	{
+		assert(iNode && "iNode was null");
 		NodeMapIteratorConst it = nodes.find(iNode);
 		return (it != nodes.end());
 	}
+
+    const NodeVectorEntry& NodeContainer::getEntry(EngineInterface::INode* iNode) const
+    {
+		assert(iNode && "iNode was null");
+		NodeMapIteratorConst it = nodes.find(iNode);
+		assert(it != nodes.end() && "node not found");
+		return nodesVector[it->second.index];
+    }
+
+	EngineNodeData* NodeContainer::getEngineNodeData(EngineInterface::INode* iNode) const
+	{
+		return getEntry(iNode).eNode;
+	}
+
+    std::vector<EngineNodeData*> NodeContainer::getMeshes() const
+    {
+		std::vector<EngineNodeData*> out;
+		out.reserve(nodesVector.size());
+		for (const NodeVectorEntry& entry : nodesVector)
+		{
+			assert(entry.eNode);
+			if (entry.eNode && entry.eNode->mesh)
+			{
+				out.push_back(entry.eNode);
+			}
+		}
+        return out;
+    }
 
 	
 

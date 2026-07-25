@@ -1,10 +1,11 @@
 #include "core/draw/FxDrawer.h"
-#include "core/nodes/MeshNode.h"
 #include "core/engine/MeshData.h"
 #include "core/types/CommonTypes.h"
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Material.h"
 #include "core/render/Renderer.h"
+#include "core/nodes/EngineNodeData.h"
+#include "core/nodes/EMesh.h"
 #include "core/types/glm_conversions.h"
 
 namespace EngineCore
@@ -40,17 +41,18 @@ namespace EngineCore
 		fullscreenInfo.shadingProperties.enableDepth = false;
 		fullscreenInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		fullscreenMaterial = std::make_unique<Material>(fullscreenInfo, device);
+		fullscreenMaterial->finalize();
 
-		// setup mesh and material
-		MeshBuilder builder{};
-		builder.loadFromFile(makePath("meshes/teapot.obj"));
-		mesh = std::make_unique<Nodes::MeshNode>();
-		mesh->setDevice(device);
-		mesh->build(builder);
+		// translucent teapot mesh with refraction
+		// setup mesh and material (this mesh is engine-only, the node is not managed by the game and does not participate in any sector)
+		enode = std::make_unique<WorldSystem::EngineNodeData>(nullptr, device);
+		enode->mesh = std::make_unique<WorldSystem::Mesh>(device);
+		enode->mesh->build("meshes/teapot.obj"); // load mesh from file
+
 		ShaderFilePaths shader(makePath("shaders/fx_test.vert.spv"), makePath("shaders/fx_test.frag.spv"));
-		mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, sizeof(ShaderPushConstants::MeshPushConstants)));
-		Transform tf(Vec(-80.f, 0.f, 0.f), Vec(), Vec(5.f));
-		mesh->setTransform(tf);
+		enode->mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, sizeof(ShaderPushConstants::MeshPushConstants)));
+		enode->mesh->getMaterial()->finalize();
+		enode->engineTransform = Transform(Vec(-80.f, 0.f, 0.f), Vec(), Vec(5.f));
 	}
 
 	void FxDrawer::render(VkCommandBuffer cmdBuffer, Renderer& renderer)
@@ -70,17 +72,17 @@ namespace EngineCore
 		vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
 
 		// draw mesh
-		bindDescriptorSets(cmdBuffer, mesh->getMaterial()->getPipelineLayout(), frameIndex, imageIndex);
-		auto material = mesh->getMaterial();
+		auto material = enode->mesh->getMaterial();
+		bindDescriptorSets(cmdBuffer, material->getPipelineLayout(), frameIndex, imageIndex);
 		material->bindToCommandBuffer(cmdBuffer);
 		
 		ShaderPushConstants::MeshPushConstants push{};
 		
-		push.transform = cglm::transformToGLMmat4(mesh->getTransform());
+		push.transform = cglm::transformToGLMmat4(enode->engineTransform);
 		material->writePushConstants(cmdBuffer, push);
 
-		mesh->bind(cmdBuffer);
-		mesh->draw(cmdBuffer);
+		enode->mesh->bind(cmdBuffer);
+		enode->mesh->draw(cmdBuffer);
 
 		renderer.endRendering(cmdBuffer); // FX PASS END
 	}
