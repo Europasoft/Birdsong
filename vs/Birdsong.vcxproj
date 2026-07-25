@@ -74,6 +74,11 @@
     <IncludePath>D:/VulkanDev/VulkanSDK/1.4.328.1/Include;$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/include;$(ProjectDir)/../src/deps/box3d-cpp;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src/include/box3d;$(ProjectDir)/../src/deps/box3d-cpp/box3d/include;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src;$(ProjectDir)/../src;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)..\vs_build_$(Platform)\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:/VulkanDev/VulkanSDK/1.4.328.1/Include;$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/include;$(ProjectDir)/../src/deps/box3d-cpp;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src/include/box3d;$(ProjectDir)/../src/deps/box3d-cpp/box3d/include;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src;$(ProjectDir)/../src;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\vs_build_$(Platform)_release\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -131,17 +136,22 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/lib-vc2022;D:/VulkanDev/VulkanSDK/1.4.328.1/Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libucrtd;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
