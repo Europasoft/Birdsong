@@ -241,6 +241,8 @@ namespace EngineCore
 		/* num copies to create of each buffer, usually MAX_FRAMES_IN_FLIGHT, 
 		but may be set to a different number (e.g. swapchain image count, when using an attachment image) */
 		uint32_t framesInFlight;
+
+		bool finalized = false; // catch error if we forget to call finalize() on the material before trying to render it
 	};
 
 }

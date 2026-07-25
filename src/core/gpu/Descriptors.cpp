@@ -370,6 +370,7 @@ namespace EngineCore
 
 	void DescriptorSet::finalize()
 	{
+		assert((not finalized) && "DescriptorSet::finalize called twice");
 		assert(framesInFlight > 0 && "descriptor set must have framesInFlight set to a valid number");
 		sets.resize(framesInFlight);
 
@@ -446,10 +447,13 @@ namespace EngineCore
 
 			writer.build(sets[f]); // make descriptor set for frame
 		}
+
+		finalized = true; // mark descriptor set as ready to use
 	}
 
 	VkDescriptorSetLayout DescriptorSet::getLayout() const
 	{
+		assert(finalized && "DescriptorSet was never finalized, DescriptorSet::finalize must be called");
 		assert(layout.get() && "tried to get layout from uninitialized descriptor set");
 		if (!layout.get()) { return VK_NULL_HANDLE; }
 		return layout.get()->getDescriptorSetLayout();

@@ -40,7 +40,6 @@ namespace EngineCore
 
 		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
 
-		world->getScene().initGlobalDescriptorSet();
 		setupDrawers();
 		setupDefaultInputs();
 

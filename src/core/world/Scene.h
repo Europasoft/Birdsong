@@ -29,7 +29,6 @@ namespace WorldSystem
 		Scene(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine);
 		~Scene();
 
-		void initGlobalDescriptorSet();
 		void setupDemoScene();
 
 		void updateDescriptors(uint32_t frameIndex, double deltaTime);
@@ -46,6 +45,8 @@ namespace WorldSystem
 		std::unique_ptr<SectorCoord> localSectorCoord;
 
 	protected:
+		void initGlobalDescriptorSet();
+
 		std::unique_ptr<EngineCore::DescriptorSet> sceneGlobalDescriptorSet;
 
 		std::shared_ptr<EngineCore::Camera> currentCamera;

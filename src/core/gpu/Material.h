@@ -3,6 +3,7 @@
 #include "core/gpu/Device.h"
 #include "core/gpu/Descriptors.h"
 #include "core/engine/EngineSettings.h"
+#include "core/types/vk.h"
 
 #include <glm/glm.hpp> // TODO: get rid of this
 
@@ -105,10 +106,10 @@ namespace EngineCore
 		MaterialCreateInfo materialCreateInfo;
 
 		EngineDevice& device;
-		VkShaderModule vertexShaderModule;
-		VkShaderModule fragmentShaderModule;
-		VkPipelineLayout pipelineLayout;
-		VkPipeline pipeline;
+		VkShaderModule vertexShaderModule = VK_NULL_HANDLE;
+		VkShaderModule fragmentShaderModule = VK_NULL_HANDLE;
+		VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+		VkPipeline pipeline = VK_NULL_HANDLE;
 
 		std::shared_ptr<DescriptorSet> descriptorSet = nullptr; // material-specific descriptor set
 

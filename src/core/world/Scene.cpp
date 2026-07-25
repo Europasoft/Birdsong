@@ -30,11 +30,8 @@ namespace WorldSystem
 	{
 		using namespace EngineCore;
 		sceneGlobalDescriptorSet = std::make_unique<DescriptorSet>(device);
+		initGlobalDescriptorSet();
 		sectors = std::make_unique<WorldSystem::SectorContainer>();
-
-		// create the persistent sector
-		// TODO: ASAP: make sure this works!
-		//sectors.push_back(std::make_unique<Sector>(SectorCoord(0, 0, 0)));
 		localSectorCoord = std::make_unique<SectorCoord>();
 	}
 
