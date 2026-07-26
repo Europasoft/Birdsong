@@ -229,9 +229,6 @@
     <ClCompile Include="..\src\core\engine\MeshData.cpp">
       <Filter>core\engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\nodes\MeshNode.cpp">
-      <Filter>core\nodes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\nodes\Node.cpp">
       <Filter>core\nodes</Filter>
     </ClCompile>
@@ -246,6 +243,27 @@
     </ClCompile>
     <ClCompile Include="..\src\core\engine\interop\IEngineImpl.cpp">
       <Filter>core\engine\interop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\world\SectorContainer.cpp">
+      <Filter>core\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\world\NodeContainer.cpp">
+      <Filter>core\world</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\nodes\EngineNodeData.cpp">
+      <Filter>core\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\nodes\EMesh.cpp">
+      <Filter>core\nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorPool.cpp">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorSetLayout.cpp">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\gpu\descriptors\BindlessTextureManager.cpp">
+      <Filter>core\gpu\descriptors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -486,9 +504,6 @@
     <ClInclude Include="..\src\core\engine\MeshData.h">
       <Filter>core\engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\nodes\MeshNode.h">
-      <Filter>core\nodes</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\core\nodes\Node.h">
       <Filter>core\nodes</Filter>
     </ClInclude>
@@ -518,6 +533,27 @@
     </ClInclude>
     <ClInclude Include="..\src\core\engine\interop\IEngineImpl.h">
       <Filter>core\engine\interop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\nodes\EngineNodeData.h">
+      <Filter>core\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\world\NodeContainer.h">
+      <Filter>core\world</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\world\SectorContainer.h">
+      <Filter>core\world</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\nodes\EMesh.h">
+      <Filter>core\nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorPool.h">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorSetLayout.h">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\descriptors\BindlessTextureManager.h">
+      <Filter>core\gpu\descriptors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -586,6 +622,9 @@
     </Filter>
     <Filter Include="core\engine\interop">
       <UniqueIdentifier>{7a165813-c6f4-48f2-b3fa-9c7c5053bcd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\gpu\descriptors">
+      <UniqueIdentifier>{1003dc91-1803-482f-8238-a2b65ca8f740}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

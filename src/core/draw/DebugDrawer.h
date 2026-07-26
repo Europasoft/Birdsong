@@ -5,9 +5,9 @@
 #include <memory>
 #include <vector>
 
-namespace Nodes
+namespace WorldSystem
 {
-	class MeshNode;
+	class EngineNodeData;
 }
 
 namespace EngineCore
@@ -36,7 +36,7 @@ namespace EngineCore
 
 		EngineDevice& device;
 		DescriptorSet& defaultSet;
-		std::unique_ptr<Nodes::MeshNode> boxMesh;
+		std::unique_ptr<WorldSystem::EngineNodeData> enodeBox;
 		std::vector<DDPushConstant> boxPushConstants;
 
 		bool hasPushConstantBox(const DDPushConstant& compareBox) const;

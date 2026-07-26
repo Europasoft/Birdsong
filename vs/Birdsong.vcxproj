@@ -74,6 +74,11 @@
     <IncludePath>D:/VulkanDev/VulkanSDK/1.4.328.1/Include;$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/include;$(ProjectDir)/../src/deps/box3d-cpp;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src/include/box3d;$(ProjectDir)/../src/deps/box3d-cpp/box3d/include;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src;$(ProjectDir)/../src;$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)..\vs_build_$(Platform)\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:/VulkanDev/VulkanSDK/1.4.328.1/Include;$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/include;$(ProjectDir)/../src/deps/box3d-cpp;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src/include/box3d;$(ProjectDir)/../src/deps/box3d-cpp/box3d/include;$(ProjectDir)/../src/deps/box3d-cpp/box3d/src;$(ProjectDir)/../src;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)..\vs_build_$(Platform)_release\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -131,17 +136,22 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)/../src/thirdparty/glfw-3.3.8.bin.WIN64/lib-vc2022;D:/VulkanDev/VulkanSDK/1.4.328.1/Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libucrtd;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -164,6 +174,9 @@
     <ClInclude Include="..\src\core\engine\Window.h" />
     <ClInclude Include="..\src\core\gpu\Buffer.h" />
     <ClInclude Include="..\src\core\gpu\Descriptors.h" />
+    <ClInclude Include="..\src\core\gpu\descriptors\BindlessTextureManager.h" />
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorPool.h" />
+    <ClInclude Include="..\src\core\gpu\descriptors\DescriptorSetLayout.h" />
     <ClInclude Include="..\src\core\gpu\Device.h" />
     <ClInclude Include="..\src\core\gpu\Image.h" />
     <ClInclude Include="..\src\core\gpu\Material.h" />
@@ -174,7 +187,8 @@
     <ClInclude Include="..\src\core\include\shared\INode.h" />
     <ClInclude Include="..\src\core\include\shared\Transform.h" />
     <ClInclude Include="..\src\core\input\Input.h" />
-    <ClInclude Include="..\src\core\nodes\MeshNode.h" />
+    <ClInclude Include="..\src\core\nodes\EMesh.h" />
+    <ClInclude Include="..\src\core\nodes\EngineNodeData.h" />
     <ClInclude Include="..\src\core\nodes\Node.h" />
     <ClInclude Include="..\src\core\render\Attachment.h" />
     <ClInclude Include="..\src\core\render\Renderer.h" />
@@ -183,8 +197,10 @@
     <ClInclude Include="..\src\core\types\CommonTypes.h" />
     <ClInclude Include="..\src\core\types\glm_conversions.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
+    <ClInclude Include="..\src\core\world\NodeContainer.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
+    <ClInclude Include="..\src\core\world\SectorContainer.h" />
     <ClInclude Include="..\src\core\world\World.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\base.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\box3d\include\box3d\box3d.h" />
@@ -254,19 +270,25 @@
     <ClCompile Include="..\src\core\engine\Window.cpp" />
     <ClCompile Include="..\src\core\gpu\Buffer.cpp" />
     <ClCompile Include="..\src\core\gpu\Descriptors.cpp" />
+    <ClCompile Include="..\src\core\gpu\descriptors\BindlessTextureManager.cpp" />
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorPool.cpp" />
+    <ClCompile Include="..\src\core\gpu\descriptors\DescriptorSetLayout.cpp" />
     <ClCompile Include="..\src\core\gpu\Device.cpp" />
     <ClCompile Include="..\src\core\gpu\Image.cpp" />
     <ClCompile Include="..\src\core\gpu\Material.cpp" />
     <ClCompile Include="..\src\core\gpu\Swapchain.cpp" />
     <ClCompile Include="..\src\core\input\Input.cpp" />
-    <ClCompile Include="..\src\core\nodes\MeshNode.cpp" />
+    <ClCompile Include="..\src\core\nodes\EMesh.cpp" />
+    <ClCompile Include="..\src\core\nodes\EngineNodeData.cpp" />
     <ClCompile Include="..\src\core\nodes\Node.cpp" />
     <ClCompile Include="..\src\core\render\Attachment.cpp" />
     <ClCompile Include="..\src\core\render\Renderer.cpp" />
     <ClCompile Include="..\src\core\render\Renderpass.cpp" />
     <ClCompile Include="..\src\core\types\glm_conversions.cpp" />
+    <ClCompile Include="..\src\core\world\NodeContainer.cpp" />
     <ClCompile Include="..\src\core\world\Scene.cpp" />
     <ClCompile Include="..\src\core\world\Sector.cpp" />
+    <ClCompile Include="..\src\core\world\SectorContainer.cpp" />
     <ClCompile Include="..\src\core\world\World.cpp" />
     <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\aabb.c" />
     <ClCompile Include="..\src\deps\box3d-cpp\box3d\src\arena_allocator.c" />

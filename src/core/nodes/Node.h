@@ -51,19 +51,4 @@ namespace Nodes
 
 	};
 
-	// utility to filter a list (std::vector) of Nodes to get only objects of a specific subclass
-	template <typename T>
-		requires std::derived_from<T, Node>
-	auto getNodesOfType(const std::vector<std::unique_ptr<Node>>& nodes)
-	{
-		return nodes
-			| std::views::filter([](const auto& nodePtr)
-				{
-					return dynamic_cast<const T*>(nodePtr.get()) != nullptr;
-				})
-			| std::views::transform([](const auto& nodePtr) -> T&
-				{
-					return *static_cast<T*>(nodePtr.get());
-				});
-	}
 }

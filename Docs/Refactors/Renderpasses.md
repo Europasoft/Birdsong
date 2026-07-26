@@ -1,4 +1,5 @@
 # VK_KHR_dynamic_rendering Migration Plan
+### COMPLETED
 
 ## Old architecture
 

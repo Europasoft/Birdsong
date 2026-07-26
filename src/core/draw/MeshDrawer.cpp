@@ -5,13 +5,14 @@
 #include "core/world/World.h"
 #include "core/world/Scene.h"
 #include "core/world/Sector.h"
-#include "core/nodes/MeshNode.h"
+#include "core/world/NodeContainer.h"
+#include "core/nodes/EMesh.h"
+#include "core/include/shared/Transform.h"
 #include "core/types/glm_conversions.h"
 
 #include <stdexcept>
 #include <array>
 #include <limits>
-#include <iostream> // temporary
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -23,6 +24,16 @@ namespace EngineCore
 {
 	MeshDrawer::~MeshDrawer() = default;
 
+	struct MeshDrawer::DrawMeshContext
+	{
+		WorldSystem::Mesh& mesh;
+		const Transform& transform;
+		VkDescriptorSet sceneGlobalDescriptorSet;
+		VkCommandBuffer commandBuffer;
+		uint32_t frameIndex;
+		WorldSystem::SectorCoord cameraSectorCoord;
+	};
+
 	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
 			double deltaTimeSeconds, double time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
 			const glm::mat4& viewMatrix) //FakeScaleTest082
@@ -30,44 +41,58 @@ namespace EngineCore
 		using namespace WorldSystem;
 
 		Scene& scene = world.getScene();
-		const SectorCoord cameraSectorCoord = scene.getLocalSectorCoordinate();
+		
 		const float S = static_cast<float>(scene.getSectorSize());
 
 		for (Sector* sector : scene.getLoadedSectors())
 		{
-			for (const Nodes::MeshNode* meshNode : sector->getMeshNodes())
+			for (EngineNodeData* nodeData : sector->nodes().getMeshes())
 			{
-				auto material = meshNode->getMaterial();
-				material->bindToCommandBuffer(commandBuffer); // bind material-specific shading pipeline
-
-				std::vector<VkDescriptorSet> sets;
-				sets.push_back(sceneGlobalDescriptorSet); // scene global descriptor set
-
-				if (auto* matSet = material->getMaterialSpecificDescriptorSet())
-				{
-					// bind material-specific descriptor set
-					sets.push_back(matSet->getDescriptorSet(frameIndex));
-				}
-
-				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(),
-					0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-
-				ShaderPushConstants::MeshPushConstants push{};
-				const auto& transform = meshNode->getTransform();
-
-				// get the unified world space position relative to the camera's sector origin
-				const Vec meshPosRelative = WorldSystem::calculateRelative(transform.translation, sector->coordinates, cameraSectorCoord);
-				push.transform = cglm::makeMatrixQ(transform.rotation, transform.rotation_w, transform.scale, meshPosRelative);
-				std::cout << "\n rot x: " << transform.rotation.x << " w: " << transform.rotation_w;
-				push.normalMatrix = glm::transpose(glm::inverse(push.transform));
-				material->writePushConstants(commandBuffer, push);
-
-				// record mesh draw command
-				meshNode->bind(commandBuffer);
-				meshNode->draw(commandBuffer);
+				// update the engine-side node transform, using data from game
+				nodeData->updateTransformFromGame();
+				WorldSystem::Mesh& mesh = *nodeData->mesh.get();
+				const Transform& transform = nodeData->engineTransform;
+				
+				renderOne({
+					mesh, 
+					transform, 
+					sceneGlobalDescriptorSet, 
+					commandBuffer, 
+					frameIndex, 
+					scene.getLocalSectorCoordinate()
+					});
 			}
 		}
 
+	}
+
+	void MeshDrawer::renderOne(const DrawMeshContext& ctx)
+	{
+		Material& material = *ctx.mesh.getMaterial().get();
+		material.bindToCommandBuffer(ctx.commandBuffer); // bind material-specific shading pipeline
+
+		std::vector<VkDescriptorSet> sets;
+		sets.push_back(ctx.sceneGlobalDescriptorSet); // scene global descriptor set
+
+		// bind material-specific descriptor set
+		auto& matSet = material.getDescriptorSet();
+		sets.push_back(matSet.getDescriptorSet(ctx.frameIndex));
+
+		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material.getPipelineLayout(),
+			0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+
+		ShaderPushConstants::MeshPushConstants push{};
+
+		// get the unified world space position relative to the camera's sector origin
+		const Vec meshPosRelative = WorldSystem::calculateRelative(ctx.transform.translation, ctx.transform.sector, ctx.cameraSectorCoord);
+		push.transform = cglm::makeMatrixQ(ctx.transform.rotation, ctx.transform.rotation_w, ctx.transform.scale, meshPosRelative);
+		//std::cout << "\n rot x: " << transform.rotation.x << " w: " << transform.rotation_w;
+		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
+		material.writePushConstants(ctx.commandBuffer, push);
+
+		// record mesh draw command
+		ctx.mesh.bind(ctx.commandBuffer);
+		ctx.mesh.draw(ctx.commandBuffer);
 	}
 
 	glm::mat4 MeshDrawer::lerpMat4(float t, glm::mat4 matA, glm::mat4 matB) 

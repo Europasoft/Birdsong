@@ -7,10 +7,12 @@
 #include <cmath> // only used in perspective calculation
 
 class Camera;
+struct Transform;
 
 namespace WorldSystem 
 { 
 	class World;
+	class Mesh;
 }
 
 namespace EngineCore
@@ -32,7 +34,8 @@ namespace EngineCore
 						const glm::mat4& viewMatrix); //FakeScaleTest082 (used to take a transform param here)
 
 	private:
-		EngineDevice& device;
+		struct DrawMeshContext;
+		void renderOne(const DrawMeshContext& ctx);
 
 		static glm::mat4 orthographicMatrix(const float& n, const float& f)
 		{
@@ -66,6 +69,7 @@ namespace EngineCore
 			return static_cast<float>((a * (1.0 - t)) + (b * t));
 		}
 
+		EngineDevice& device;
 	};
 
 }

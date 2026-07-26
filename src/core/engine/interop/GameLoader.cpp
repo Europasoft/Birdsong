@@ -111,8 +111,7 @@ namespace EngineCore
 	GameLoader::GameLoader(EngineApplication* engine)
 	{
 		// the engine interface object is exposed to the game DLL as an opaque IEngine pointer
-		engineItf = std::make_unique<IEngineImpl>();
-		engineItf->engine = engine;
+		engineItf = std::make_unique<IEngineImpl>(*engine);
 	}
 
 	GameLoader::~GameLoader() 

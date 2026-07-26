@@ -6,25 +6,25 @@ The engine must be able to find this DLL file easily. For that reason, the worki
 
 ### Execution flow
 <pre>
-[Engine]                       │       │   [Game]
-                               │  ABI  │
-Engine starts                  │       │
-Loads the game DLL             │       │
-Retrieves factory function     │       │
-Calls factory function ────────┤───────├───▶ Creates Game object
-                           ◄───┤───────├──── Passes IGame* pointer back
-                               │       │
-Calls OnLoad ──────────────────┤───────├───▶ OnLoad runs
-                               │       │
-Passes IEngine* pointer ───────┤───────├───▶
-Some function runs ◄───────────┤───────├──── Calls some function on IEngine
-                               │       │
-Calls some function on IGame ──┤───────├───▶ Some function runs
-                               │       │
-Calls tick ────────────────────┤───────├───▶ Tick runs
-...                            │       │
-Calls onUnload ────────────────┤───────├───▶ onUnload runs 
-                               │       │     Destroys Game object
+[Engine]                        │       │   [Game]
+                                │  ABI  │
+Engine starts                   │       │
+Loads the game DLL              │       │
+Retrieves factory function      │       │
+Calls factory function ─────────┤───────├───▶ Creates Game object
+                           ◄────┤───────├──── Passes IGame* pointer back
+                                │       │
+Calls IGame::onLoadCall ────────┤───────├───▶ Game::onLoad runs
+                                │       │
+Passes IEngine* pointer ────────┤───────├───▶
+Some function runs ◄────────────┤───────├──── Calls some function on IEngine*
+                                │       │
+Calls some function on IGame* ──┤───────├───▶ Some function runs
+                                │       │
+Calls IGame::onTickCall ────────┤───────├───▶ Game::tick runs
+...                             │       │
+Calls IGame::onUnloadCall ──────┤───────├───▶ Game::onUnload runs 
+                                │       │     Destroys Game object
 </pre>
 
 ### ABI safety
@@ -66,6 +66,26 @@ Because an implementation class contains function logic that is only safe to exe
 | `src/core/engine/interop/` | Engine | These files contain logic that will run directly in the engine application. Do not include these in game code. |
 | `src/core/include/game/` | Game | These files contain logic that will run inside the game DLL. Do not include any headers here in engine code. The source files here are compiled ONLY into the game DLL. They are conceptually part of the engine, but they do not contribute to the final application when the engine is built. |
 
+### Node lifetime
+A physical (or just visual) object is called a "Node". Nodes are usually created by the game, they are exposed to the engine only through the INode interface.<br>
+As nodes are not movable (in memory), it is safe for the engine to keep a list of pointers to the nodes. They will remain valid up until the nodes are destroyed.<br>
+When a Node is spawned, the Node itself notifies the engine. Likewise, the node notifies when it is about to be destroyed, so that the engine can safely stop using that Node's memory address.
+
+<pre>
+[Game]                        │       │   [Engine]
+                              │  ABI  │
+Game::spawnNode               │       │
+Node constructor runs         │       │
+Calls IEngine::registerNode ──┤───────├───▶ IEngineImpl::registerNode runs
+                              │       │     Adds INode* to internal registry
+Runs Node::onSpawn            │       │
+                              │       │
+Node::tick runs ◄─────────────┤───────├──── Calls INode::tickCall
+...                           │       │                              
+~Node destructor runs         │       │
+IEngine::unregisterNode ──────┤───────├───▶ IEngineImpl::unregisterNode
+                              │       │     Removes INode* from internal registry
+</pre>
 
 
 

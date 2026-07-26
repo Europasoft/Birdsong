@@ -16,6 +16,7 @@ namespace WorldSystem
 	World::World(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine)
 		: device{ device }, engine{ engine }
 	{
+		currentScene = std::make_unique<Scene>(device, engine);
 	}
 
 	Scene& World::getScene() const

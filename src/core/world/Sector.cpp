@@ -1,22 +1,28 @@
 #include "core/world/Sector.h"
+#include "core/world/NodeContainer.h"
 #include "core/world/World.h"
 #include "core/nodes/Node.h"
-#include "core/nodes/MeshNode.h"
 
 #include "deps/box3d-cpp/include/b3cpp.h"
 
 #include <iostream>
+#include <cassert>
 
 namespace WorldSystem
 {
 	Sector::Sector(const SectorCoord& coord)
 		: coordinates{ coord }
 	{
+		nodesContainer = std::make_unique<NodeContainer>();
+
 		b3cpp::WorldDef wd;
 		wd.gravity = { 0, 0, -0.1 };
 		physicsWorld = std::make_unique<b3cpp::World>(wd);
 		assert(physicsWorld->isIdValid());
 	}
+
+	Sector::~Sector() 
+	{}
 
 	Vec calculateRelative(Vec subjectLocalCoords, SectorCoord subjectSector, SectorCoord referenceSector)
 	{
@@ -37,15 +43,9 @@ namespace WorldSystem
 			};
 	}
 
-	std::vector<Nodes::MeshNode*> Sector::getMeshNodes() const
+	NodeContainer& Sector::nodes() const
 	{
-		std::vector<Nodes::MeshNode*> meshNodes;
-		meshNodes.reserve(nodes.size());
-		for (const auto& mesh : Nodes::getNodesOfType<Nodes::MeshNode>(nodes)) 
-		{
-			meshNodes.push_back(const_cast<Nodes::MeshNode*>(&mesh));
-		}
-		return meshNodes;
+		return *nodesContainer.get();
 	}
 
 	b3cpp::World& Sector::getPhysicsWorld() const
@@ -58,10 +58,11 @@ namespace WorldSystem
 		static bool didExplode = false;//TMP
 		if (not physicsWorld) return;
 
-		for (Nodes::MeshNode* node : getMeshNodes())
-		{
-			node->physicsTick();
-		}
+		// TODO: ASAP: make this work with the new system based on EngineNodeData
+		//for (Nodes::MeshNode* node : getMeshNodes())
+		//{
+		//	node->physicsTick();
+		//}
 
 		physicsWorld->step();
 
@@ -72,7 +73,7 @@ namespace WorldSystem
 			x.falloff = 10000;
 			x.radius = 1000;
 			x.position = { 0, 400, -200 };
-			x.impulsePerArea = 100000;
+			x.impulsePerArea = 100000 * 100;
 			physicsWorld->explode(x);
 			didExplode = 1;
 		}

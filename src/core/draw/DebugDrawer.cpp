@@ -1,10 +1,11 @@
 #include "core/draw/DebugDrawer.h"
-#include "core/nodes/MeshNode.h"
 #include "core/engine/MeshData.h"
 #include "core/world/World.h"
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Material.h"
 #include "core/render/Renderer.h"
+#include "core/nodes/EngineNodeData.h"
+#include "core/nodes/EMesh.h"
 #include "core/types/glm_conversions.h"
 
 namespace EngineCore
@@ -15,11 +16,11 @@ namespace EngineCore
 		: device{ device }, defaultSet{ defaultSet }
 	{
 		// setup box mesh
+		enodeBox = std::make_unique<WorldSystem::EngineNodeData>(nullptr, device);
+		enodeBox->mesh = std::make_unique<WorldSystem::Mesh>(device);
 		MeshBuilder builder{};
 		builder.makeCubeMeshWireframe();
-		boxMesh = std::make_unique<Nodes::MeshNode>();
-		boxMesh->setDevice(device);
-		boxMesh->build(builder);
+		enodeBox->mesh->build(builder);
 
 		// setup debug primitive material
 		auto shader = ShaderFilePaths(makePath("shaders/debug_primitive.vert.spv"), makePath("shaders/debug_primitive.frag.spv"));
@@ -29,7 +30,8 @@ namespace EngineCore
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_LINE;
 		matInfo.shadingProperties.lineWidth = 4.f;
-		boxMesh->setMaterial(matInfo);
+		enodeBox->mesh->setMaterial(matInfo);
+		enodeBox->mesh->getMaterial()->finalize();
 	}
 
 	void DebugDrawer::addDebugBox(Vec dimensions, Vec location, Vec color, float opacity)
@@ -51,9 +53,9 @@ namespace EngineCore
 	{
 		// called after the base renderpass has been initiated'
 
-		auto material = boxMesh->getMaterial();
+		auto material = enodeBox->mesh->getMaterial();
 		material->bindToCommandBuffer(cmdBuffer);
-		boxMesh->bind(cmdBuffer);
+		enodeBox->mesh->bind(cmdBuffer);
 
 		auto sets = std::vector<VkDescriptorSet>{ defaultSet.getDescriptorSet(renderer.getFrameIndex()) };
 
@@ -62,7 +64,7 @@ namespace EngineCore
 		for (DDPushConstant& box : boxPushConstants)
 		{
 			material->writePushConstants(cmdBuffer, box);
-			boxMesh->draw(cmdBuffer);
+			enodeBox->mesh->draw(cmdBuffer);
 		}
 	}
 

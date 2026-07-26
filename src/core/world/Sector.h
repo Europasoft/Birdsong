@@ -24,14 +24,23 @@ namespace b3cpp
 namespace WorldSystem
 {
 	class Scene;
+	class NodeContainer;
+
+	enum class ESectorLookup : int32_t
+	{
+		FIND_EXISTING = 0,
+		FIND_OR_CREATE = 1,
+	};
 
 	class Sector
 	{
 	public:
 		Sector(const SectorCoord& coord);
+		~Sector();
 		static constexpr uint32_t SECTOR_SIZE = 10000;
 
-		std::vector<Nodes::MeshNode*> getMeshNodes() const;
+		NodeContainer& nodes() const;
+
 		b3cpp::World& getPhysicsWorld() const;
 		void physicsTick();
 
@@ -41,20 +50,10 @@ namespace WorldSystem
 		friend class EngineCore::MeshDrawer;
 
 		SectorCoord coordinates;
-		std::vector<std::unique_ptr<Nodes::Node>> nodes;
+		std::unique_ptr<NodeContainer> nodesContainer;
 		bool isSectorCulled = false;
 
 		std::unique_ptr<b3cpp::World> physicsWorld;
-
-		template <typename T>
-		requires std::derived_from<T, Nodes::Node>
-		T& createNode(EngineCore::EngineDevice& device)
-		{
-			nodes.push_back(std::unique_ptr<T>(new T()));
-			nodes.back()->device = &device;
-			nodes.back()->setSectorCoord(coordinates);
-			return *static_cast<T*>(nodes.back().get());
-		}
 
 	};
 

@@ -17,7 +17,7 @@ namespace EngineCore
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData) 
 	{
-		std::cerr << "\nDEBUG: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "\nVulkan: " << pCallbackData->pMessage << std::endl;
 		return VK_FALSE;
 	}
 
@@ -180,6 +180,12 @@ namespace EngineCore
 		VkPhysicalDeviceVulkan12Features deviceFeatures12 = {};
 		deviceFeatures12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 		deviceFeatures12.uniformBufferStandardLayout = VK_TRUE;
+		// enable descriptor indexing features
+		deviceFeatures12.descriptorIndexing = VK_TRUE;
+		deviceFeatures12.shaderSampledImageArrayNonUniformIndexing = VK_TRUE; // allow different indices within the same draw call (with nonuniformEXT)
+		deviceFeatures12.descriptorBindingPartiallyBound = VK_TRUE; // allow large, sparse arrays, with fixed size but empty slots enabled
+		deviceFeatures12.descriptorBindingVariableDescriptorCount = VK_TRUE; // allows last descriptor in set to have unbound size
+		deviceFeatures12.runtimeDescriptorArray = VK_TRUE; // allows declaring unbounded descriptor arrays in GLSL shader
 
 		// vulkan v1.3 features (includes dynamic rendering)
 		VkPhysicalDeviceVulkan13Features deviceFeatures13 = {};

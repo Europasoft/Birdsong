@@ -1,4 +1,6 @@
 #include "core/gpu/Material.h"
+#include "core/gpu/descriptors/DescriptorSetLayout.h"
+#include "core/gpu/descriptors/DescriptorPool.h"
 #include "core/engine/MeshData.h"
 
 #include <fstream>
@@ -18,8 +20,27 @@ namespace EngineCore
 		{ 
 			throw std::runtime_error("material error, material must have at least one color format"); 
 		}
+		// materials create their own descriptor set 
+		// adding elements to it should be done externally, then call Material::finalize()
+		descriptorSet = std::make_shared<EngineCore::DescriptorSet>(device);
+	}
+
+	void Material::finalize()
+	{
+		assert((not finalized) && "Material::finalize called twice");
+		// automatically finalize the material-specific descriptor set
+		descriptorSet->finalize();
+		// automatically add the material-specific descriptor set's layout
+		materialCreateInfo.descriptorSetLayouts.push_back(descriptorSet->getLayout());
 		createPipelineLayout();
 		createPipeline();
+		finalized = true;
+	}
+
+	VkPipelineLayout Material::getPipelineLayout() const
+	{
+		assert(finalized && "material was never finalized, Material::finalize must be called");
+		return pipelineLayout;
 	}
 
 	Material::~Material() 
@@ -29,10 +50,11 @@ namespace EngineCore
 		vkDestroyShaderModule(device.device(), vertexShaderModule, nullptr);
 		vkDestroyShaderModule(device.device(), fragmentShaderModule, nullptr);
 		vkDestroyPipeline(device.device(), pipeline, nullptr);
-	};
+	}
 
 	void Material::bindToCommandBuffer(VkCommandBuffer commandBuffer) const
 	{
+		assert(finalized && "material was never finalized, Material::finalize must be called");
 		/* a pipeline binding affects subsequent commands until a different pipeline is bound */
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
 	}

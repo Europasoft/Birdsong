@@ -26,7 +26,11 @@
 namespace EngineCore
 {
 	EngineApplication::EngineApplication() {}
-	EngineApplication::~EngineApplication() {}
+
+	EngineApplication::~EngineApplication()
+	{
+		gameLoader.reset(); // makes sure the game is unloaded before engine state teardown
+	}
 
 	void EngineApplication::startExecution()
 	{
@@ -39,7 +43,7 @@ namespace EngineCore
 		gameLoader->loadDll("Game");
 
 		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
-		world->loadDemoScene();
+
 		setupDrawers();
 		setupDefaultInputs();
 

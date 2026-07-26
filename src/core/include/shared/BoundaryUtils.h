@@ -73,4 +73,21 @@ namespace BoundaryUtils
 		unpackValue(t.sector.z, src);
 	}
 
+	static size_t getTransformDataSize(const Transform& t)
+	{
+		size_t size = 0;
+		size += sizeof(t.translation.x);
+		size += sizeof(t.translation.y);
+		size += sizeof(t.translation.z);
+		size += sizeof(t.rotation.x);
+		size += sizeof(t.rotation.y);
+		size += sizeof(t.rotation.z);
+		size += sizeof(t.scale.x);
+		size += sizeof(t.scale.y);
+		size += sizeof(t.scale.z);
+		size += sizeof(t.sector.x);
+		size += sizeof(t.sector.y);
+		size += sizeof(t.sector.z);
+		return size;
+	}
 }
