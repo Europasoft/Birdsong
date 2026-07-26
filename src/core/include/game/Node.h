@@ -35,6 +35,7 @@ namespace EngineInterface
 		void setTransform(const Transform& newTransform);
 		void setTranslation(const Vec newTranslation);
 		void setPosition(const Vec newTranslation) { setTranslation(newTranslation); }
+		const Transform& getTransform() const;
 
 	private:
 		// interface functions called by the engine executable, running in the DLLs memory space

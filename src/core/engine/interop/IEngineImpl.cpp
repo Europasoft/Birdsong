@@ -128,7 +128,7 @@ namespace EngineInteropUtil
 		// get the sector this node belongs to, or create a new one
 		const auto sectorCoord = getNodeTransform(iNode).sector;
 		Sector* sector = scene.getSector(sectorCoord, mode);
-		assert(sector && sector->nodes().contains(iNode) && "sector of node not found");
+		assert(sector && "failed to create sector");
 		return sector;
 	}
 }

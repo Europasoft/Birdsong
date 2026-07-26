@@ -51,4 +51,9 @@ namespace EngineInterface
 		transform.translation = newTranslation;
 		teleported = true;
 	}
+
+	const Transform& Node::getTransform() const
+	{
+		return transform;
+	}
 }
