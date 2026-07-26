@@ -31,9 +31,9 @@ namespace EngineCore
 	{
 	public:
 #ifdef NDEBUG
-		const bool enableValidationLayers = false;
+		static constexpr bool enableValidationLayers = false;
 #else
-		const bool enableValidationLayers = true;
+		static constexpr bool enableValidationLayers = true;
 #endif
 		EngineDevice(EngineWindow& window);
 		~EngineDevice();

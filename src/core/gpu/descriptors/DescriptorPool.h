@@ -41,6 +41,7 @@ namespace EngineCore
 		void freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
 
 		void resetPool();
+		VkDescriptorPool getPool() const { return descriptorPool; }
 
 	private:
 		EngineDevice& device;
@@ -55,7 +56,7 @@ namespace EngineCore
 		DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool);
 
 		DescriptorWriter& writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo);
-		DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo, uint32_t arrSize = 1);
+		DescriptorWriter& writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo, uint32_t arrSize = 1, uint32_t dstArrayElement = 0);
 
 		bool build(VkDescriptorSet& set);
 		void overwrite(VkDescriptorSet& set);

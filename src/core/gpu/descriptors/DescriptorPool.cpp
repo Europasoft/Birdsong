@@ -116,7 +116,7 @@ namespace EngineCore
 		return *this;
 	}
 
-	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo, uint32_t arrSize)
+	DescriptorWriter& DescriptorWriter::writeImage(uint32_t binding, VkDescriptorImageInfo* imageInfo, uint32_t arrSize, uint32_t dstArrayElement)
 	{
 		assert(setLayout.bindings.count(binding) == 1 && "failed to write descriptor binding, not present in layout");
 
@@ -128,6 +128,7 @@ namespace EngineCore
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		write.descriptorType = bindingDescription.descriptorType;
 		write.dstBinding = binding;
+		write.dstArrayElement = dstArrayElement;
 		write.pImageInfo = imageInfo;
 		write.descriptorCount = arrSize; // if binding multiple, imageInfo must be ptr to array
 

@@ -96,7 +96,8 @@ namespace EngineCore
 
 	// *************** Uniform Buffer wrapper *********************
 
-	UBO::UBO(const UBO_Layout& sLayout, uint32_t numBuffers, EngineDevice& device) : structLayout{ sLayout }
+	UBO::UBO(const UBO_Layout& sLayout, uint32_t numBuffers, EngineDevice& device) 
+		: structLayout{ sLayout }
 	{
 		createBuffers(device, numBuffers);
 	}
@@ -114,7 +115,7 @@ namespace EngineCore
 
 	void UBO::createBuffers(EngineDevice& device, uint32_t numBuffers)
 	{
-		auto minOffsetAlignment = device.properties.limits.minUniformBufferOffsetAlignment;
+		const auto minOffsetAlignment = device.properties.limits.minUniformBufferOffsetAlignment;
 		for (uint32_t i = 0; i < numBuffers; i++) 
 		{
 			buffers.push_back(std::make_unique<GBuffer>(device, structLayout.getBufferSize(), 1,
@@ -198,7 +199,7 @@ namespace EngineCore
 		
 		pool = poolBuilder.build();
 		
-		DescriptorSetLayout::Builder layoutBuilder(device);
+		DSetLayoutBuilder layoutBuilder(device);
 		// add uniform buffer bindings to layout
 		for (uint32_t i = 0; i < numUBOs; i++) /* UBOs start at binding index 0 */
 		{ layoutBuilder.addBinding(i, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS); }
