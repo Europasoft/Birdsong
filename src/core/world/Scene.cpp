@@ -18,6 +18,7 @@
 #include "core/gpu/Swapchain.h"
 #include "core/types/glm_conversions.h"
 #include "core/include/shared/Transform.h"
+#include "core/nodes/MeshCache.h"
 
 
 #include "deps/box3d-cpp/include/b3cpp.h"
@@ -41,6 +42,7 @@ namespace WorldSystem
 		initGlobalDescriptorSet();
 		sectors = std::make_unique<WorldSystem::SectorContainer>();
 		localSectorCoord = std::make_unique<SectorCoord>();
+		meshCache = std::make_unique<EngineCore::MeshCache>();
 	}
 
 	EngineCore::DescriptorSet& Scene::getSceneGlobalDescriptorSet() const

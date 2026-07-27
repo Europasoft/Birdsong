@@ -85,7 +85,7 @@ namespace EngineCore
 	void Camera::moveInPlaneXY(const Vector2D<double>& lookInput, const float& moveFwd, const float& moveRight, 
 								const float& moveUp, const bool& extraSpeed, const float& deltaTime)
 	{
-		float lookSpeed = 0.004f;
+		float lookSpeed = 0.002f;
 		float moveSpeed = 30.f;
 		//if (extraSpeed) { moveSpeed *= 80.f; }
 		if (extraSpeed) { moveSpeed *= 100.f; }

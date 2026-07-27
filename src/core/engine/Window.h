@@ -31,7 +31,7 @@ namespace EngineCore
 
 		void createWindowSurface(VkInstance inst, VkSurfaceKHR* surface);
 
-		void pollEvents() const;
+		void pollEvents(double delta) const;
 
 		// middleman function that forwards glfw events to the input system
 		static void keypressCallbackHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -56,6 +56,8 @@ namespace EngineCore
 		GLFWwindow* windowPtr;
 		// window name
 		std::string wndName;
+
+		void updateFpsInTitle(double delta) const;
 	};
 
 }

@@ -18,6 +18,7 @@ namespace EngineCore
 	class DescriptorSet;
 	class BindlessTextureManager;
 	class InstanceBuffer;
+	class MeshCache;
 }
 
 namespace WorldSystem
@@ -53,6 +54,8 @@ namespace WorldSystem
 		// currently loaded sectors
 		std::unique_ptr<WorldSystem::SectorContainer> sectors;
 		std::unique_ptr<SectorCoord> localSectorCoord;
+
+		std::unique_ptr<EngineCore::MeshCache> meshCache;
 
 	protected:
 		void initGlobalDescriptorSet();

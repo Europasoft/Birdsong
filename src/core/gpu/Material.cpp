@@ -68,7 +68,7 @@ namespace EngineCore
 	void Material::createShaderModule(const std::string& path, VkShaderModule* shaderModule)
 	{
 		// read SPIR-V shader from file
-		std::cout << "Loading shader: '" << path << "'\n";
+		//std::cout << "Loading shader: '" << path << "'\n";
 		std::ifstream file{ path, std::ios::ate | std::ios::binary };
 		if (!file.is_open()) { throw std::runtime_error("pipeline error, could not read file " + path); }
 		size_t fileSize = static_cast<size_t>(file.tellg());

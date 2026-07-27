@@ -44,9 +44,35 @@ namespace EngineCore
 		}
 	}
 
-	void EngineWindow::pollEvents() const
+	void EngineWindow::updateFpsInTitle(double delta) const
+	{
+		static float timeAccumulator = 0.0f;
+		static int frameCounter = 0;
+
+		timeAccumulator += delta;
+		frameCounter++;
+
+		// update the title every N seconds
+		if (timeAccumulator >= 0.8f && windowPtr)
+		{
+			float avgFps = static_cast<float>(frameCounter) / timeAccumulator;
+			float frameTimeMs = (timeAccumulator / static_cast<float>(frameCounter)) * 1000.0f;
+
+			std::string title = "Birdsong | FPS: " + std::to_string(static_cast<int>(avgFps)) +
+				" (" + std::to_string(frameTimeMs).substr(0, 4) + " ms)";
+
+			glfwSetWindowTitle(windowPtr, title.c_str());
+
+			// reset tracking counters
+			timeAccumulator = 0.0f;
+			frameCounter = 0;
+		}
+	}
+
+	void EngineWindow::pollEvents(double delta) const
 	{
 		glfwPollEvents();
+		updateFpsInTitle(delta);
 	}
 
 	const bool EngineWindow::getCloseWindow() const

@@ -57,7 +57,7 @@ namespace EngineCore
 	struct EngineApplication::FrameContext
 	{
 		VkCommandBuffer commandBuffer;
-		double delta;
+		double delta = 0;
 		uint32_t bufferIndex = 0;
 		WorldSystem::Scene* scene;
 		Camera* camera;
@@ -71,7 +71,7 @@ namespace EngineCore
 		{
 			window->input.resetInputValues(); // reset input values
 			window->input.updateBoundInputs(); // get new input states
-			window->pollEvents(); // process events in window queue
+			window->pollEvents(f.delta); // process events in window queue
 
 			f.scene = &world->getScene();
 			f.camera = &f.scene->getCurrentCamera();

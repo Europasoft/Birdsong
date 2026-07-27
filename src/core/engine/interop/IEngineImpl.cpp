@@ -9,6 +9,8 @@
 #include "core/nodes/EMesh.h"
 #include "core/gpu/Material.h"
 #include "core/render/Renderer.h"
+#include "core/engine/MeshData.h"
+#include "core/nodes/MeshCache.h"
 
 #include "core/include/shared/BoundaryUtils.h"
 #include "core/include/shared/Transform.h"
@@ -58,7 +60,8 @@ namespace EngineCore
 
 		// create a new mesh object and attach it to the EngineNodeData
 		eNode.mesh = std::make_unique<Mesh>(device);
-		eNode.mesh->build(path); // load mesh from file
+		std::shared_ptr<MeshBuilder> meshBuilder = world.getScene().meshCache->getMeshBuilder(path);
+		eNode.mesh->build(*meshBuilder.get()); // load mesh from file
 
 		// info for material
 		EngineCore::ShaderFilePaths shaders(makePath("Shaders/compiled/shader.vert.spv"), makePath("Shaders/compiled/pbr.frag.spv"));
