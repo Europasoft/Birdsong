@@ -14,7 +14,7 @@ namespace EngineCore
 	SkyDrawer::SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 	{
 		// TODO: hardcoded paths
-		ShaderFilePaths skyShaders(makePath("shaders/sky.vert.spv"), makePath("shaders/sky.frag.spv"));
+		ShaderFilePaths skyShaders(makePath("shaders/compiled/sky.vert.spv"), makePath("shaders/compiled/sky.frag.spv"));
 
 		// prepare sky mesh
 		enodeSky = std::make_unique<WorldSystem::EngineNodeData>(nullptr, device);

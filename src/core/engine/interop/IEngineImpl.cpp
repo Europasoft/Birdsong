@@ -61,7 +61,7 @@ namespace EngineCore
 		eNode.mesh->build(path); // load mesh from file
 
 		// info for material
-		EngineCore::ShaderFilePaths shaders(makePath("Shaders/shader.vert.spv"), makePath("Shaders/pbr.frag.spv"));
+		EngineCore::ShaderFilePaths shaders(makePath("Shaders/compiled/shader.vert.spv"), makePath("Shaders/compiled/pbr.frag.spv"));
 		EngineCore::MaterialCreateInfo matInfo(
 				shaders, world.getScene().getDescriptorSetLayouts(),
 				engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants)

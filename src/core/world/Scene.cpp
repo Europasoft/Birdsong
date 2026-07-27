@@ -177,7 +177,7 @@ namespace WorldSystem
 		matSet->finalize(); // create material-specific descriptor set
 
 		// create demo material
-		EngineCore::ShaderFilePaths shader(makePath("Shaders/shader.vert.spv"), makePath("Shaders/pbr.frag.spv"));
+		EngineCore::ShaderFilePaths shader(makePath("shaders/compiled/shader.vert.spv"), makePath("shaders/compiled/pbr.frag.spv"));
 		for (size_t i = 0; i < sector.nodes.size(); i++)
 		{
 			// TODO: materials should automatically include the layout of their own set (if present) on construct!!! ...note: in the process of solving this now!

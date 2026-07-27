@@ -28,7 +28,7 @@ namespace EngineCore
 		: device{ device }
 	{
 		// create default UI material
-		ShaderFilePaths shaderPaths(makePath("shaders/ui_test.vert.spv"), makePath("shaders/ui_test.frag.spv"));
+		ShaderFilePaths shaderPaths(makePath("shaders/compiled/ui_test.vert.spv"), makePath("shaders/compiled/ui_test.frag.spv"));
 		MaterialCreateInfo materialInfo(shaderPaths, {}, samples, formats, sizeof(ShaderPushConstants::InterfaceElementPushConstants));
 		materialInfo.shadingProperties.useVertexInput = false;
 		materialInfo.shadingProperties.enableDepth = false;
