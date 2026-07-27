@@ -1,10 +1,14 @@
 #include "core/gpu/descriptors/BindlessTextureManager.h"
 #include "core/gpu/descriptors/DescriptorSetLayout.h"
 #include "core/gpu/descriptors/DescriptorPool.h"
+#include "core/gpu/Image.h"
+#include "core/types/CommonTypes.h"
 
 #include <stdexcept>
 #include <array>
 #include <utility>
+#include <cassert>
+#include <iostream>
 
 namespace EngineCore
 {
@@ -18,10 +22,6 @@ namespace EngineCore
 
 	BindlessTextureManager::~BindlessTextureManager()
 	{
-		if (fallbackSampler) vkDestroySampler(device.device(), fallbackSampler, nullptr);
-		if (fallbackView) vkDestroyImageView(device.device(), fallbackView, nullptr);
-		if (fallbackImage) vkDestroyImage(device.device(), fallbackImage, nullptr);
-		if (fallbackMemory) vkFreeMemory(device.device(), fallbackMemory, nullptr);
 	}
 
 	void BindlessTextureManager::createDescriptorSetLayout()
@@ -94,18 +94,20 @@ namespace EngineCore
 		{
 			if (nextAvailableSlot >= MAX_BINDLESS_TEXTURES)
 			{
-				throw std::runtime_error("Exceeded maximum bindless texture capacity!");
+				throw std::runtime_error("exceeded maximum bindless texture capacity");
 			}
 			slot = nextAvailableSlot++;
 		}
 
-		VkDescriptorImageInfo imageInfo{
+		VkDescriptorImageInfo imageInfo
+		{
 			.sampler = sampler,
 			.imageView = imageView,
 			.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 		};
 
-		VkWriteDescriptorSet descriptorWrite{
+		VkWriteDescriptorSet descriptorWrite
+		{
 			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
 			.dstSet = descriptorSet,
 			.dstBinding = 0,
@@ -122,12 +124,11 @@ namespace EngineCore
 
 	void BindlessTextureManager::unregisterTexture(uint32_t slotIndex)
 	{
-		if (slotIndex == 0) return; // Do not unregister the fallback index
-
-		// Re-point slot to fallback texture to avoid accessing dangling views in GPU memory
-		VkDescriptorImageInfo imageInfo{
-			.sampler = fallbackSampler,
-			.imageView = fallbackView,
+		// re-point slot to fallback texture to avoid accessing dangling views in GPU memory
+		VkDescriptorImageInfo imageInfo
+		{
+			.sampler = fallbackImage->sampler,
+			.imageView = fallbackImage->getView(),
 			.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 		};
 
@@ -147,10 +148,67 @@ namespace EngineCore
 
 	void BindlessTextureManager::initFallbackTexture()
 	{
-		// 1. Create a 1x1 magenta/missing texture image & view (or use your Engine's Image wrapper)
-		// ... (allocate 1x1 image, transition layout, create view & sampler) ...
-		// 2. Register slot 0 as fallback
-		// registerTexture(fallbackView, fallbackSampler); // Asserts slot == 0
+		VkImageCreateInfo imageInfo{
+			.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+			.imageType = VK_IMAGE_TYPE_2D,
+			.format = VK_FORMAT_R8G8B8A8_UNORM,
+			.extent = {1, 1, 1},
+			.mipLevels = 1,
+			.arrayLayers = 1,
+			.samples = VK_SAMPLE_COUNT_1_BIT,
+			.tiling = VK_IMAGE_TILING_OPTIMAL,
+			.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+			.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
+		};
+		
+		try 
+		{
+			fallbackImage = std::make_unique<Image>(device, makePath("textures/missing.png"));
+		}
+		catch (...)
+		{
+			std::cout << "Failed to load the fallback texture - defaulting to solid color\n";
+			// create 1x1 image
+			fallbackImage = std::make_unique<Image>(device, imageInfo);
+			std::array<uint8_t, 4> rgba = { 0xFF, 0x00, 0xFF, 0xFF };
+			GBuffer stagingBuffer
+			{
+				device, rgba.size(), 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+			};
+			// map temporary buffer to host and copy to it
+			stagingBuffer.map(rgba.size());
+			memcpy(stagingBuffer.getMappedMemory(), rgba.data(), static_cast<size_t>(rgba.size()));
+			stagingBuffer.unmap();
+			// push to final image (also handles layout transitions)
+			fallbackImage->copyBufferToImage(stagingBuffer, imageInfo.extent.width, imageInfo.extent.height, 1);
+
+			// create view and sampler
+			fallbackImage->updateView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT);
+			Image::createSampler(fallbackImage->sampler, device, 1.f);
+		}
+
+		// pre-fill every slot with fallback texture
+		std::vector<VkDescriptorImageInfo> imageInfos(MAX_BINDLESS_TEXTURES, VkDescriptorImageInfo
+			{
+				.sampler = fallbackImage->sampler,
+				.imageView = fallbackImage->getView(),
+				.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+			});
+
+		VkWriteDescriptorSet writeAll
+		{
+			.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet = descriptorSet,
+			.dstBinding = 0,
+			.dstArrayElement = 0,
+			.descriptorCount = MAX_BINDLESS_TEXTURES,
+			.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+			.pImageInfo = imageInfos.data()
+		};
+
+		vkUpdateDescriptorSets(device.device(), 1, &writeAll, 0, nullptr);
 	}
 
 }

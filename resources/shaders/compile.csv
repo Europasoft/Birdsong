@@ -1,1 +1,10 @@
-shader, sky, fx_test, fullscreen, pbr, red, shader2test, shaderDifferentColor, ui_test, debug_primitive
+shader.vert,
+pbr.frag,
+sky.vert,
+sky.frag,
+debug_primitive.vert,
+debug_primitive.frag,
+fullscreen.vert,
+fullscreen.frag,
+fx_test.vert,
+fx_test.frag

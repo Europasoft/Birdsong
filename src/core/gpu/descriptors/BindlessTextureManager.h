@@ -2,7 +2,7 @@
 
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Device.h"
-#include <vulkan/vulkan.h>
+#include "core/types/vk.h"
 
 #include <vector>
 #include <queue>
@@ -13,11 +13,12 @@ namespace EngineCore
 	class DescriptorPool;
 	class DSetLayoutBuilder;
 	class DescriptorSetLayout;
+	class Image;
 
 	class BindlessTextureManager
 	{
 	public:
-		static constexpr uint32_t MAX_BINDLESS_TEXTURES = 15000;
+		static constexpr uint32_t MAX_BINDLESS_TEXTURES = 128000;
 
 		BindlessTextureManager(EngineDevice& device);
 		~BindlessTextureManager();
@@ -47,14 +48,12 @@ namespace EngineCore
 		std::unique_ptr<DescriptorSetLayout> layout;
 		VkDescriptorSet descriptorSet{ VK_NULL_HANDLE };
 
-		uint32_t nextAvailableSlot{ 0 };
+		uint32_t nextAvailableSlot{ 1 }; // reserve slot 0 as the permanent fallback index
 		std::queue<uint32_t> freeSlots;
 
 		// default dummy texture for index 0 (fallback for unbound/loading textures)
-		VkImage fallbackImage{ VK_NULL_HANDLE };
-		VkDeviceMemory fallbackMemory{ VK_NULL_HANDLE };
-		VkImageView fallbackView{ VK_NULL_HANDLE };
-		VkSampler fallbackSampler{ VK_NULL_HANDLE };
+		std::unique_ptr<Image> fallbackImage;
+
 	};
 
 }

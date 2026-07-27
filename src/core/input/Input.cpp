@@ -76,10 +76,11 @@ namespace EngineCore
 			mouse->isFirstMouseMove = false;
 			return;
 		}
-		// every other frame
-		Vector2D oldPos = mouse->mousePosition;
-		mouse->mousePosition = { x, y };
-		mouse->mouseDelta = mouse->mousePosition - oldPos;
+
+		Vector2D currentPos = { x, y };
+		mouse->mouseDelta.x += (currentPos.x - mouse->mousePosition.x);
+		mouse->mouseDelta.y += (currentPos.y - mouse->mousePosition.y);
+		mouse->mousePosition = currentPos;
 	}
 
 	uint32_t InputSystem::addBinding(KeyBinding binding, const std::string& newAxisName)

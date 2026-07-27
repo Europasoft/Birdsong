@@ -1,5 +1,5 @@
-#include "core/gpu/Device.h"
 #include "core/world/Scene.h"
+#include "core/gpu/Device.h"
 #include "core/world/Sector.h"
 #include "core/world/SectorContainer.h"
 #include "core/engine/Camera.h"
@@ -9,10 +9,17 @@
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/descriptors/DescriptorSetLayout.h"
 #include "core/gpu/descriptors/DescriptorPool.h"
+#include "core/gpu/descriptors/BindlessTextureManager.h"
+#include "core/gpu/descriptors/InstanceBuffer.h"
+#include "core/nodes/EngineNodeData.h"
+#include "core/world/NodeContainer.h"
 #include "core/engine/Engine.h"
 #include "core/render/Renderer.h"
 #include "core/gpu/Swapchain.h"
 #include "core/types/glm_conversions.h"
+#include "core/include/shared/Transform.h"
+#include "core/nodes/MeshCache.h"
+
 
 #include "deps/box3d-cpp/include/b3cpp.h"
 
@@ -35,11 +42,12 @@ namespace WorldSystem
 		initGlobalDescriptorSet();
 		sectors = std::make_unique<WorldSystem::SectorContainer>();
 		localSectorCoord = std::make_unique<SectorCoord>();
+		meshCache = std::make_unique<EngineCore::MeshCache>();
 	}
-
+	
 	EngineCore::DescriptorSet& Scene::getSceneGlobalDescriptorSet() const
 	{
-		return *sceneGlobalDescriptorSet.get();
+		return *sceneGlobalDescriptorSet.get(); 
 	}
 
 	EngineCore::Camera& Scene::getCurrentCamera() const
@@ -58,7 +66,7 @@ namespace WorldSystem
 		using namespace Nodes;
 
 		// create a basic camera
-		currentCamera = std::make_shared<EngineCore::Camera>(85.f, 10.f, 10000 * 100.f);
+		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 10, .farDistance = 10000 * 100 });
 		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
 		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
 
@@ -77,99 +85,26 @@ namespace WorldSystem
 		sceneGlobalDescriptorSet->addImageArray(demoTextureArray);
 		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
 		sceneGlobalDescriptorSet->finalize();
+
+		// initialize texture manager and instance buffer (SSBO)
+		textureManager = std::make_unique<EngineCore::BindlessTextureManager>(device);
+		instanceBuffer = std::make_unique<EngineCore::InstanceBuffer>(device);
 	}
 
-	void Scene::setupDemoScene()
+	std::vector<VkDescriptorSetLayout> Scene::getDescriptorSetLayouts() const
 	{
-		using namespace EngineCore;
-		using namespace Nodes;
-		// create a basic camera
-		currentCamera = std::make_shared<EngineCore::Camera>(85.f, 10.f, 10000 * 100.f);
-		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
-		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
+		return {
+			sceneGlobalDescriptorSet->getLayout(),
+			textureManager->getDescriptorSetLayout()
+		};
+	}
 
-		// demo textures
-		marsTexture = std::make_unique<Image>(device, makePath("Textures/mars6k_v2.jpg"));
-		spaceTexture = std::make_unique<Image>(device, makePath("Textures/space.png"));
-
-		// scene global descriptors
-		UBO_Struct ubo1{};
-		ubo1.add(uelem::mat4); // MVP matrix
-		sceneGlobalDescriptorSet->addUBO(ubo1, device);
-		// as the demo textures will never be overwritten from the CPU, only one buffer is needed for each, so the view can simply be duplicated
-		ImageArrayDescriptor demoTextureArray{};
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, marsTexture->getView()));
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, spaceTexture->getView()));
-		sceneGlobalDescriptorSet->addImageArray(demoTextureArray);
-		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
-		sceneGlobalDescriptorSet->finalize();
-
-		/* TODO: ASAP: some of this should be handled by the game, and some in EngineNodeData class [IN PROGRESS NOW!] x)
-		// create 3D primitive(s)
-		auto& sector = *sectors[0]; // get the persistent sector
-		{
-			// TODO: hardcoded path
-			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
-			node.build("Meshes/axis_cube.obj");
-			Transform tf(Vec(5000, 0.f, 0.f), Vec(), Vec(1000.f));
-			node.setTransform(tf);
-			// TEST: add physics body for mesh
-			b3cpp::BodyDef bodyDef;
-			bodyDef.type = b3cpp::EBodyType::DynamicBody;
-			b3cpp::Body& body = node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
-			b3cpp::BoxHullShape& s = body.createShape<b3cpp::BoxHullShape>();
-			s.halfWidthX = 1000;
-			s.halfWidthY = 1000;
-			s.halfWidthZ = 1000;
-			b3cpp::ShapeDef shapeDef;
-			shapeDef.density = 5;
-			s.activate(shapeDef);
-			body.setAngularVelocity({ 0.08, 0.008, 0.01 });
-		}
-
-		for (size_t i = 0; i < 8; i++)
-		{
-			// TODO: hardcoded path
-			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
-			node.build("Meshes/teapot.obj");
-			Transform tf(Vec(1517 + (i * 200.f), (i * 200.f), 0.f), Vec(), Vec(30.f));
-			node.setTransform(tf);
-			// TEST: add physics body for mesh
-			b3cpp::BodyDef bodyDef;
-			bodyDef.type = b3cpp::EBodyType::DynamicBody;
-			auto& body = node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
-			b3cpp::BoxHullShape& s = body.createShape<b3cpp::BoxHullShape>();
-			s.halfWidthX = 200;
-			s.halfWidthY = 200;
-			s.halfWidthZ = 200;
-			b3cpp::ShapeDef shapeDef;
-			shapeDef.density = 5;
-			s.activate(shapeDef);
-			body.setAngularVelocity({ 0.02, 0.006, -0.003 });
-			body.setLinearVelocity({ 800, 0, (i * -80.f)});
-		}
-
-		// create material-specific descriptor set (the set must be initialized before using its layout)
-		EngineCore::UBO_Struct ubo{};
-		ubo.add(EngineCore::uelem::vec3); // camera position
-		ubo.add(EngineCore::uelem::vec3); // light position
-		ubo.add(EngineCore::uelem::scalar); // roughness
-		auto matSet = std::make_shared<EngineCore::DescriptorSet>(device);
-		matSet->addUBO(ubo, device);
-		matSet->finalize(); // create material-specific descriptor set
-
-		// create demo material
-		EngineCore::ShaderFilePaths shader(makePath("Shaders/shader.vert.spv"), makePath("Shaders/pbr.frag.spv"));
-		for (size_t i = 0; i < sector.nodes.size(); i++)
-		{
-			// TODO: materials should automatically include the layout of their own set (if present) on construct!!! ...note: in the process of solving this now!
-			EngineCore::MaterialCreateInfo matInfo(shader, std::vector<VkDescriptorSetLayout>{ sceneGlobalDescriptorSet->getLayout(), matSet->getLayout() },
-				engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants));
-			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
-
-			sector.nodes[i]->setMaterial(matInfo);
-			sector.nodes[i]->getMaterial()->setMaterialSpecificDescriptorSet(matSet); // TODO: better way to create material-specific sets
-		}*/
+	std::vector<VkDescriptorSet> Scene::getDescriptorSets(uint32_t frameIndex) const
+	{
+		return {
+			sceneGlobalDescriptorSet->getDescriptorSet(frameIndex),
+			textureManager->getDescriptorSet()
+		};
 	}
 
 	void Scene::updateDescriptors(uint32_t frameIndex, double deltaTime)
@@ -192,6 +127,31 @@ namespace WorldSystem
 			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, roughness, EngineCore::UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);
 		}*/
+	}
+
+	void Scene::updateInstanceData(uint32_t frameIndex)
+	{
+		for (Sector* sector : getLoadedSectors())
+		{
+			for (EngineNodeData* eNode : sector->nodes().getMeshes())
+			{
+				const Transform& t = eNode->engineTransform;
+				const Vec meshPosRelative = WorldSystem::calculateRelative(t.translation, t.sector, getLocalSectorCoordinate());
+				const auto modelMatrix = EngineCore::cglm::makeMatrixQ(t.rotation, t.rotation_w, t.scale, meshPosRelative);
+				const auto normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+				
+				instanceBuffer->addInstanceData(
+					EngineCore::InstanceData
+					{
+						.modelMatrix = modelMatrix,
+						.normalMatrix = normalMatrix,
+						.albedoTexIdx = 0,
+						.normalTexIdx = 0,
+						.roughnessTexIdx = 0
+					});
+			}
+		}
+		instanceBuffer->pushBufferToGPU(frameIndex);
 	}
 
 	void Scene::physicsTick()

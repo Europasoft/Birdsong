@@ -37,8 +37,8 @@ namespace EngineCore
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout(), uboSet->getLayout(), attachmentSet->getLayout() };
 
 		// setup material for the fullscreen shaders (no mesh)
-		ShaderFilePaths fullscreenShader(makePath("shaders/fullscreen.vert.spv"), makePath("shaders/fullscreen.frag.spv"));
-		MaterialCreateInfo fullscreenInfo(fullscreenShader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, 0);
+		ShaderFilePaths fullscreenShader(makePath("shaders/compiled/fullscreen.vert.spv"), makePath("shaders/compiled/fullscreen.frag.spv"));
+		MaterialCreateInfo fullscreenInfo(fullscreenShader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, 0, EMatSet::NO);
 		fullscreenInfo.shadingProperties.useVertexInput = false;
 		fullscreenInfo.shadingProperties.enableDepth = false;
 		fullscreenInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
@@ -51,8 +51,8 @@ namespace EngineCore
 		enode->mesh = std::make_unique<WorldSystem::Mesh>(device);
 		enode->mesh->build("meshes/teapot.obj"); // load mesh from file
 
-		ShaderFilePaths shader(makePath("shaders/fx_test.vert.spv"), makePath("shaders/fx_test.frag.spv"));
-		enode->mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, sizeof(ShaderPushConstants::MeshPushConstants)));
+		ShaderFilePaths shader(makePath("shaders/compiled/fx_test.vert.spv"), makePath("shaders/compiled/fx_test.frag.spv"));
+		enode->mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO));
 		enode->mesh->getMaterial()->finalize();
 		enode->engineTransform = Transform(Vec(-80.f, 0.f, 0.f), Vec(), Vec(5.f));
 	}
@@ -78,8 +78,7 @@ namespace EngineCore
 		bindDescriptorSets(cmdBuffer, material->getPipelineLayout(), frameIndex, imageIndex);
 		material->bindToCommandBuffer(cmdBuffer);
 		
-		ShaderPushConstants::MeshPushConstants push{};
-		
+		ShaderPushConstants::EngineMeshPushConstants push{};
 		push.transform = cglm::transformToGLMmat4(enode->engineTransform);
 		material->writePushConstants(cmdBuffer, push);
 

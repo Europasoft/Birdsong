@@ -59,13 +59,16 @@ namespace EngineCore
 		VkFormat stencilFormat = VK_FORMAT_UNDEFINED;
 	};
 
+	enum class EMatSet : uint32_t { YES, NO };
+
 	// holds all properties needed to create a material object (used to generate a pipeline config)
 	struct MaterialCreateInfo 
 	{
 		MaterialCreateInfo(const ShaderFilePaths& shadersIn, const std::vector<VkDescriptorSetLayout>& setLayoutsIn, 
-						VkSampleCountFlagBits samples, const RenderingFormats& formats, size_t pushConstSize)
+						VkSampleCountFlagBits samples, const RenderingFormats& formats, size_t pushConstSize, EMatSet createSet = EMatSet::NO)
 			: shaderPaths(shadersIn), descriptorSetLayouts(setLayoutsIn), samples{ samples }, 
-			  renderingFormats{ formats }, pushConstSize{ pushConstSize } {};
+			renderingFormats{ formats }, pushConstSize{ pushConstSize }, createDescriptorSet{ createSet }
+		{};
 		// the shading properties hold common settings like backface culling and polygon fill mode
 		MaterialShadingProperties shadingProperties{};
 		ShaderFilePaths shaderPaths; // SPIR-V shaders
@@ -73,6 +76,7 @@ namespace EngineCore
 		VkSampleCountFlagBits samples;
 		RenderingFormats renderingFormats; // for VK_KHR_dynamic_rendering
 		size_t pushConstSize;
+		EMatSet createDescriptorSet;
 	};
 
 	// a material object is mainly an abstraction around a VkPipeline
@@ -98,8 +102,7 @@ namespace EngineCore
 								sizeof(T), (void*)&data);
 		}
 
-		// TODO: remove soon, this will be obsolete, as the material should manage its own descriptor set
-		void setMaterialSpecificDescriptorSet(const std::shared_ptr<DescriptorSet>& set) { descriptorSet = set; }
+		bool hasDescriptorSet() const { return descriptorSet.get(); }
 		DescriptorSet& getDescriptorSet() { return *descriptorSet.get(); }
 
 	private:
@@ -128,7 +131,15 @@ namespace EngineCore
 	{
 		struct MeshPushConstants
 		{
-			glm::mat4 transform{1.f};
+			VkDeviceAddress instanceBufferAddress; // 8 bytes
+			uint32_t instanceID; // 4 bytes
+			uint32_t _pad; // 4 bytes, total 16 bytes
+		};
+
+		// used for meshes managed interally by the engine, not spawned by the game
+		struct EngineMeshPushConstants
+		{
+			glm::mat4 transform{ 1.f };
 			glm::mat4 normalMatrix{1.f};
 		};
 

@@ -28,6 +28,7 @@ namespace EngineCore
 		void updateView(VkFormat format, VkImageAspectFlags aspect, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D);
 		// returns a new image view using the current image, does not update the default view
 		void createView(VkImageView& view, VkFormat format, VkImageAspectFlags aspect, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D);
+		void copyBufferToImage(const GBuffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount);
 		
 		static VkImageCreateInfo makeImageCreateInfo(uint32_t width, uint32_t height);
 		static void createSampler(VkSampler& samplerHandleOut, EngineDevice& device, const float& anisotropy = 0.f);
@@ -45,7 +46,6 @@ namespace EngineCore
 		void create(VkMemoryPropertyFlags memProps, VkImageCreateInfo info);
 		void loadFromDisk(const std::string& path);
 		void transitionImageLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-		void copyBufferToImage(const GBuffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount);
 		void destroyView();
 		void destroyImage();
 

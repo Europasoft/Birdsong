@@ -9,6 +9,8 @@
 #include "core/nodes/EMesh.h"
 #include "core/gpu/Material.h"
 #include "core/render/Renderer.h"
+#include "core/engine/MeshData.h"
+#include "core/nodes/MeshCache.h"
 
 #include "core/include/shared/BoundaryUtils.h"
 #include "core/include/shared/Transform.h"
@@ -58,12 +60,13 @@ namespace EngineCore
 
 		// create a new mesh object and attach it to the EngineNodeData
 		eNode.mesh = std::make_unique<Mesh>(device);
-		eNode.mesh->build(path); // load mesh from file
+		std::shared_ptr<MeshBuilder> meshBuilder = world.getScene().meshCache->getMeshBuilder(path);
+		eNode.mesh->build(*meshBuilder.get()); // load mesh from file
 
 		// info for material
-		EngineCore::ShaderFilePaths shaders(makePath("Shaders/shader.vert.spv"), makePath("Shaders/pbr.frag.spv"));
+		EngineCore::ShaderFilePaths shaders(makePath("Shaders/compiled/shader.vert.spv"), makePath("Shaders/compiled/pbr.frag.spv"));
 		EngineCore::MaterialCreateInfo matInfo(
-				shaders, std::vector<VkDescriptorSetLayout>{ world.getScene().getSceneGlobalDescriptorSet().getLayout() },
+				shaders, world.getScene().getDescriptorSetLayouts(),
 				engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants)
 			);
 			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
@@ -72,11 +75,11 @@ namespace EngineCore
 		auto material = std::make_shared<Material>(matInfo, device);
 
 		// add elements to the material's descriptor set
-		EngineCore::UBO_Struct ubo{};
-		ubo.add(EngineCore::uelem::vec3); // camera position (doesn't make sense here anymore, supposed to be rendering with camera at center, from shader's perspective)
-		ubo.add(EngineCore::uelem::vec3); // light position
-		ubo.add(EngineCore::uelem::scalar); // roughness
-		material->getDescriptorSet().addUBO(ubo, device);
+		//EngineCore::UBO_Struct ubo{};
+		//ubo.add(EngineCore::uelem::vec3); // camera position (doesn't make sense here anymore, supposed to be rendering with camera at center, from shader's perspective)
+		//ubo.add(EngineCore::uelem::vec3); // light position
+		//ubo.add(EngineCore::uelem::scalar); // roughness
+		//material->getDescriptorSet().addUBO(ubo, device);
 
 		// finalize material (also finalizes the descriptor set)
 		material->finalize();

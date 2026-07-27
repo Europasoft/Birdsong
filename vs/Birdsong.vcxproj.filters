@@ -265,6 +265,12 @@
     <ClCompile Include="..\src\core\gpu\descriptors\BindlessTextureManager.cpp">
       <Filter>core\gpu\descriptors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\gpu\descriptors\InstanceBuffer.cpp">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\nodes\MeshCache.cpp">
+      <Filter>core\nodes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -554,6 +560,12 @@
     </ClInclude>
     <ClInclude Include="..\src\core\gpu\descriptors\BindlessTextureManager.h">
       <Filter>core\gpu\descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\descriptors\InstanceBuffer.h">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\nodes\MeshCache.h">
+      <Filter>core\nodes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

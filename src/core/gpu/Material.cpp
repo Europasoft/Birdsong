@@ -20,18 +20,24 @@ namespace EngineCore
 		{ 
 			throw std::runtime_error("material error, material must have at least one color format"); 
 		}
-		// materials create their own descriptor set 
-		// adding elements to it should be done externally, then call Material::finalize()
-		descriptorSet = std::make_shared<EngineCore::DescriptorSet>(device);
+		if (matInfo.createDescriptorSet == EMatSet::YES)
+		{
+			// materials create their own descriptor set 
+			// adding elements to it should be done externally, then call Material::finalize()
+			descriptorSet = std::make_shared<EngineCore::DescriptorSet>(device);
+		}
 	}
 
 	void Material::finalize()
 	{
 		assert((not finalized) && "Material::finalize called twice");
-		// automatically finalize the material-specific descriptor set
-		descriptorSet->finalize();
-		// automatically add the material-specific descriptor set's layout
-		materialCreateInfo.descriptorSetLayouts.push_back(descriptorSet->getLayout());
+		if (descriptorSet)
+		{
+			// automatically finalize the material-specific descriptor set
+			descriptorSet->finalize();
+			// automatically add the material-specific descriptor set's layout
+			materialCreateInfo.descriptorSetLayouts.push_back(descriptorSet->getLayout());
+		}
 		createPipelineLayout();
 		createPipeline();
 		finalized = true;
@@ -62,6 +68,7 @@ namespace EngineCore
 	void Material::createShaderModule(const std::string& path, VkShaderModule* shaderModule)
 	{
 		// read SPIR-V shader from file
+		//std::cout << "Loading shader: '" << path << "'\n";
 		std::ifstream file{ path, std::ios::ate | std::ios::binary };
 		if (!file.is_open()) { throw std::runtime_error("pipeline error, could not read file " + path); }
 		size_t fileSize = static_cast<size_t>(file.tellg());

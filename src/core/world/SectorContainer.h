@@ -50,7 +50,6 @@ namespace WorldSystem
 
 		std::vector<Sector*> getLoadedSectors() const
 		{
-			assert((not sectors.empty()) && "no loaded sectors!");
 			if (sectors.empty()) return {};
 			auto raw_ptrs_view = sectors
 				| std::views::values

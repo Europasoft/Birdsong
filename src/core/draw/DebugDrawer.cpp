@@ -23,7 +23,7 @@ namespace EngineCore
 		enodeBox->mesh->build(builder);
 
 		// setup debug primitive material
-		auto shader = ShaderFilePaths(makePath("shaders/debug_primitive.vert.spv"), makePath("shaders/debug_primitive.frag.spv"));
+		auto shader = ShaderFilePaths(makePath("shaders/compiled/debug_primitive.vert.spv"), makePath("shaders/compiled/debug_primitive.frag.spv"));
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };
 		auto matInfo = MaterialCreateInfo(shader, layouts, samples, formats, sizeof(ShaderPushConstants::DebugPrimitivePushConstants));
 		//matInfo.shadingProperties.enableDepth = false;
@@ -51,8 +51,8 @@ namespace EngineCore
 
 	void DebugDrawer::render(VkCommandBuffer cmdBuffer, Renderer& renderer)
 	{
+		
 		// called after the base renderpass has been initiated'
-
 		auto material = enodeBox->mesh->getMaterial();
 		material->bindToCommandBuffer(cmdBuffer);
 		enodeBox->mesh->bind(cmdBuffer);

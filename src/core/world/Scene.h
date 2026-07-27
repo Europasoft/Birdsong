@@ -2,6 +2,8 @@
 #include "core/types/CommonTypes.h"
 #include "core/world/Sector.h"
 
+#include "core/types/vk.h"
+
 #include <stdint.h>
 #include <memory>
 #include <vector>
@@ -14,6 +16,9 @@ namespace EngineCore
 	class Image;
 	class Camera;
 	class DescriptorSet;
+	class BindlessTextureManager;
+	class InstanceBuffer;
+	class MeshCache;
 }
 
 namespace WorldSystem
@@ -29,14 +34,20 @@ namespace WorldSystem
 		Scene(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine);
 		~Scene();
 
-		void setupDemoScene();
-
 		void updateDescriptors(uint32_t frameIndex, double deltaTime);
+		void updateInstanceData(uint32_t frameIndex);
 
 		void physicsTick();
 
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
+
+		EngineCore::InstanceBuffer& getInstanceBuffer() const { return *instanceBuffer.get(); }
+
+		// returns layouts for all global descriptor sets
+		std::vector<VkDescriptorSetLayout> getDescriptorSetLayouts() const;
+		// returns set handles for all global descriptor sets
+		std::vector<VkDescriptorSet> getDescriptorSets(uint32_t frameIndex) const;
 
 		Sector* getSector(const SectorCoord& coord, const ESectorLookup& mode) const;
 
@@ -44,15 +55,18 @@ namespace WorldSystem
 		std::unique_ptr<WorldSystem::SectorContainer> sectors;
 		std::unique_ptr<SectorCoord> localSectorCoord;
 
+		std::unique_ptr<EngineCore::MeshCache> meshCache;
+
 	protected:
 		void initGlobalDescriptorSet();
 
 		std::unique_ptr<EngineCore::DescriptorSet> sceneGlobalDescriptorSet;
+		std::unique_ptr<EngineCore::BindlessTextureManager> textureManager;
+		std::unique_ptr<EngineCore::InstanceBuffer> instanceBuffer;
 
 		std::shared_ptr<EngineCore::Camera> currentCamera;
 
 		/* temporary demo content */
-		
 		std::unique_ptr<EngineCore::Image> spaceTexture;
 		std::unique_ptr<EngineCore::Image> marsTexture;
 
@@ -68,10 +82,9 @@ namespace WorldSystem
 		Vec getLocalSectorOriginAbsolute() const;
 		uint32_t getSectorSize() const;
 		std::vector<Sector*> getLoadedSectors() const;
-		//Sector& getPersistentSector() const { return *sectors[0].get(); } TODO: ASAP
+		
 	private:
 		bool updateSectorCoord(Vec& pos);
-		//Sector& loadSector(const SectorCoord& sectorPosition); TODO: ASAP
 		void forgetSector(const SectorCoord& coord);
 
 	};

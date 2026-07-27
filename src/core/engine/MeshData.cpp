@@ -4,7 +4,7 @@
 #include "thirdparty/tiny_obj_loader.h"
 
 #include <stdexcept>
-
+#include <iostream>
 namespace EngineCore
 {
 	std::vector<VkVertexInputBindingDescription> Vertex::getBindingDescriptions()
@@ -67,6 +67,7 @@ namespace EngineCore
 				vertices.push_back(vert); // add vertex
 			}
 		}
+		std::cout << "mesh at " << path << " loaded with " << vertices.size() << " vertices\n";
 	}
 
 	void MeshBuilder::makeCubeMesh()

@@ -29,13 +29,11 @@ namespace EngineCore
 		MeshDrawer(const MeshDrawer&) = delete;
 		MeshDrawer& operator=(const MeshDrawer&) = delete;
 
-		void renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
-						double deltaTimeSeconds, double time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet,
-						const glm::mat4& viewMatrix); //FakeScaleTest082 (used to take a transform param here)
+		void renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world, uint32_t frameIndex);
 
 	private:
 		struct DrawMeshContext;
-		void renderOne(const DrawMeshContext& ctx);
+		void renderOne(DrawMeshContext& ctx);
 
 		static glm::mat4 orthographicMatrix(const float& n, const float& f)
 		{
