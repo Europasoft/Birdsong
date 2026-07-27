@@ -2,7 +2,7 @@
 
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/Device.h"
-#include <vulkan/vulkan.h>
+#include "core/types/vk.h"
 
 #include <vector>
 #include <queue>
@@ -17,7 +17,7 @@ namespace EngineCore
 	class BindlessTextureManager
 	{
 	public:
-		static constexpr uint32_t MAX_BINDLESS_TEXTURES = 15000;
+		static constexpr uint32_t MAX_BINDLESS_TEXTURES = 128000;
 
 		BindlessTextureManager(EngineDevice& device);
 		~BindlessTextureManager();

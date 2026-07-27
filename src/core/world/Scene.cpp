@@ -1,5 +1,5 @@
-#include "core/gpu/Device.h"
 #include "core/world/Scene.h"
+#include "core/gpu/Device.h"
 #include "core/world/Sector.h"
 #include "core/world/SectorContainer.h"
 #include "core/engine/Camera.h"
@@ -9,10 +9,16 @@
 #include "core/gpu/Descriptors.h"
 #include "core/gpu/descriptors/DescriptorSetLayout.h"
 #include "core/gpu/descriptors/DescriptorPool.h"
+#include "core/gpu/descriptors/BindlessTextureManager.h"
+#include "core/gpu/descriptors/InstanceBuffer.h"
+#include "core/nodes/EngineNodeData.h"
+#include "core/world/NodeContainer.h"
 #include "core/engine/Engine.h"
 #include "core/render/Renderer.h"
 #include "core/gpu/Swapchain.h"
 #include "core/types/glm_conversions.h"
+#include "core/include/shared/Transform.h"
+
 
 #include "deps/box3d-cpp/include/b3cpp.h"
 
@@ -77,6 +83,18 @@ namespace WorldSystem
 		sceneGlobalDescriptorSet->addImageArray(demoTextureArray);
 		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
 		sceneGlobalDescriptorSet->finalize();
+
+		// initialize texture manager and instance buffer (SSBO)
+		textureManager = std::make_unique<EngineCore::BindlessTextureManager>(device);
+		instanceBuffer = std::make_unique<EngineCore::InstanceBuffer>(device);
+	}
+
+	std::vector<VkDescriptorSetLayout> Scene::getDescriptorSetLayouts() const
+	{
+		return {
+			sceneGlobalDescriptorSet->getLayout(),
+			//textureManager->getDescriptorSetLayout() TODO: ASAP: finish implementing global texture array
+		};
 	}
 
 	void Scene::setupDemoScene()
@@ -168,7 +186,7 @@ namespace WorldSystem
 			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 
 			sector.nodes[i]->setMaterial(matInfo);
-			sector.nodes[i]->getMaterial()->setMaterialSpecificDescriptorSet(matSet); // TODO: better way to create material-specific sets
+			sector.nodes[i]->getMaterial()->setMaterialSpecificDescriptorSet(matSet); // old way
 		}*/
 	}
 
@@ -192,6 +210,31 @@ namespace WorldSystem
 			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
 			meshDset.writeUBOMember(0, roughness, EngineCore::UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);
 		}*/
+	}
+
+	void Scene::updateInstanceData(uint32_t frameIndex)
+	{
+		for (Sector* sector : getLoadedSectors())
+		{
+			for (EngineNodeData* eNode : sector->nodes().getMeshes())
+			{
+				const Transform& t = eNode->engineTransform;
+				const Vec meshPosRelative = WorldSystem::calculateRelative(t.translation, t.sector, getLocalSectorCoordinate());
+				const auto modelMatrix = EngineCore::cglm::makeMatrixQ(t.rotation, t.rotation_w, t.scale, meshPosRelative);
+				const auto normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+				
+				instanceBuffer->addInstanceData(
+					EngineCore::InstanceData
+					{
+						.modelMatrix = modelMatrix,
+						.normalMatrix = normalMatrix,
+						.albedoTexIdx = 0,
+						.normalTexIdx = 0,
+						.roughnessTexIdx = 0
+					});
+			}
+		}
+		instanceBuffer->pushBufferToGPU(frameIndex);
 	}
 
 	void Scene::physicsTick()

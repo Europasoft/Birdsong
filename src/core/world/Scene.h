@@ -2,6 +2,8 @@
 #include "core/types/CommonTypes.h"
 #include "core/world/Sector.h"
 
+#include "core/types/vk.h"
+
 #include <stdint.h>
 #include <memory>
 #include <vector>
@@ -14,6 +16,8 @@ namespace EngineCore
 	class Image;
 	class Camera;
 	class DescriptorSet;
+	class BindlessTextureManager;
+	class InstanceBuffer;
 }
 
 namespace WorldSystem
@@ -32,11 +36,17 @@ namespace WorldSystem
 		void setupDemoScene();
 
 		void updateDescriptors(uint32_t frameIndex, double deltaTime);
+		void updateInstanceData(uint32_t frameIndex);
 
 		void physicsTick();
 
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
+
+		EngineCore::InstanceBuffer& getInstanceBuffer() const { return *instanceBuffer.get(); }
+
+		// returns layouts for all global descriptor sets
+		std::vector<VkDescriptorSetLayout> getDescriptorSetLayouts() const;
 
 		Sector* getSector(const SectorCoord& coord, const ESectorLookup& mode) const;
 
@@ -48,6 +58,8 @@ namespace WorldSystem
 		void initGlobalDescriptorSet();
 
 		std::unique_ptr<EngineCore::DescriptorSet> sceneGlobalDescriptorSet;
+		std::unique_ptr<EngineCore::BindlessTextureManager> textureManager;
+		std::unique_ptr<EngineCore::InstanceBuffer> instanceBuffer;
 
 		std::shared_ptr<EngineCore::Camera> currentCamera;
 

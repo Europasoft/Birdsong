@@ -186,6 +186,8 @@ namespace EngineCore
 		deviceFeatures12.descriptorBindingPartiallyBound = VK_TRUE; // allow large, sparse arrays, with fixed size but empty slots enabled
 		deviceFeatures12.descriptorBindingVariableDescriptorCount = VK_TRUE; // allows last descriptor in set to have unbound size
 		deviceFeatures12.runtimeDescriptorArray = VK_TRUE; // allows declaring unbounded descriptor arrays in GLSL shader
+		deviceFeatures12.bufferDeviceAddress = VK_TRUE; // allows access to buffers by pointer in shaders
+		deviceFeatures12.descriptorBindingSampledImageUpdateAfterBind = VK_TRUE;
 
 		// vulkan v1.3 features (includes dynamic rendering)
 		VkPhysicalDeviceVulkan13Features deviceFeatures13 = {};
@@ -486,6 +488,14 @@ namespace EngineCore
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
 		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+		// required if the buffer uses the buffer device address feature
+		VkMemoryAllocateFlagsInfo allocFlagsInfo{};
+		allocFlagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+		allocFlagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT;
+		if (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT)
+		{
+			allocInfo.pNext = &allocFlagsInfo; 
+		}
 
 		if (vkAllocateMemory(device_, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) 
 		{ throw std::runtime_error("failed to allocate VkBuffer memory"); }

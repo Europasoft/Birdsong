@@ -1,4 +1,7 @@
 #version 450
+#extension GL_EXT_buffer_reference : require
+#extension GL_EXT_scalar_block_layout : require
+#extension GL_EXT_nonuniform_qualifier : enable
 #extension GL_EXT_scalar_block_layout: require
 // inputs from vertex shader
 layout(location = 0) in vec3 fragColor;
@@ -8,21 +11,36 @@ layout(location = 3) in vec2 fragUV;
 
 layout (location = 0) out vec4 outColor;
 
+struct InstanceData 
+{
+    mat4 modelMatrix;
+    mat4 normalMatrix;
+    uint albedoTexIdx;
+    uint normalTexIdx;
+    uint roughnessTexIdx;
+    uint _pad;
+};
 
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
+    mat4 normalMatrix;
 } ubo1;
 
 layout(set = 0, binding = 1) uniform texture2D textures[2];
 layout(set = 0, binding = 2) uniform sampler _sampler;
 
-layout(std430, set = 1, binding = 0) uniform UBO2 
+
+layout(buffer_reference, scalar) readonly buffer InstanceBufferRef 
 {
-	vec3 cameraPosition;
-    vec3 lightPosition;
-    float roughness;
-} ubo2;
+    InstanceData instances[];
+};
+
+layout(push_constant) uniform PushConstants 
+{
+    InstanceBufferRef instanceBuffer;
+    uint instanceID;
+} push;
 
 #define PI 3.1415926535897932384626433832795
 
@@ -66,11 +84,13 @@ vec3 BRDF(vec3 baseColor, vec3 N, vec3 V, vec3 L, vec3 H, float roughness)
 
 void main()
 {
-    vec3 lightDir = normalize(ubo2.lightPosition - fragPositionWS);
-    vec3 viewDir = normalize(ubo2.cameraPosition - fragPositionWS);
+    vec3 lightPos = vec3(10.0, 10.0, 10.0); // temporary
+    vec3 camPos = vec3(0.0, 0.0, 0.0); // temporary
+    vec3 lightDir = normalize(lightPos - fragPositionWS);
+    vec3 viewDir = normalize(camPos - fragPositionWS);
     vec3 halfwayVec = normalize(lightDir + viewDir);
 
-    float effectiveRoughness = ubo2.roughness;
+    float effectiveRoughness = 0.5; // temporary
     float indirect = 0.001;
     //vec4 baseColor = texture(sampler2D(textures[0], _sampler), fragUV);
     float colorGrayscale = 1.0;

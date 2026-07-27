@@ -63,7 +63,7 @@ namespace EngineCore
 		// info for material
 		EngineCore::ShaderFilePaths shaders(makePath("Shaders/shader.vert.spv"), makePath("Shaders/pbr.frag.spv"));
 		EngineCore::MaterialCreateInfo matInfo(
-				shaders, std::vector<VkDescriptorSetLayout>{ world.getScene().getSceneGlobalDescriptorSet().getLayout() },
+				shaders, world.getScene().getDescriptorSetLayouts(),
 				engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants)
 			);
 			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
@@ -72,11 +72,11 @@ namespace EngineCore
 		auto material = std::make_shared<Material>(matInfo, device);
 
 		// add elements to the material's descriptor set
-		EngineCore::UBO_Struct ubo{};
-		ubo.add(EngineCore::uelem::vec3); // camera position (doesn't make sense here anymore, supposed to be rendering with camera at center, from shader's perspective)
-		ubo.add(EngineCore::uelem::vec3); // light position
-		ubo.add(EngineCore::uelem::scalar); // roughness
-		material->getDescriptorSet().addUBO(ubo, device);
+		//EngineCore::UBO_Struct ubo{};
+		//ubo.add(EngineCore::uelem::vec3); // camera position (doesn't make sense here anymore, supposed to be rendering with camera at center, from shader's perspective)
+		//ubo.add(EngineCore::uelem::vec3); // light position
+		//ubo.add(EngineCore::uelem::scalar); // roughness
+		//material->getDescriptorSet().addUBO(ubo, device);
 
 		// finalize material (also finalizes the descriptor set)
 		material->finalize();

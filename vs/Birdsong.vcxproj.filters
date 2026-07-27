@@ -265,6 +265,9 @@
     <ClCompile Include="..\src\core\gpu\descriptors\BindlessTextureManager.cpp">
       <Filter>core\gpu\descriptors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\gpu\descriptors\InstanceBuffer.cpp">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -553,6 +556,9 @@
       <Filter>core\gpu\descriptors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\gpu\descriptors\BindlessTextureManager.h">
+      <Filter>core\gpu\descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\gpu\descriptors\InstanceBuffer.h">
       <Filter>core\gpu\descriptors</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,4 +1,7 @@
 #version 450
+#extension GL_EXT_buffer_reference : require
+#extension GL_EXT_scalar_block_layout : require
+#extension GL_EXT_nonuniform_qualifier : enable
 #extension GL_EXT_scalar_block_layout: require
 // vertex inputs
 layout(location = 0) in vec4 position;
@@ -27,10 +30,25 @@ layout(std430, set = 0, binding = 0) uniform UBO1
 layout(set = 0, binding = 1) uniform texture2D textures[2];
 layout(set = 0, binding = 2) uniform sampler _sampler;
 
-layout(push_constant) uniform Push
+struct InstanceData 
 {
-	mat4 transform;
+    mat4 modelMatrix;
 	mat4 normalMatrix;
+    uint albedoTexIdx;
+    uint normalTexIdx;
+    uint roughnessTexIdx;
+    uint _pad;
+};
+
+layout(buffer_reference, scalar) readonly buffer InstanceBufferRef 
+{
+    InstanceData instances[];
+};
+
+layout(push_constant) uniform PushConstants 
+{
+    InstanceBufferRef instanceBuffer;
+    uint instanceID;
 } push;
 
 mat4 blenderToVulkan1()
@@ -54,9 +72,13 @@ mat4 blenderToVulkan2()
 
 void main()
 {
-  gl_Position =  ubo1.projectionViewMatrix * push.transform * position;
-  fragNormalWS = normalize(mat3(push.normalMatrix) * normal);
-  fragPositionWS = vec4( push.transform * position).xyz;
-  fragUV = uv;
-  fragColor = color;
+	InstanceData instance = push.instanceBuffer.instances[push.instanceID];
+    mat4 modelMat = instance.modelMatrix;
+	mat4 normalMat = instance.normalMatrix;
+
+	gl_Position =  ubo1.projectionViewMatrix * modelMat * position;
+	fragNormalWS = normalize(mat3(normalMat) * normal);
+	fragPositionWS = vec4( modelMat * position).xyz;
+	fragUV = uv;
+	fragColor = color;
 }

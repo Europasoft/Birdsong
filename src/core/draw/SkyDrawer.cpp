@@ -26,7 +26,7 @@ namespace EngineCore
 
 		// create unique material for sky, set to render backfaces, since it will be viewed from inside
 		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };
-		MaterialCreateInfo matInfo(skyShaders, layouts, samples, formats, sizeof(ShaderPushConstants::MeshPushConstants));
+		MaterialCreateInfo matInfo(skyShaders, layouts, samples, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO);
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		enodeSky->mesh->setMaterial(matInfo);
 		enodeSky->mesh->getMaterial()->finalize();
@@ -47,7 +47,7 @@ namespace EngineCore
 		Transform otf{}; // zero init transform, only translation is relevant
 		otf.translation = observerPosition;
 		otf.scale = { skyMeshScale, skyMeshScale, skyMeshScale };
-		ShaderPushConstants::MeshPushConstants push{};
+		ShaderPushConstants::EngineMeshPushConstants push{};
 		push.transform = cglm::transformToGLMmat4(otf);
 		skyMat->writePushConstants(commandBuffer, push);
 

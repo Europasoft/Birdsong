@@ -143,6 +143,7 @@ namespace EngineCore
 	void EngineApplication::render(const FrameContext& f)
 	{
 		f.scene->updateDescriptors(f.bufferIndex, f.delta);
+		f.scene->updateInstanceData(f.bufferIndex);
 
 		debugDrawer->removeDebugBoxes();
 		debugDrawer->addDebugBox(Vec(static_cast<float>(f.scene->getSectorSize())), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);

@@ -51,8 +51,8 @@ namespace EngineCore
 
 	void DebugDrawer::render(VkCommandBuffer cmdBuffer, Renderer& renderer)
 	{
+		
 		// called after the base renderpass has been initiated'
-
 		auto material = enodeBox->mesh->getMaterial();
 		material->bindToCommandBuffer(cmdBuffer);
 		enodeBox->mesh->bind(cmdBuffer);

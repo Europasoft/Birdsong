@@ -9,6 +9,7 @@
 #include "core/nodes/EMesh.h"
 #include "core/include/shared/Transform.h"
 #include "core/types/glm_conversions.h"
+#include "core/gpu/descriptors/InstanceBuffer.h"
 
 #include <stdexcept>
 #include <array>
@@ -32,6 +33,8 @@ namespace EngineCore
 		VkCommandBuffer commandBuffer;
 		uint32_t frameIndex;
 		WorldSystem::SectorCoord cameraSectorCoord;
+		uint32_t instanceID;
+		VkDeviceAddress instanceBufferAddress;
 	};
 
 	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
@@ -44,6 +47,7 @@ namespace EngineCore
 		
 		const float S = static_cast<float>(scene.getSectorSize());
 
+		uint32_t instanceID = 0;
 		for (Sector* sector : scene.getLoadedSectors())
 		{
 			for (EngineNodeData* nodeData : sector->nodes().getMeshes())
@@ -53,14 +57,12 @@ namespace EngineCore
 				WorldSystem::Mesh& mesh = *nodeData->mesh.get();
 				const Transform& transform = nodeData->engineTransform;
 				
-				renderOne({
-					mesh, 
-					transform, 
-					sceneGlobalDescriptorSet, 
-					commandBuffer, 
-					frameIndex, 
-					scene.getLocalSectorCoordinate()
+				renderOne(DrawMeshContext{
+						mesh, transform, sceneGlobalDescriptorSet, commandBuffer, 
+						frameIndex, scene.getLocalSectorCoordinate(), instanceID,
+						scene.getInstanceBuffer().getDeviceAddress(frameIndex)
 					});
+				instanceID++;
 			}
 		}
 
@@ -74,20 +76,25 @@ namespace EngineCore
 		std::vector<VkDescriptorSet> sets;
 		sets.push_back(ctx.sceneGlobalDescriptorSet); // scene global descriptor set
 
-		// bind material-specific descriptor set
-		auto& matSet = material.getDescriptorSet();
-		sets.push_back(matSet.getDescriptorSet(ctx.frameIndex));
+		if (material.hasDescriptorSet())
+		{
+			// bind material-specific descriptor set
+			auto& matSet = material.getDescriptorSet();
+			sets.push_back(matSet.getDescriptorSet(ctx.frameIndex));
+		}
 
 		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material.getPipelineLayout(),
 			0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 
 		ShaderPushConstants::MeshPushConstants push{};
+		push.instanceBufferAddress = ctx.instanceBufferAddress;
+		push.instanceID = ctx.instanceID;
 
 		// get the unified world space position relative to the camera's sector origin
-		const Vec meshPosRelative = WorldSystem::calculateRelative(ctx.transform.translation, ctx.transform.sector, ctx.cameraSectorCoord);
-		push.transform = cglm::makeMatrixQ(ctx.transform.rotation, ctx.transform.rotation_w, ctx.transform.scale, meshPosRelative);
-		//std::cout << "\n rot x: " << transform.rotation.x << " w: " << transform.rotation_w;
-		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
+		//const Vec meshPosRelative = WorldSystem::calculateRelative(ctx.transform.translation, ctx.transform.sector, ctx.cameraSectorCoord);
+		//push.transform = cglm::makeMatrixQ(ctx.transform.rotation, ctx.transform.rotation_w, ctx.transform.scale, meshPosRelative);
+		////std::cout << "\n rot x: " << transform.rotation.x << " w: " << transform.rotation_w;
+		//push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 		material.writePushConstants(ctx.commandBuffer, push);
 
 		// record mesh draw command
