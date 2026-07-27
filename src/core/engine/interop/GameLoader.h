@@ -23,7 +23,7 @@ namespace EngineCore
 		~GameLoader();
 		void loadDll(std::string_view fileName);
 		void unloadAll();
-		void tick(double dt);
+		void gameTick(double dt);
 
 	private:
 		std::vector<std::unique_ptr<LoadedDLL>> dlls;

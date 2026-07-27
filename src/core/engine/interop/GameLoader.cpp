@@ -140,7 +140,7 @@ namespace EngineCore
 		dlls.clear(); // destructors handle cleanup
 	}
 
-	void GameLoader::tick(double dt)
+	void GameLoader::gameTick(double dt)
 	{
 		for (auto& dll : dlls)
 		{

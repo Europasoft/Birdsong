@@ -40,8 +40,6 @@ namespace EngineCore
 		using namespace WorldSystem;
 
 		Scene& scene = world.getScene();
-		
-		const float S = static_cast<float>(scene.getSectorSize());
 
 		uint32_t instanceID = 0;
 		for (Sector* sector : scene.getLoadedSectors())
