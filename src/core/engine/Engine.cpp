@@ -155,8 +155,7 @@ namespace EngineCore
 		skyDrawer->renderSky(f.commandBuffer, f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->transform.translation);
 
 		// render meshes
-		meshDrawer->renderMeshes(f.commandBuffer, *world, f.delta, engineClock.getElapsed(), f.bufferIndex,
-			f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->getProjectionViewMatrix());
+		meshDrawer->renderMeshes(f.commandBuffer, *world, f.bufferIndex);
 
 		debugDrawer->render(f.commandBuffer, *renderer);
 

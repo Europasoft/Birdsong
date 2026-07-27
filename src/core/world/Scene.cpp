@@ -44,7 +44,7 @@ namespace WorldSystem
 		localSectorCoord = std::make_unique<SectorCoord>();
 		meshCache = std::make_unique<EngineCore::MeshCache>();
 	}
-	// TODO: should not be needed anymore
+	
 	EngineCore::DescriptorSet& Scene::getSceneGlobalDescriptorSet() const
 	{
 		return *sceneGlobalDescriptorSet.get(); 
@@ -105,99 +105,6 @@ namespace WorldSystem
 			sceneGlobalDescriptorSet->getDescriptorSet(frameIndex),
 			textureManager->getDescriptorSet()
 		};
-	}
-
-	void Scene::setupDemoScene()
-	{
-		using namespace EngineCore;
-		using namespace Nodes;
-		// create a basic camera
-		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 10, .farDistance = 10000 * 100 });
-		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
-		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
-
-		// demo textures
-		marsTexture = std::make_unique<Image>(device, makePath("Textures/mars6k_v2.jpg"));
-		spaceTexture = std::make_unique<Image>(device, makePath("Textures/space.png"));
-
-		// scene global descriptors
-		UBO_Struct ubo1{};
-		ubo1.add(uelem::mat4); // MVP matrix
-		sceneGlobalDescriptorSet->addUBO(ubo1, device);
-		// as the demo textures will never be overwritten from the CPU, only one buffer is needed for each, so the view can simply be duplicated
-		ImageArrayDescriptor demoTextureArray{};
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, marsTexture->getView()));
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, spaceTexture->getView()));
-		sceneGlobalDescriptorSet->addImageArray(demoTextureArray);
-		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
-		sceneGlobalDescriptorSet->finalize();
-
-		/* TODO: ASAP: some of this should be handled by the game, and some in EngineNodeData class [IN PROGRESS NOW!] x)
-		// create 3D primitive(s)
-		auto& sector = *sectors[0]; // get the persistent sector
-		{
-			// TODO: hardcoded path
-			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
-			node.build("Meshes/axis_cube.obj");
-			Transform tf(Vec(5000, 0.f, 0.f), Vec(), Vec(1000.f));
-			node.setTransform(tf);
-			// TEST: add physics body for mesh
-			b3cpp::BodyDef bodyDef;
-			bodyDef.type = b3cpp::EBodyType::DynamicBody;
-			b3cpp::Body& body = node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
-			b3cpp::BoxHullShape& s = body.createShape<b3cpp::BoxHullShape>();
-			s.halfWidthX = 1000;
-			s.halfWidthY = 1000;
-			s.halfWidthZ = 1000;
-			b3cpp::ShapeDef shapeDef;
-			shapeDef.density = 5;
-			s.activate(shapeDef);
-			body.setAngularVelocity({ 0.08, 0.008, 0.01 });
-		}
-
-		for (size_t i = 0; i < 8; i++)
-		{
-			// TODO: hardcoded path
-			Nodes::MeshNode& node = sector.createNode<Nodes::MeshNode>(device);
-			node.build("Meshes/teapot.obj");
-			Transform tf(Vec(1517 + (i * 200.f), (i * 200.f), 0.f), Vec(), Vec(30.f));
-			node.setTransform(tf);
-			// TEST: add physics body for mesh
-			b3cpp::BodyDef bodyDef;
-			bodyDef.type = b3cpp::EBodyType::DynamicBody;
-			auto& body = node.addPhysicsBody(bodyDef, sector.getPhysicsWorld());
-			b3cpp::BoxHullShape& s = body.createShape<b3cpp::BoxHullShape>();
-			s.halfWidthX = 200;
-			s.halfWidthY = 200;
-			s.halfWidthZ = 200;
-			b3cpp::ShapeDef shapeDef;
-			shapeDef.density = 5;
-			s.activate(shapeDef);
-			body.setAngularVelocity({ 0.02, 0.006, -0.003 });
-			body.setLinearVelocity({ 800, 0, (i * -80.f)});
-		}
-
-		// create material-specific descriptor set (the set must be initialized before using its layout)
-		EngineCore::UBO_Struct ubo{};
-		ubo.add(EngineCore::uelem::vec3); // camera position
-		ubo.add(EngineCore::uelem::vec3); // light position
-		ubo.add(EngineCore::uelem::scalar); // roughness
-		auto matSet = std::make_shared<EngineCore::DescriptorSet>(device);
-		matSet->addUBO(ubo, device);
-		matSet->finalize(); // create material-specific descriptor set
-
-		// create demo material
-		EngineCore::ShaderFilePaths shader(makePath("shaders/compiled/shader.vert.spv"), makePath("shaders/compiled/pbr.frag.spv"));
-		for (size_t i = 0; i < sector.nodes.size(); i++)
-		{
-			// TODO: materials should automatically include the layout of their own set (if present) on construct!!! ...note: in the process of solving this now!
-			EngineCore::MaterialCreateInfo matInfo(shader, std::vector<VkDescriptorSetLayout>{ sceneGlobalDescriptorSet->getLayout(), matSet->getLayout() },
-				engine.getRenderSettings().sampleCountMSAA, engine.getRenderer().getBasePassFormats(), sizeof(EngineCore::ShaderPushConstants::MeshPushConstants));
-			matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
-
-			sector.nodes[i]->setMaterial(matInfo);
-			sector.nodes[i]->getMaterial()->setMaterialSpecificDescriptorSet(matSet); // old way
-		}*/
 	}
 
 	void Scene::updateDescriptors(uint32_t frameIndex, double deltaTime)

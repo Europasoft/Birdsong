@@ -34,8 +34,6 @@ namespace WorldSystem
 		Scene(EngineCore::EngineDevice& device, EngineCore::EngineApplication& engine);
 		~Scene();
 
-		void setupDemoScene();
-
 		void updateDescriptors(uint32_t frameIndex, double deltaTime);
 		void updateInstanceData(uint32_t frameIndex);
 
@@ -69,7 +67,6 @@ namespace WorldSystem
 		std::shared_ptr<EngineCore::Camera> currentCamera;
 
 		/* temporary demo content */
-		
 		std::unique_ptr<EngineCore::Image> spaceTexture;
 		std::unique_ptr<EngineCore::Image> marsTexture;
 
@@ -85,10 +82,9 @@ namespace WorldSystem
 		Vec getLocalSectorOriginAbsolute() const;
 		uint32_t getSectorSize() const;
 		std::vector<Sector*> getLoadedSectors() const;
-		//Sector& getPersistentSector() const { return *sectors[0].get(); } TODO: ASAP
+		
 	private:
 		bool updateSectorCoord(Vec& pos);
-		//Sector& loadSector(const SectorCoord& sectorPosition); TODO: ASAP
 		void forgetSector(const SectorCoord& coord);
 
 	};

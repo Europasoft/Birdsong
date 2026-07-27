@@ -94,13 +94,8 @@ void main()
 
     float effectiveRoughness = 0.5; // temporary
     float indirect = 0.001;
-    //vec4 baseColor = texture(sampler2D(textures[0], _sampler), fragUV);
-    float colorGrayscale = 1.0;
-    vec4 baseColor = vec4(colorGrayscale,colorGrayscale,colorGrayscale,1.0);
+    // nonuniformEXT tells driver that different threads inside the warp/wavefront might sample different texture indices simultaneously
+    vec4 baseColor = texture(globalTextures[nonuniformEXT(1000)], fragUV);
 	vec3 litColor = BRDF(baseColor.xyz, normalize(fragNormalWS), viewDir, lightDir, halfwayVec, effectiveRoughness);
     outColor = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
-    //outColor = vec4(fragNormalWS.x, fragNormalWS.y, fragNormalWS.z, 1.0);
-
-    // nonuniformEXT tells driver that different threads inside the warp/wavefront might sample different texture indices simultaneously
-    outColor = texture(globalTextures[nonuniformEXT(1000)], fragUV);
 }

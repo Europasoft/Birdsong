@@ -27,8 +27,6 @@ namespace WorldSystem
 
 		Scene& getScene() const;
 
-		void loadDemoScene();
-
 	private:
 		EngineCore::EngineDevice& device;
 		EngineCore::EngineApplication& engine;

@@ -28,19 +28,14 @@ namespace EngineCore
 	struct MeshDrawer::DrawMeshContext
 	{
 		WorldSystem::Mesh& mesh;
-		const Transform& transform;
-		VkDescriptorSet sceneGlobalDescriptorSet;
 		VkCommandBuffer commandBuffer;
 		uint32_t frameIndex;
-		WorldSystem::SectorCoord cameraSectorCoord;
 		uint32_t instanceID;
 		VkDeviceAddress instanceBufferAddress;
 		std::vector<VkDescriptorSet> descriptorSets;
 	};
 
-	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
-			double deltaTimeSeconds, double time, uint32_t frameIndex, VkDescriptorSet sceneGlobalDescriptorSet, 
-			const glm::mat4& viewMatrix) //FakeScaleTest082
+	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world, uint32_t frameIndex)
 	{
 		using namespace WorldSystem;
 
@@ -58,44 +53,39 @@ namespace EngineCore
 				WorldSystem::Mesh& mesh = *nodeData->mesh.get();
 				const Transform& transform = nodeData->engineTransform;
 				
-				renderOne(DrawMeshContext{
-						mesh, transform, sceneGlobalDescriptorSet, commandBuffer, 
-						frameIndex, scene.getLocalSectorCoordinate(), instanceID,
+				DrawMeshContext ctx
+				{
+						mesh, commandBuffer,
+						frameIndex, instanceID,
 						scene.getInstanceBuffer().getDeviceAddress(frameIndex),
 						scene.getDescriptorSets(frameIndex)
-					});
+				};
+				renderOne(ctx);
 				instanceID++;
 			}
 		}
 
 	}
 
-	void MeshDrawer::renderOne(const DrawMeshContext& ctx)
+	void MeshDrawer::renderOne(DrawMeshContext& ctx)
 	{
 		Material& material = *ctx.mesh.getMaterial().get();
 		material.bindToCommandBuffer(ctx.commandBuffer); // bind material-specific shading pipeline
-
-		std::vector<VkDescriptorSet> sets = ctx.descriptorSets; // scene global descriptor sets
 
 		if (material.hasDescriptorSet())
 		{
 			// bind material-specific descriptor set
 			auto& matSet = material.getDescriptorSet();
-			sets.push_back(matSet.getDescriptorSet(ctx.frameIndex));
+			ctx.descriptorSets.push_back(matSet.getDescriptorSet(ctx.frameIndex));
 		}
 
 		vkCmdBindDescriptorSets(ctx.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material.getPipelineLayout(),
-			0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+			0, static_cast<uint32_t>(ctx.descriptorSets.size()), ctx.descriptorSets.data(), 0, nullptr);
 
 		ShaderPushConstants::MeshPushConstants push{};
 		push.instanceBufferAddress = ctx.instanceBufferAddress;
 		push.instanceID = ctx.instanceID;
 
-		// get the unified world space position relative to the camera's sector origin
-		//const Vec meshPosRelative = WorldSystem::calculateRelative(ctx.transform.translation, ctx.transform.sector, ctx.cameraSectorCoord);
-		//push.transform = cglm::makeMatrixQ(ctx.transform.rotation, ctx.transform.rotation_w, ctx.transform.scale, meshPosRelative);
-		////std::cout << "\n rot x: " << transform.rotation.x << " w: " << transform.rotation_w;
-		//push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 		material.writePushConstants(ctx.commandBuffer, push);
 
 		// record mesh draw command

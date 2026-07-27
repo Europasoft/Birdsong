@@ -23,12 +23,6 @@ namespace WorldSystem
 	{
 		return *currentScene.get();
 	}
-	
-	void World::loadDemoScene()
-	{
-		currentScene = std::make_unique<Scene>(device, engine);
-		currentScene->setupDemoScene();
-	}
-    
+
 }
 
