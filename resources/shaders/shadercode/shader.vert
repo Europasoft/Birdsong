@@ -14,13 +14,6 @@ layout(location = 1) out vec3 fragPositionWS;
 layout(location = 2) out vec3 fragNormalWS;
 layout(location = 3) out vec2 fragUV;
 
-
-//struct testStruct
-//{
-//	float s;
-//	vec3 v;
-//};
-
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;

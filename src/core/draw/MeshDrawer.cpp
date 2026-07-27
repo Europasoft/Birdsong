@@ -35,6 +35,7 @@ namespace EngineCore
 		WorldSystem::SectorCoord cameraSectorCoord;
 		uint32_t instanceID;
 		VkDeviceAddress instanceBufferAddress;
+		std::vector<VkDescriptorSet> descriptorSets;
 	};
 
 	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world,
@@ -60,7 +61,8 @@ namespace EngineCore
 				renderOne(DrawMeshContext{
 						mesh, transform, sceneGlobalDescriptorSet, commandBuffer, 
 						frameIndex, scene.getLocalSectorCoordinate(), instanceID,
-						scene.getInstanceBuffer().getDeviceAddress(frameIndex)
+						scene.getInstanceBuffer().getDeviceAddress(frameIndex),
+						scene.getDescriptorSets(frameIndex)
 					});
 				instanceID++;
 			}
@@ -73,8 +75,7 @@ namespace EngineCore
 		Material& material = *ctx.mesh.getMaterial().get();
 		material.bindToCommandBuffer(ctx.commandBuffer); // bind material-specific shading pipeline
 
-		std::vector<VkDescriptorSet> sets;
-		sets.push_back(ctx.sceneGlobalDescriptorSet); // scene global descriptor set
+		std::vector<VkDescriptorSet> sets = ctx.descriptorSets; // scene global descriptor sets
 
 		if (material.hasDescriptorSet())
 		{

@@ -48,6 +48,8 @@ namespace WorldSystem
 
 		// returns layouts for all global descriptor sets
 		std::vector<VkDescriptorSetLayout> getDescriptorSetLayouts() const;
+		// returns set handles for all global descriptor sets
+		std::vector<VkDescriptorSet> getDescriptorSets(uint32_t frameIndex) const;
 
 		Sector* getSector(const SectorCoord& coord, const ESectorLookup& mode) const;
 

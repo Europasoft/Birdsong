@@ -44,10 +44,10 @@ namespace WorldSystem
 		localSectorCoord = std::make_unique<SectorCoord>();
 		meshCache = std::make_unique<EngineCore::MeshCache>();
 	}
-
+	// TODO: should not be needed anymore
 	EngineCore::DescriptorSet& Scene::getSceneGlobalDescriptorSet() const
 	{
-		return *sceneGlobalDescriptorSet.get();
+		return *sceneGlobalDescriptorSet.get(); 
 	}
 
 	EngineCore::Camera& Scene::getCurrentCamera() const
@@ -95,7 +95,15 @@ namespace WorldSystem
 	{
 		return {
 			sceneGlobalDescriptorSet->getLayout(),
-			//textureManager->getDescriptorSetLayout() TODO: ASAP: finish implementing global texture array
+			textureManager->getDescriptorSetLayout()
+		};
+	}
+
+	std::vector<VkDescriptorSet> Scene::getDescriptorSets(uint32_t frameIndex) const
+	{
+		return {
+			sceneGlobalDescriptorSet->getDescriptorSet(frameIndex),
+			textureManager->getDescriptorSet()
 		};
 	}
 

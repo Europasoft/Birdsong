@@ -30,6 +30,8 @@ layout(std430, set = 0, binding = 0) uniform UBO1
 layout(set = 0, binding = 1) uniform texture2D textures[2];
 layout(set = 0, binding = 2) uniform sampler _sampler;
 
+// second descriptor set: unbounded texture array
+layout(set = 1, binding = 0) uniform sampler2D globalTextures[];
 
 layout(buffer_reference, scalar) readonly buffer InstanceBufferRef 
 {
@@ -98,4 +100,7 @@ void main()
 	vec3 litColor = BRDF(baseColor.xyz, normalize(fragNormalWS), viewDir, lightDir, halfwayVec, effectiveRoughness);
     outColor = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
     //outColor = vec4(fragNormalWS.x, fragNormalWS.y, fragNormalWS.z, 1.0);
+
+    // nonuniformEXT tells driver that different threads inside the warp/wavefront might sample different texture indices simultaneously
+    outColor = texture(globalTextures[nonuniformEXT(1000)], fragUV);
 }
