@@ -21,13 +21,15 @@ void spawn(DemoGame& g, xyz p)
 	g.demoMeshes.back()->setTransform(t);
 }
 
+static constexpr auto spawnBaseNum = 4;
+
 void DemoGame::onLoad()
 {
 	std::cout << "Game DLL onLoad called\n";
 
-	for (double x = 0; x < 12; x++)
-		for (double y = 0; y < 12; y++)
-			for (double z = 0; z < 12; z++)
+	for (double x = 0; x < spawnBaseNum; x++)
+		for (double y = 0; y < spawnBaseNum; y++)
+			for (double z = 0; z < spawnBaseNum; z++)
 			{
 				spawnPositions.push_back(xyz{ (x + 1) * 1000, y * 1000, z * 1000 });
 			}
@@ -40,15 +42,21 @@ void DemoGame::tick(double dt)
 	static int i = 0;
 	if (tickTimer <= 0 && i < spawnPositions.size())
 	{
-		for (double j = 0; j < 12; j++)
+		for (double j = 0; j < spawnBaseNum; j++)
 		{
 			if (i < spawnPositions.size())
 				spawn(*this, spawnPositions[i]);
 			i++;
 		}
-		tickTimer = 0.4;
+		tickTimer = 0.1;
 	}
 
+	//for (auto& x : demoMeshes)
+	//{
+	//	Transform t = x->getTransform();
+	//	t.scale = 250;
+	//	x->setTransform(t);
+	//}
 
 	//Transform t = demoMeshes.back()->getTransform();
 	//if (t.scale.x < 100)
