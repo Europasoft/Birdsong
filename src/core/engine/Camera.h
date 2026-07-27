@@ -6,12 +6,19 @@
 
 namespace EngineCore
 { 
+	struct CameraSettings
+	{
+		float fieldOfViewDeg;
+		float nearDistance;
+		float farDistance;
+	};
+
 	/* a virtual camera, this is you */
 	class Camera
 	{
 	public:
 		Camera() = default;
-		Camera(float fieldOfViewDeg, float nearDistance, float farDistance);
+		Camera(CameraSettings settings);
 
 		Camera& operator=(const Camera&) = default;
 		Camera& operator=(Camera&&) = default;

@@ -8,11 +8,11 @@
 
 namespace EngineCore
 {
-	Camera::Camera(float fieldOfViewDeg, float nearDistance, float farDistance)
+	Camera::Camera(CameraSettings settings)
 	{
-		near = nearDistance;
-		far = farDistance;
-		setFieldOfView(fieldOfViewDeg);
+		near = settings.nearDistance;
+		far = settings.farDistance;
+		setFieldOfView(settings.fieldOfViewDeg);
 		createConversionMatrices();
 	}
 

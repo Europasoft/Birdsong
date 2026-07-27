@@ -66,7 +66,7 @@ namespace WorldSystem
 		using namespace Nodes;
 
 		// create a basic camera
-		currentCamera = std::make_shared<EngineCore::Camera>(85.f, 10.f, 10000 * 100.f);
+		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 10, .farDistance = 10000 * 100 });
 		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
 		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
 
@@ -104,7 +104,7 @@ namespace WorldSystem
 		using namespace EngineCore;
 		using namespace Nodes;
 		// create a basic camera
-		currentCamera = std::make_shared<EngineCore::Camera>(85.f, 10.f, 10000 * 100.f);
+		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 10, .farDistance = 10000 * 100 });
 		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
 		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
 
