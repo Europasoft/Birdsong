@@ -85,13 +85,13 @@ namespace EngineCore
 	void Camera::moveInPlaneXY(const Vector2D<double>& lookInput, const float& moveFwd, const float& moveRight, 
 								const float& moveUp, const bool& extraSpeed, const float& deltaTime)
 	{
-		float lookSpeed = 6.8f;
+		float lookSpeed = 0.004f;
 		float moveSpeed = 30.f;
 		//if (extraSpeed) { moveSpeed *= 80.f; }
 		if (extraSpeed) { moveSpeed *= 100.f; }
 
-		transform.rotation.y += (float)lookInput.y * lookSpeed * deltaTime;      // pitch
-		transform.rotation.z += (float)(-lookInput.x) * lookSpeed * deltaTime;   // yaw
+		transform.rotation.y += (float)lookInput.y * lookSpeed;      // pitch
+		transform.rotation.z += (float)(-lookInput.x) * lookSpeed;   // yaw
 
 		// limit pitch values to exactly 85 degrees
 		transform.rotation.y = glm::clamp(transform.rotation.y, 
