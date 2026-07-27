@@ -51,7 +51,6 @@ namespace EngineCore
 				// update the engine-side node transform, using data from game
 				nodeData->updateTransformFromGame();
 				WorldSystem::Mesh& mesh = *nodeData->mesh.get();
-				const Transform& transform = nodeData->engineTransform;
 				
 				DrawMeshContext ctx
 				{
