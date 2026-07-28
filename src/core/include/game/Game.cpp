@@ -6,6 +6,7 @@ namespace EngineInterface
 	void DLL_CALL Game::onLoadCall(IEngine* engineItf)
 	{
 		engine = engineItf; // game code can use this pointer to make calls in the other direction
+		CommonGameFunctions::engine = engineItf;
 		onLoad();
 	}
 

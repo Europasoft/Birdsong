@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cstring>
 #include <utility>
+#include <vector>
 
 // utilities to safely call functions and pass data that needs to cross the ABI boundary (executable <-> DLL)
 
@@ -26,20 +27,20 @@ static constexpr auto igameFactoryNameString = IG_FAC_STRINGIFY(IG_FACTORY);
 namespace BoundaryUtils
 {
 	template <typename T>
-	static inline void packValue(const T& value, uint8_t*& dstPtr)
+	inline void packValue(const T& value, uint8_t*& dstPtr)
 	{
 		std::memcpy(dstPtr, &value, sizeof(T));
 		dstPtr += sizeof(T);
 	}
 
 	template <typename T>
-	static inline void unpackValue(T& value, const uint8_t*& srcPtr)
+	inline void unpackValue(T& value, const uint8_t*& srcPtr)
 	{
 		std::memcpy(&value, srcPtr, sizeof(T));
 		srcPtr += sizeof(T);
 	}
 
-	static void packTransform(const Transform& t, uint8_t* outBuffer)
+	inline void packTransform(const Transform& t, uint8_t* outBuffer)
 	{
 		uint8_t* dst = outBuffer;
 		packValue(t.translation.x, dst);
@@ -56,7 +57,7 @@ namespace BoundaryUtils
 		packValue(t.sector.z, dst);
 	}
 
-	static void unpackTransform(const uint8_t* inBuffer, Transform& t)
+	inline void unpackTransform(const uint8_t* inBuffer, Transform& t)
 	{
 		const uint8_t* src = inBuffer;
 		unpackValue(t.translation.x, src);
@@ -73,7 +74,7 @@ namespace BoundaryUtils
 		unpackValue(t.sector.z, src);
 	}
 
-	static size_t getTransformDataSize(const Transform& t)
+	inline size_t getTransformDataSize(const Transform& t)
 	{
 		size_t size = 0;
 		size += sizeof(t.translation.x);
@@ -89,5 +90,19 @@ namespace BoundaryUtils
 		size += sizeof(t.sector.y);
 		size += sizeof(t.sector.z);
 		return size;
+	}
+
+	inline std::vector<uint8_t> transformToBuffer(const Transform& t)
+	{
+		std::vector<uint8_t> buffer(BoundaryUtils::getTransformDataSize(t));
+		BoundaryUtils::packTransform(t, buffer.data());
+		return buffer;
+	}
+
+	inline Transform transformFromBuffer(const uint8_t* bufferData)
+	{
+		Transform t;
+		BoundaryUtils::unpackTransform(bufferData, t);
+		return t;
 	}
 }

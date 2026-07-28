@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <cassert>
+#include <iostream>
 
 namespace EngineCore
 {
@@ -118,7 +119,17 @@ namespace EngineCore
 
 	void DLL_CALL IEngineImpl::physicsExplode(const uint8_t* transformBuffer, float falloff, float radius, float impulsePerArea)
 	{
+		Transform t;
+		BoundaryUtils::unpackTransform(transformBuffer, t);
+		Sector* sector = world.getScene().getSector(t.sector, ESectorLookup::FIND_EXISTING);
+		if (not sector) return;
 
+		b3cpp::ExplosionDef def;
+		def.falloff = falloff;
+		def.radius = radius;
+		def.position = { t.translation.x, t.translation.y, t.translation.z };
+		def.impulsePerArea = impulsePerArea;
+		sector->getPhysicsWorld().explode(def);
 	}
 
 }

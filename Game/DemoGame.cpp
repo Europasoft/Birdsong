@@ -49,7 +49,15 @@ void DemoGame::tick(double dt)
 				spawn(*this, spawnPositions[i], engine);
 			i++;
 		}
-		tickTimer = 0.1;
+		tickTimer = 0.05;
+	}
+
+	static double explodeTimer = 0;
+	explodeTimer += dt;
+	if (explodeTimer > 2)
+	{
+		CommonGameFunctions::physicsExplode(demoMeshes.back()->getTransform(), 10000, 1000, 100000 * 150);
+		explodeTimer = -15;
 	}
 
 	/*for (auto& x : demoMeshes)

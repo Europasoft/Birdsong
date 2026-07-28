@@ -3,6 +3,7 @@
 #include "shared/BoundaryUtils.h"
 #include "shared/IEngine.h"
 #include "game/Node.h"
+#include "game/CommonGameFunctions.h"
 
 // macro used in DLL code to define the factory function which creates an instance of the game class
 #if defined(_WIN32) || defined(_WIN64)
@@ -19,7 +20,7 @@
 
 namespace EngineInterface
 {
-	class Game : public IGame
+	class Game : public IGame, public CommonGameFunctions
 	{
 	protected:
 		// these can be overridden by a user-created game class

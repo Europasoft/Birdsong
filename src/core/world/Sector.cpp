@@ -73,19 +73,6 @@ namespace WorldSystem
 		{
 			node->mesh->postPhysics(*node);
 		}
-
-		//TMP
-		static bool didExplode = false;
-		if (!didExplode)
-		{
-			b3cpp::ExplosionDef x;
-			x.falloff = 10000;
-			x.radius = 1000;
-			x.position = { 0, 400, -200 };
-			x.impulsePerArea = 100000 * 100;
-			physicsWorld->explode(x);
-			didExplode = true;
-		}
 	}
 
 	void Sector::gamePostPhysicsUpdate()
