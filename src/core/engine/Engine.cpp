@@ -77,8 +77,8 @@ namespace EngineCore
 
 			// engine tick updates
 			moveCamera(*f.camera);
-			f.camera->testValue += window->input.getAxisValue(4) * static_cast<float>(f.delta) * 2.f;
 			gameLoader->gameTick(f.delta);
+			f.scene->updateNodes();
 			f.scene->sectorUpdate(*f.camera);
 			f.scene->physicsTick();
 
@@ -89,6 +89,7 @@ namespace EngineCore
 				f.bufferIndex = renderer->getFrameIndex();
 				render(f);
 			}
+			f.scene->gamePostPhysicsUpdate();
 		}
 	}
 

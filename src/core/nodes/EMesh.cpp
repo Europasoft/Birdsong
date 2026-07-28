@@ -1,5 +1,6 @@
 #pragma once
 #include "core/nodes/EMesh.h"
+#include "core/nodes/EngineNodeData.h"
 #include "core/gpu/Device.h"
 #include "core/gpu/Material.h"
 #include "core/engine/MeshData.h"
@@ -58,45 +59,20 @@ namespace WorldSystem
 		createIndexBuffers(meshBuilder.indices);
 	}
 
-	b3cpp::Body& Mesh::addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w)
+	void Mesh::prePhysics(EngineNodeData& data)
 	{
-		physicsBody = w.createBody(def);
-		return *physicsBody;
-	}
+		if ((not teleported) or (not data.physicsBody)) return;
 
-	b3cpp::Body& Mesh::getPhysicsBody()
-	{
-		return *physicsBody;
-	}
+		auto& p = data.engineTransform.translation;
+		auto& r = data.engineTransform.rotation;
+		auto& rw = data.engineTransform.rotation_w;
 
-	void Mesh::physicsTick()
-	{
-		if (not physicsBody) return;
-		/* TODO: ASAP: physics tick/transform update has to be moved (now updating transform game->engine in renderMeshes)
-		if (teleported)
-		{
-			// the transform was manually changed, inform the physics engine
-			const auto& p = transform.translation;
-			const auto& r = transform.rotation;
-			physicsBody->setTransform({ p.x, p.y, p.z }, { r.x, r.y, r.z, transform.rotation_w });
-			// reset so this doesn't happen every tick
-			teleported = false;
-		}
-		else
-		{
-			// update transform with data from physics engine
-			const b3cpp::Vector pos = physicsBody->getPosition();
-			const b3cpp::Vector rot = physicsBody->getRotationQuat();
-			transform.translation.x = pos.x;
-			transform.translation.y = pos.y;
-			transform.translation.z = pos.z;
-			transform.rotation.x = rot.x;
-			transform.rotation.y = rot.y;
-			transform.rotation.z = rot.z;
-			transform.rotation_w = rot.w;
-		}
+		// the transform was manually changed, inform the physics engine
+		data.physicsBody->setTransform({ (float)p.x, (float)p.y, (float)p.z }, { (float)r.x, (float)r.y, (float)r.z, rw });
+		// reset so this doesn't happen every tick
+		data.teleported = false;
 
-		static bool applied = false;
+		/*static bool applied = false;
 		// TEST: make it spin
 		if (!applied)
 		{
@@ -104,6 +80,22 @@ namespace WorldSystem
 			applied = true;
 		}
 		*/
+	}
+
+	void Mesh::postPhysics(EngineNodeData& data)
+	{
+		if (not data.physicsBody) return;
+
+		auto& p = data.engineTransform.translation;
+		auto& r = data.engineTransform.rotation;
+		auto& rw = data.engineTransform.rotation_w;
+
+		// update transform with data from physics engine
+		const b3cpp::Vector phys_p = data.physicsBody->getPosition();
+		const b3cpp::Vector phys_r = data.physicsBody->getRotationQuat();
+		p = { (float)phys_p.x, (float)phys_p.y, (float)phys_p.z };
+		r = { (float)phys_r.x, (float)phys_r.y, (float)phys_r.z };
+		rw = phys_r.w;
 	}
 
 	void Mesh::createVertexBuffers(const std::vector<EngineCore::Vertex>& vertices)

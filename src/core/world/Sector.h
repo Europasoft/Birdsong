@@ -1,6 +1,6 @@
 #pragma once
-#include "core/nodes/Node.h"
 #include "core/types/CommonTypes.h"
+#include "core/include/shared/Transform.h"
 
 #include <stdint.h>
 #include <vector>
@@ -11,10 +11,6 @@ namespace EngineCore
 	class EngineDevice;
 	class DebugDrawer;
 	class MeshDrawer;
-}
-namespace Nodes
-{
-	class MeshNode;
 }
 namespace b3cpp
 {
@@ -43,6 +39,7 @@ namespace WorldSystem
 
 		b3cpp::World& getPhysicsWorld() const;
 		void physicsTick();
+		void gamePostPhysicsUpdate();
 
 	protected:
 		friend class Scene;

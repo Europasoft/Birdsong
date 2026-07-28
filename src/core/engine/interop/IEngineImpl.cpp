@@ -11,6 +11,7 @@
 #include "core/render/Renderer.h"
 #include "core/engine/MeshData.h"
 #include "core/nodes/MeshCache.h"
+#include "deps/box3d-cpp/include/b3cpp.h"
 
 #include "core/include/shared/BoundaryUtils.h"
 #include "core/include/shared/Transform.h"
@@ -98,6 +99,21 @@ namespace EngineCore
 		const auto mp = engine.window->input.getMousePosition();
 		x = mp.x;
 		y = mp.y;
+	}
+
+	void DLL_CALL IEngineImpl::setPhysicsBodyForNode(EngineInterface::INode* iNode)
+	{
+		Sector* sector = EngineInteropUtil::getNodeSector(iNode, world.getScene(), ESectorLookup::FIND_EXISTING);
+		EngineNodeData& eNode = *sector->nodes().getEngineNodeData(iNode);
+
+		// just adding a predefined shape for now
+		b3cpp::BodyDef def = { .type = b3cpp::EBodyType::DynamicBody };
+		b3cpp::Body& body = eNode.addPhysicsBody(def, sector->getPhysicsWorld());
+		b3cpp::SphereShape& shape = body.createShape<b3cpp::SphereShape>();
+		b3cpp::ShapeDef shapeDef = { .density = 100.f };
+		assert(body);
+		shape.activate(shapeDef);
+		assert(shape);
 	}
 
 }

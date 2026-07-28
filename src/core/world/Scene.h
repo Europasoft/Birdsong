@@ -36,12 +36,12 @@ namespace WorldSystem
 
 		void updateDescriptors(uint32_t frameIndex, double deltaTime);
 		void updateInstanceData(uint32_t frameIndex);
-
+		void updateNodes();
 		void physicsTick();
+		void gamePostPhysicsUpdate();
 
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
-
 		EngineCore::InstanceBuffer& getInstanceBuffer() const { return *instanceBuffer.get(); }
 
 		// returns layouts for all global descriptor sets
@@ -74,7 +74,8 @@ namespace WorldSystem
 
 		// sector stuff
 	public:
-		void sectorUpdate(EngineCore::Camera& camera);// checks whether we have moved into a new sector
+		void sectorUpdate(EngineCore::Camera& camera); // checks whether we have moved into a new sector
+		void loadSector(const SectorCoord& coord);
 		const SectorCoord& getLocalSectorCoordinate() const;
 		void setLocalSectorCoordinate(const SectorCoord& coordNew);
 		static Vec sectorToAbsolute(const SectorCoord& sector, Vec offset = Vec::zero());

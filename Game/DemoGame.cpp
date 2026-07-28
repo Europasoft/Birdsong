@@ -9,7 +9,7 @@
 
 
 
-void spawn(DemoGame& g, xyz p)
+void spawn(DemoGame& g, xyz p, EngineInterface::IEngine* engine)
 {
 	g.demoMeshes.push_back(g.spawnNode<EngineInterface::MeshNode>());
 	g.demoMeshes.back()->setMesh();
@@ -19,6 +19,7 @@ void spawn(DemoGame& g, xyz p)
 	t.translation.y = p.y;
 	t.translation.z = p.z;
 	g.demoMeshes.back()->setTransform(t);
+	engine->setPhysicsBodyForNode(g.demoMeshes.back().get());
 }
 
 static constexpr auto spawnBaseNum = 4;
@@ -45,23 +46,18 @@ void DemoGame::tick(double dt)
 		for (double j = 0; j < spawnBaseNum; j++)
 		{
 			if (i < spawnPositions.size())
-				spawn(*this, spawnPositions[i]);
+				spawn(*this, spawnPositions[i], engine);
 			i++;
 		}
 		tickTimer = 0.1;
 	}
 
-	//for (auto& x : demoMeshes)
-	//{
-	//	Transform t = x->getTransform();
-	//	t.scale = 250;
-	//	x->setTransform(t);
-	//}
-
-	//Transform t = demoMeshes.back()->getTransform();
-	//if (t.scale.x < 100)
-	//t.scale += dt * 15;
-	//demoMeshes.back()->setTransform(t);
+	/*for (auto& x : demoMeshes)
+	{
+		Transform t = x->getTransform();
+		t.scale += 3 * dt;
+		x->setTransform(t);
+	}*/
 }
 
 void DemoGame::onUnload()

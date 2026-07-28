@@ -8,6 +8,7 @@ namespace WorldSystem
 {
 	class SectorCoord;
 	class Sector;
+	class EngineNodeData;
 }
 namespace EngineCore
 {
@@ -22,13 +23,6 @@ namespace EngineCore
 // forward declare for bind/draw functions
 struct VkCommandBuffer_T;
 typedef struct VkCommandBuffer_T* VkCommandBuffer;
-
-namespace b3cpp
-{
-	class World;
-	class Body;
-	struct BodyDef;
-}
 
 namespace WorldSystem
 {
@@ -52,12 +46,8 @@ namespace WorldSystem
 
 		bool useFakeScale = false; //TODO: TMP - FakeScaleTest082
 
-		// TODO: make this cleaner
-		std::unique_ptr<b3cpp::Body> physicsBody = nullptr;
-		b3cpp::Body& addPhysicsBody(b3cpp::BodyDef def, b3cpp::World& w);
-		b3cpp::Body& getPhysicsBody();
-
-		void physicsTick();
+		void prePhysics(EngineNodeData& data);
+		void postPhysics(EngineNodeData& data);
 
 	protected:
 		friend class Sector;
@@ -73,8 +63,8 @@ namespace WorldSystem
 
 		std::unique_ptr<EngineCore::GBuffer> vertexBuffer;
 		std::unique_ptr<EngineCore::GBuffer> indexBuffer;
-		uint32_t vertexCount;
-		uint32_t indexCount;
+		uint32_t vertexCount = 0;
+		uint32_t indexCount = 0;
 		bool hasIndexBuffer = false;
 
 		//void generateOOBB(const std::vector<Vertex>& vertices);

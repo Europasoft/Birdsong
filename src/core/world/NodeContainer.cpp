@@ -98,6 +98,17 @@ namespace WorldSystem
         return out;
     }
 
+	std::vector<EngineNodeData*> NodeContainer::getEngineNodeDatas() const
+	{
+		std::vector<EngineNodeData*> out;
+		out.reserve(nodesVector.size());
+		for (const NodeVectorEntry& entry : nodesVector)
+		{
+			out.push_back(entry.eNode);
+		}
+		return out;
+	}
+
 	
 
 

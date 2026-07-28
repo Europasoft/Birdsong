@@ -191,7 +191,6 @@
     <ClInclude Include="..\src\core\nodes\EMesh.h" />
     <ClInclude Include="..\src\core\nodes\EngineNodeData.h" />
     <ClInclude Include="..\src\core\nodes\MeshCache.h" />
-    <ClInclude Include="..\src\core\nodes\Node.h" />
     <ClInclude Include="..\src\core\render\Attachment.h" />
     <ClInclude Include="..\src\core\render\Renderer.h" />
     <ClInclude Include="..\src\core\render\Renderpass.h" />
@@ -284,7 +283,6 @@
     <ClCompile Include="..\src\core\nodes\EMesh.cpp" />
     <ClCompile Include="..\src\core\nodes\EngineNodeData.cpp" />
     <ClCompile Include="..\src\core\nodes\MeshCache.cpp" />
-    <ClCompile Include="..\src\core\nodes\Node.cpp" />
     <ClCompile Include="..\src\core\render\Attachment.cpp" />
     <ClCompile Include="..\src\core\render\Renderer.cpp" />
     <ClCompile Include="..\src\core\render\Renderpass.cpp" />
