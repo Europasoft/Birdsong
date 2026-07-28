@@ -13,3 +13,13 @@ The physics engine may move and rotate Nodes, therefore, the engine-side transfo
 The game may also change a Node's transform, in which case a "teleported" flag is set, signaling to the engine that it should overwrite its own transform with the game transform.<br>
 The engine periodically uses the INode interface to call `Node::getTransform` which fetches the updated game transform.<br>
 > Note that the game may only modify transforms during events fired by the engine (such as `Node::tick`) in order to prevent race conditions between threads.
+
+## Per-frame sequence
+1. Tick game
+2. Pull transform updates from game
+3. Sector system update (move nodes between sectors when needed)
+4. Apply transform updates to physics engine (if any changed)
+5. Simulate physics for one step
+6. Update instance data for rendering
+7. Render frame
+8. Push updated transforms to the game (for next frame)

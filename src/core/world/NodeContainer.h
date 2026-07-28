@@ -65,6 +65,7 @@ namespace WorldSystem
 
 		// returns the EngineNodeData for every node that has a Mesh
 		std::vector<EngineNodeData*> getMeshes() const;
-
+		// returns the EngineNodeData for every node
+		std::vector<EngineNodeData*> getEngineNodeDatas() const;
 	};
 }

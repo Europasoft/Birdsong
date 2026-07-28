@@ -63,7 +63,6 @@ namespace WorldSystem
 	void Scene::initGlobalDescriptorSet()
 	{
 		using namespace EngineCore;
-		using namespace Nodes;
 
 		// create a basic camera
 		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 10, .farDistance = 10000 * 100 });
@@ -118,15 +117,6 @@ namespace WorldSystem
 		const float S = static_cast<float>(Sector::SECTOR_SIZE);
 		lightPos.y -= 50.f * static_cast<float>(deltaTime);
 		float roughness = 0.15f;
-		/* TODO: ASAP!
-		if (getLoadedSectors().size() && getPersistentSector().nodes.size() > 0)
-		{
-			glm::vec3 camPosRelative{}; // TODO: this can be removed, now using camera-relative rendering in the shader
-			auto& meshDset = *getPersistentSector().nodes[0]->getMaterial()->getMaterialSpecificDescriptorSet();
-			meshDset.writeUBOMember(0, camPosRelative, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
-			meshDset.writeUBOMember(0, lightPos, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
-			meshDset.writeUBOMember(0, roughness, EngineCore::UBO_Layout::ElementAccessor{ 2, 0, 0 }, frameIndex);
-		}*/
 	}
 
 	void Scene::updateInstanceData(uint32_t frameIndex)
@@ -154,13 +144,33 @@ namespace WorldSystem
 		instanceBuffer->pushBufferToGPU(frameIndex);
 	}
 
+	void Scene::updateNodes()
+	{
+		// TODO: this should be done for all nodes, not just meshes
+		for (Sector* sector : getLoadedSectors())
+		{
+			for (EngineNodeData* nodeData : sector->nodes().getMeshes())
+			{
+				// update the engine-side node transform with data from the game
+				nodeData->updateTransformFromGame();
+			}
+		}
+	}
+
 	void Scene::physicsTick()
 	{
-		// TODO: ASAP
-		//for (auto& sector : sectors)
-		//{
-		//	sector->physicsTick();
-		//}
+		for (Sector* sector : getLoadedSectors())
+		{
+			sector->physicsTick();
+		}
+	}
+
+	void Scene::gamePostPhysicsUpdate()
+	{
+		for (Sector* sector : getLoadedSectors())
+		{
+			sector->gamePostPhysicsUpdate();
+		}
 	}
 
 	void Scene::sectorUpdate(EngineCore::Camera& camera)
@@ -168,8 +178,7 @@ namespace WorldSystem
 		if (updateSectorCoord(camera.transform.translation))
 		{
 			// new local sector entered
-			// TODO: ASAP - this should not be commented out
-			//loadSector(getLocalSectorCoordinate());
+			loadSector(getLocalSectorCoordinate());
 		}
 	}
 
@@ -204,23 +213,10 @@ namespace WorldSystem
 		return enteredNewSector;
 	}
 
-	/* TODO: ASAP!
-	Sector& Scene::loadSector(const SectorCoord& sectorPosition)
+	void Scene::loadSector(const SectorCoord& coord)
 	{
-		
-		// TODO: allow loading arbitrary sectors from file
-		if (sectorPosition != SectorCoord(0,0,0))
-		{
-			//std::cout << "sector loading not implemented for " << sectorPosition.x << ", " << sectorPosition.y << ", " << sectorPosition.z;
-			return *sectors.back().get();
-		}
-		else
-		{
-			
-		}
-
-		return *sectors.back().get();
-	}*/
+		// TODO: load sectors from disk
+	}
 
 	const SectorCoord& Scene::getLocalSectorCoordinate() const
 	{
@@ -249,7 +245,7 @@ namespace WorldSystem
 
 	void Scene::forgetSector(const SectorCoord& coord)
 	{
-		/*TODO: ASAP
+		/*TODO: 
 		auto it = std::remove_if(sectors.begin(), sectors.end(), [coord](const std::unique_ptr<Sector>& s) { return s->coordinates == coord; });
 		assert(it != sectors.end() && "attempted to remove an unknown world sector");
 		assert(it->get()->coordinates != getLocalSectorCoordinate() && "attempted to remove the local world sector");

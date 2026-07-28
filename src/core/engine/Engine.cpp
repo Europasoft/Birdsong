@@ -69,9 +69,7 @@ namespace EngineCore
 		EngineApplication::FrameContext f = {};
 		while (!window->getCloseWindow())
 		{
-			window->input.resetInputValues(); // reset input values
-			window->input.updateBoundInputs(); // get new input states
-			window->pollEvents(f.delta); // process events in window queue
+			inputTick(f.delta);
 
 			f.scene = &world->getScene();
 			f.camera = &f.scene->getCurrentCamera();
@@ -79,8 +77,8 @@ namespace EngineCore
 
 			// engine tick updates
 			moveCamera(*f.camera);
-			f.camera->testValue += window->input.getAxisValue(4) * static_cast<float>(f.delta) * 2.f;
-			gameLoader->tick(f.delta);
+			gameLoader->gameTick(f.delta);
+			f.scene->updateNodes();
 			f.scene->sectorUpdate(*f.camera);
 			f.scene->physicsTick();
 
@@ -91,6 +89,7 @@ namespace EngineCore
 				f.bufferIndex = renderer->getFrameIndex();
 				render(f);
 			}
+			f.scene->gamePostPhysicsUpdate();
 		}
 	}
 
@@ -167,6 +166,13 @@ namespace EngineCore
 		// submit command buffer
 		renderer->endFrame(); 
 		f.camera->setAspectRatio(renderer->getSwapchainAspectRatio());
+	}
+
+	void EngineApplication::inputTick(double delta)
+	{
+		window->input.resetInputValues(); // reset input values
+		window->input.updateBoundInputs(); // get new input states
+		window->pollEvents(delta); // process events in window queue
 	}
 
 	void EngineApplication::moveCamera(Camera& camera)

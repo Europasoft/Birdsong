@@ -1,7 +1,8 @@
 #include "core/world/Sector.h"
 #include "core/world/NodeContainer.h"
 #include "core/world/World.h"
-#include "core/nodes/Node.h"
+#include "core/include/shared/INode.h"
+#include "core/engine/interop/IEngineImpl.h"
 
 #include "deps/box3d-cpp/include/b3cpp.h"
 
@@ -10,6 +11,8 @@
 
 namespace WorldSystem
 {
+	using INode = EngineInterface::INode;
+
 	Sector::Sector(const SectorCoord& coord)
 		: coordinates{ coord }
 	{
@@ -55,18 +58,24 @@ namespace WorldSystem
 
 	void Sector::physicsTick()
 	{
-		static bool didExplode = false;//TMP
 		if (not physicsWorld) return;
 
-		// TODO: ASAP: make this work with the new system based on EngineNodeData
-		//for (Nodes::MeshNode* node : getMeshNodes())
-		//{
-		//	node->physicsTick();
-		//}
+		// pull transform updates from game
+		for (EngineNodeData* node : nodesContainer->getMeshes())
+		{
+			node->mesh->prePhysics(*node); 
+		}
 
-		physicsWorld->step();
+		physicsWorld->step(); // simulate physics
+
+		// get updated physics transforms
+		for (EngineNodeData* node : nodesContainer->getMeshes())
+		{
+			node->mesh->postPhysics(*node);
+		}
 
 		//TMP
+		static bool didExplode = false;
 		if (!didExplode)
 		{
 			b3cpp::ExplosionDef x;
@@ -75,7 +84,16 @@ namespace WorldSystem
 			x.position = { 0, 400, -200 };
 			x.impulsePerArea = 100000 * 100;
 			physicsWorld->explode(x);
-			didExplode = 1;
+			didExplode = true;
+		}
+	}
+
+	void Sector::gamePostPhysicsUpdate()
+	{
+		// push updated physics transforms to game, for next game tick
+		for (EngineNodeData* data : nodesContainer->getEngineNodeDatas())
+		{
+			EngineInteropUtil::setNodeTransform(data->iNode, data->engineTransform); // BOUNDARY CROSSING
 		}
 	}
 

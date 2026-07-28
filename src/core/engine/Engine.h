@@ -59,6 +59,7 @@ namespace EngineCore
 		struct FrameContext;
 		void render(const FrameContext& frame);
 		void moveCamera(Camera& camera);
+		void inputTick(double delta);
 
 		EngineRenderSettings renderSettings{};
 

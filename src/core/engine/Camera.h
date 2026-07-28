@@ -30,8 +30,6 @@ namespace EngineCore
 		float far = 6000.f;
 		float aspectRatio = 1.777f;
 
-		float testValue = 1.f; // debug test value, set by user input
-
 		void createConversionMatrices();
 
 		void setFieldOfView(float deg) { fov = (float)cglm::degToRad(deg); }
