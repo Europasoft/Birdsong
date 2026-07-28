@@ -20,6 +20,6 @@ The engine periodically uses the INode interface to call `Node::getTransform` wh
 3. Sector system update (move nodes between sectors when needed)
 4. Apply transform updates to physics engine (if any changed)
 5. Simulate physics for one step
-6. Push updated transforms to the game (for next frame)
-7. Update instance data for rendering
-8. Render frame
+6. Update instance data for rendering
+7. Render frame
+8. Push updated transforms to the game (for next frame)
