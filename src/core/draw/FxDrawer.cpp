@@ -19,24 +19,30 @@ namespace EngineCore
 						const std::vector<VkImageView>& inputDepthImageViews)
 		: device{ device }, defaultSet{ defaultSet }
 	{
-		// initialized as normal
-		uboSet = std::make_unique<DescriptorSet>(device); 
-		UBO_Struct ubo{};
-		ubo.add(uelem::vec2); // viewport extent value to be used in shader
-		uboSet->addUBO(ubo, device);
-		uboSet->finalize();
+		// draws the whole frame again, sampling from the framebuffer attachment of the previous pass
+		// after the fullscreen draw, translucent meshes are drawn
+		// this allows translucent shaders to sample any pixel from the whole frame
 
+		// descriptor set 1
 		// attachments use the same image count as the swapchain, so that number is used instead of MAX_FRAMES_IN_FLIGHT
-		attachmentSet = std::make_unique<DescriptorSet>(device, (uint32_t)inputImageViews.size()); // set 2
+		attachmentSet = std::make_unique<DescriptorSet>(device, (uint32_t)inputImageViews.size());
 		ImageArrayDescriptor inputImages{}; // rendered attachment image(s) from the previous renderpass
 		inputImages.addImage(inputImageViews);
-		//inputImages.addImage(inputDepthImageViews);
 		attachmentSet->addImageArray(inputImages);
 		attachmentSet->finalize();
 
-		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout(), uboSet->getLayout(), attachmentSet->getLayout() };
+		// descriptor set 2
+		uboSet = std::make_unique<DescriptorSet>(device);
+		UBO_Struct ubo{};
+		ubo.add(uelem::vec2); // viewport extent value to be used in shader
+		uboSet->addUBO(ubo, device);
+		uboSet->addSampler(createSampler()); // the sampler is not connected to any specific image, but the shader needs one
+		uboSet->finalize();
 
-		// setup material for the fullscreen shaders (no mesh)
+		// bind the scene-global set, and the 2 specialized ones
+		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout(), attachmentSet->getLayout(), uboSet->getLayout() };
+
+		// setup material for the fullscreen shaders (no mesh, a fullscreen triangle is created in the vertex shader)
 		ShaderFilePaths fullscreenShader(makePath("shaders/compiled/fullscreen.vert.spv"), makePath("shaders/compiled/fullscreen.frag.spv"));
 		MaterialCreateInfo fullscreenInfo(fullscreenShader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, 0, EMatSet::NO);
 		fullscreenInfo.shadingProperties.useVertexInput = false;
@@ -91,8 +97,29 @@ namespace EngineCore
 	void FxDrawer::bindDescriptorSets(VkCommandBuffer cmdBuffer, VkPipelineLayout pipelineLayout, uint32_t frameIndex, uint32_t swapImageIndex)
 	{
 		// note that sets 0-1 use frame index, but set 2 uses swapchain image index
-		std::array<VkDescriptorSet, 3> vkSets = { defaultSet.getDescriptorSet(frameIndex), uboSet->getDescriptorSet(frameIndex), attachmentSet->getDescriptorSet(swapImageIndex) };
+		std::array<VkDescriptorSet, 3> vkSets = { defaultSet.getDescriptorSet(frameIndex), attachmentSet->getDescriptorSet(swapImageIndex), uboSet->getDescriptorSet(frameIndex) };
 		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 3, vkSets.data(), 0, nullptr);
+	}
+
+	VkSampler FxDrawer::createSampler()
+	{
+		VkSamplerCreateInfo info = {};
+		info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		// exact 1:1 sampling for full-screen pass
+		info.magFilter = VK_FILTER_NEAREST;
+		info.minFilter = VK_FILTER_NEAREST;
+		info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		// prevent any edge bleeding outside [0, 1]
+		info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		// no mipmaps
+		info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		info.minLod = 0.f;
+		info.maxLod = 0.f;
+
+		Image::createSampler(attachmentSampler, device, info);
+		return attachmentSampler;
 	}
 
 

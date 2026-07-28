@@ -11,12 +11,21 @@ layout(location = 1) out vec3 fragPositionWS;
 layout(location = 2) out vec3 fragNormalWS;
 layout(location = 3) out vec2 fragUV;
 
-
+// SCENE GLOBAL DESCRIPTOR SET
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
 } ubo1;
+// FX DESCRIPTOR SET - ATTACHMENT FROM PREVIOUS PASS
+layout(set = 1, binding = 0) uniform texture2D attachment;
+// FX DESCRIPTOR SET - UBO
+layout(std430, set = 2, binding = 0) uniform UBO2
+{
+	vec2 extent;
+} fx;
+layout(set = 2, binding = 1) uniform sampler _attachmentSampler;
 
+// PUSH CONSTANTS - SPECIFIC TO FX PASS
 layout(push_constant) uniform Push
 {
 	mat4 transform;

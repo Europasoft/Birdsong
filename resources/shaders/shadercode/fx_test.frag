@@ -8,16 +8,19 @@ layout(location = 3) in vec2 fragUV;
 
 layout (location = 0) out vec4 outColor;
 
-
-layout(set = 0, binding = 2) uniform sampler _sampler;
-
-layout(std430, set = 1, binding = 0) uniform UBO2
+// SCENE GLOBAL DESCRIPTOR SET
+layout(std430, set = 0, binding = 0) uniform UBO1 
+{
+	mat4 projectionViewMatrix;
+} ubo1;
+// FX DESCRIPTOR SET - ATTACHMENT FROM PREVIOUS PASS
+layout(set = 1, binding = 0) uniform texture2D attachment;
+// FX DESCRIPTOR SET - UBO
+layout(std430, set = 2, binding = 0) uniform UBO2
 {
 	vec2 extent;
 } fx;
-
-// rendered image from previous pass
-layout(set = 2, binding = 0) uniform texture2D attachment;
+layout(set = 2, binding = 1) uniform sampler _attachmentSampler;
 
 
 void main()
@@ -32,12 +35,12 @@ void main()
     vec2 Radius = Size/resolution;
 	vec2 uv = gl_FragCoord.xy / resolution;
 	uv = gl_FragCoord.xy / resolution + fragNormalWS.xy / 20.0;
-	vec4 color = texture(sampler2D(attachment, _sampler), uv);
+	vec4 color = texture(sampler2D(attachment, _attachmentSampler), uv);
 	for(float d=0.0; d<Pi; d+=Pi/Directions)
     {
 		for(float i=1.0/Quality; i<=1.0; i+=1.0/Quality)
         {
-			color += texture(sampler2D(attachment, _sampler), uv+vec2(cos(d),sin(d))*Radius*i);
+			color += texture(sampler2D(attachment, _attachmentSampler), uv+vec2(cos(d),sin(d))*Radius*i);
         }
     }
 

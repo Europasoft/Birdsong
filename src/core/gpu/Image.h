@@ -32,6 +32,7 @@ namespace EngineCore
 		
 		static VkImageCreateInfo makeImageCreateInfo(uint32_t width, uint32_t height);
 		static void createSampler(VkSampler& samplerHandleOut, EngineDevice& device, const float& anisotropy = 0.f);
+		static void createSampler(VkSampler& samplerHandleOut, EngineDevice& device, VkSamplerCreateInfo info);
 
 		void setDebugName(const std::string& name);
 

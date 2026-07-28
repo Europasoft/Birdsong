@@ -11,15 +11,13 @@ layout(location = 1) out vec3 fragPositionWS;
 layout(location = 2) out vec3 fragNormalWS;
 layout(location = 3) out vec2 fragUV;
 
-
+// SCENE GLOBAL DESCRIPTOR SET
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
 } ubo1;
 
-layout(set = 0, binding = 1) uniform texture2D textures[2];
-layout(set = 0, binding = 2) uniform sampler _sampler;
-
+// PUSH CONSTANTS - ENGINE MESH
 layout(push_constant) uniform Push	
 {
 	mat4 transform;

@@ -21,14 +21,11 @@ struct InstanceData
     uint _pad;
 };
 
+// SCENE GLOBAL DESCRIPTOR SET
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
-    mat4 normalMatrix;
 } ubo1;
-
-layout(set = 0, binding = 1) uniform texture2D textures[2];
-layout(set = 0, binding = 2) uniform sampler _sampler;
 
 // second descriptor set: unbounded texture array
 layout(set = 1, binding = 0) uniform sampler2D globalTextures[];

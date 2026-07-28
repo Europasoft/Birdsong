@@ -246,6 +246,14 @@ namespace EngineCore
 		{ throw std::runtime_error("failed to create texture sampler"); }
 	}
 
+	void Image::createSampler(VkSampler& samplerHandleOut, EngineDevice& device, VkSamplerCreateInfo info)
+	{
+		if (vkCreateSampler(device.device(), &info, nullptr, &samplerHandleOut) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create texture sampler");
+		}
+	}
+
     void Image::setDebugName(const std::string& name)
     {
 		if (not device.enableValidationLayers)

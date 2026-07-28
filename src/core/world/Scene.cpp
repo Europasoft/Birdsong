@@ -69,20 +69,10 @@ namespace WorldSystem
 		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
 		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
 
-		// demo textures (remove these later)
-		marsTexture = std::make_unique<Image>(device, makePath("Textures/mars6k_v2.jpg"));
-		spaceTexture = std::make_unique<Image>(device, makePath("Textures/space.png"));
-
 		// scene global descriptors
 		UBO_Struct ubo1{};
 		ubo1.add(uelem::mat4); // MVP matrix
 		sceneGlobalDescriptorSet->addUBO(ubo1, device);
-		// as the demo textures will never be overwritten from the CPU, only one buffer is needed for each, so the view can simply be duplicated
-		ImageArrayDescriptor demoTextureArray{};
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, marsTexture->getView()));
-		demoTextureArray.addImage(std::vector<VkImageView>(EngineSwapChain::MAX_FRAMES_IN_FLIGHT, spaceTexture->getView()));
-		sceneGlobalDescriptorSet->addImageArray(demoTextureArray);
-		sceneGlobalDescriptorSet->addSampler(marsTexture->sampler);
 		sceneGlobalDescriptorSet->finalize();
 
 		// initialize texture manager and instance buffer (SSBO)
@@ -112,11 +102,6 @@ namespace WorldSystem
 		glm::mat4 pvm{ 1.f };
 		pvm = cam.getProjectionViewMatrix();
 		sceneGlobalDescriptorSet->writeUBOMember(0, pvm, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
-
-		//const auto& cameraSector = getLocalSectorCoordinate();
-		const float S = static_cast<float>(Sector::SECTOR_SIZE);
-		lightPos.y -= 50.f * static_cast<float>(deltaTime);
-		float roughness = 0.15f;
 	}
 
 	void Scene::updateInstanceData(uint32_t frameIndex)

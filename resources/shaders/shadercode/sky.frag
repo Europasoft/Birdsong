@@ -10,12 +10,8 @@ layout (location = 0) out vec4 outColor;
 layout (depth_any) out float gl_FragDepth;
 
 
-layout(set = 0, binding = 1) uniform texture2D textures[2];
-layout(set = 0, binding = 2) uniform sampler _sampler;
-
-
 void main() 
 {
 	gl_FragDepth = 0.9999999;
-	outColor = texture(sampler2D(textures[1], _sampler), fragUV);
+	outColor = vec4(0.0, 0.0, 0.0, 1.0); //texture(sampler2D(textures[1], _sampler), fragUV);
 }

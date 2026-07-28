@@ -14,14 +14,11 @@ layout(location = 1) out vec3 fragPositionWS;
 layout(location = 2) out vec3 fragNormalWS;
 layout(location = 3) out vec2 fragUV;
 
+// SCENE GLOBAL DESCRIPTOR SET
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
-  //testStruct[2] test;
 } ubo1;
-
-layout(set = 0, binding = 1) uniform texture2D textures[2];
-layout(set = 0, binding = 2) uniform sampler _sampler;
 
 struct InstanceData 
 {
@@ -33,11 +30,13 @@ struct InstanceData
     uint _pad;
 };
 
+// GLOBAL INSTANCE BUFFER BDA
 layout(buffer_reference, scalar) readonly buffer InstanceBufferRef 
 {
     InstanceData instances[];
 };
 
+// PUSH CONSTANTS
 layout(push_constant) uniform PushConstants 
 {
     InstanceBufferRef instanceBuffer;
