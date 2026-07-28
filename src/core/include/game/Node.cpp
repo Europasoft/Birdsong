@@ -19,23 +19,23 @@ namespace EngineInterface
 		engine->unregisterNode(this);
 	}
 
-	void Node::tickCall(float dt)
+	void DLL_CALL Node::tickCall(float dt)
 	{
 		tick(dt);
 	}
 
-	void Node::getTransform(uint8_t* buffer) const
+	void DLL_CALL Node::getTransform(uint8_t* buffer) const
 	{
 		BoundaryUtils::packTransform(transform, buffer); // send to engine
 	}
 
-	void Node::setTransform(const uint8_t* buffer)
+	void DLL_CALL Node::setTransform(const uint8_t* buffer)
 	{
 		BoundaryUtils::unpackTransform(buffer, transform); // retrieve from engine
 		teleported = false;
 	}
 
-	bool Node::getDidTeleport() const
+	bool DLL_CALL Node::getDidTeleport() const
 	{
 		return teleported;
 	}

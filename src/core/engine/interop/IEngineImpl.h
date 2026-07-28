@@ -35,6 +35,7 @@ namespace EngineCore
 		void DLL_CALL setMeshForNode(EngineInterface::INode* iNode, const char* str, size_t size) final override;
 		void DLL_CALL setTextureForNode(EngineInterface::INode* iNode, const char* str, size_t size) final override;
 		void DLL_CALL setPhysicsBodyForNode(EngineInterface::INode* iNode) final override;
+		void DLL_CALL physicsExplode(const uint8_t* transformBuffer, float falloff, float radius, float impulsePerArea) final override;
 
 	private:
 		EngineApplication& engine;

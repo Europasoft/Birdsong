@@ -35,21 +35,21 @@ namespace EngineCore
 
 	// functions called from the game DLL, executes in engine
 
-	void IEngineImpl::registerNode(INode* iNode)
+	void DLL_CALL IEngineImpl::registerNode(INode* iNode)
 	{
 		// add node to the engine registry
 		Sector* sector = EngineInteropUtil::getNodeSector(iNode, world.getScene(), ESectorLookup::FIND_OR_CREATE);
 		sector->nodes().add(iNode, std::make_unique<EngineNodeData>(iNode, device));
 	}
 
-	void IEngineImpl::unregisterNode(INode* iNode)
+	void DLL_CALL IEngineImpl::unregisterNode(INode* iNode)
 	{
 		// remove node from the engine registry
 		Sector* sector = EngineInteropUtil::getNodeSector(iNode, world.getScene(), ESectorLookup::FIND_EXISTING);
 		sector->nodes().remove(iNode);
 	}
 
-	void IEngineImpl::setMeshForNode(INode* iNode, const char* str, size_t size)
+	void DLL_CALL IEngineImpl::setMeshForNode(INode* iNode, const char* str, size_t size)
 	{
 		// called by the game to set which mesh a node uses
 		std::string path(str, size);
@@ -89,12 +89,12 @@ namespace EngineCore
 		eNode.mesh->setMaterial(material);
 	}
 
-	void IEngineImpl::setTextureForNode(INode* iNode, const char* str, size_t size)
+	void DLL_CALL IEngineImpl::setTextureForNode(INode* iNode, const char* str, size_t size)
 	{
 		// TODO: implement setTextureForNode
 	}
 
-	void IEngineImpl::getMousePosition(double& x, double& y) const
+	void DLL_CALL IEngineImpl::getMousePosition(double& x, double& y) const
 	{
 		const auto mp = engine.window->input.getMousePosition();
 		x = mp.x;
@@ -114,6 +114,11 @@ namespace EngineCore
 		assert(body);
 		shape.activate(shapeDef);
 		assert(shape);
+	}
+
+	void DLL_CALL IEngineImpl::physicsExplode(const uint8_t* transformBuffer, float falloff, float radius, float impulsePerArea)
+	{
+
 	}
 
 }

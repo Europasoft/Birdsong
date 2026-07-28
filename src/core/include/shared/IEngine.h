@@ -17,6 +17,8 @@ namespace EngineInterface
 		virtual void DLL_CALL setMeshForNode(INode* iNode, const char* str, size_t size) = 0;
 		virtual void DLL_CALL setTextureForNode(INode* iNode, const char* str, size_t size) = 0;
 		virtual void DLL_CALL setPhysicsBodyForNode(INode* iNode) = 0;
+		virtual void DLL_CALL physicsExplode(const uint8_t* transformBuffer, float falloff, float radius, float impulsePerArea) = 0;
+		
 
 	protected:
 		// prevent the game DLL from deleting the object
