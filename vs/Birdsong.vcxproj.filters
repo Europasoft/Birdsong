@@ -268,6 +268,12 @@
     <ClCompile Include="..\src\core\nodes\MeshCache.cpp">
       <Filter>core\nodes</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\draw\planets\LODSphere.cpp">
+      <Filter>core\draw\planets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\draw\planets\PlanetDrawer.cpp">
+      <Filter>core\draw\planets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -561,6 +567,12 @@
     <ClInclude Include="..\src\core\nodes\MeshCache.h">
       <Filter>core\nodes</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\draw\planets\LODSphere.h">
+      <Filter>core\draw\planets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\planets\PlanetDrawer.h">
+      <Filter>core\draw\planets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -631,6 +643,9 @@
     </Filter>
     <Filter Include="core\gpu\descriptors">
       <UniqueIdentifier>{1003dc91-1803-482f-8238-a2b65ca8f740}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\draw\planets">
+      <UniqueIdentifier>{1a762a15-deca-47a3-8f93-d789dbd8a0b1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,7 @@
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Image.h"
 #include "core/engine/interop/GameLoader.h"
+#include "core/draw/planets/PlanetDrawer.h"
 
 #include <stdexcept>
 #include <array>
@@ -104,6 +105,7 @@ namespace EngineCore
 		fxDrawer = std::make_unique<FxDrawer>(*device, sceneGlobalDescriptorSet, fxFormats, renderer->getFxPassInputImageViews(), renderer->getFxPassInputDepthImageViews());
 		uiDrawer = std::make_unique<InterfaceDrawer>(*device, baseFormats, renderSettings.sampleCountMSAA);
 		debugDrawer = std::make_unique<DebugDrawer>(*device, sceneGlobalDescriptorSet, baseFormats, renderSettings.sampleCountMSAA);
+		planetDrawer = std::make_unique<PlanetDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
 	}
 
 	void EngineApplication::setupDefaultInputs()
@@ -145,13 +147,16 @@ namespace EngineCore
 		f.scene->updateInstanceData(f.bufferIndex);
 
 		debugDrawer->removeDebugBoxes();
-		debugDrawer->addDebugBox(Vec(static_cast<float>(f.scene->getSectorSize())), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
+		//debugDrawer->addDebugBox(Vec(static_cast<float>(f.scene->getSectorSize())), Vec(0.f), Vec(0.f, 0.f, .8f), 0.5f);
 		
 		// RENDER BASE PASS
 		renderer->beginRenderingBase(f.commandBuffer); 
 
 		// render sky sphere
 		skyDrawer->renderSky(f.bufferIndex, f.commandBuffer, f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->transform.translation);
+
+		// render planet (experimental)
+		planetDrawer->render(f.commandBuffer, f.bufferIndex);
 
 		// render meshes
 		meshDrawer->renderMeshes(f.commandBuffer, *world, f.bufferIndex);

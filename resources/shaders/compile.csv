@@ -7,4 +7,6 @@ debug_primitive.frag,
 fullscreen.vert,
 fullscreen.frag,
 fx_test.vert,
-fx_test.frag
+fx_test.frag,
+planet.frag,
+planet.vert

@@ -24,6 +24,7 @@ namespace EngineCore
 	class FxDrawer;
 	class InterfaceDrawer;
 	class DebugDrawer;
+	class PlanetDrawer;
 	class GameLoader;
 	class Camera;
 
@@ -79,6 +80,7 @@ namespace EngineCore
 		std::unique_ptr<FxDrawer> fxDrawer;
 		std::unique_ptr<InterfaceDrawer> uiDrawer;
 		std::unique_ptr<DebugDrawer> debugDrawer;
+		std::unique_ptr<PlanetDrawer> planetDrawer;
 
 		std::unique_ptr<GameLoader> gameLoader;
 		std::unique_ptr<WorldSystem::World> world;

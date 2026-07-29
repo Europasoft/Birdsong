@@ -88,7 +88,7 @@ namespace EngineCore
 		float lookSpeed = 0.002f;
 		float moveSpeed = 30.f;
 		//if (extraSpeed) { moveSpeed *= 80.f; }
-		if (extraSpeed) { moveSpeed *= 100.f; }
+		if (extraSpeed) { moveSpeed *= 100.f * 100; }
 
 		transform.rotation.y += (float)lookInput.y * lookSpeed;      // pitch
 		transform.rotation.z += (float)(-lookInput.x) * lookSpeed;   // yaw

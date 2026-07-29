@@ -11,6 +11,7 @@
 
 void spawn(DemoGame& g, xyz p, EngineInterface::IEngine* engine)
 {
+	return; // don't spawn anything, for now
 	g.demoMeshes.push_back(g.spawnNode<EngineInterface::MeshNode>());
 	g.demoMeshes.back()->setMesh();
 	Transform t = g.demoMeshes.back()->getTransform();
@@ -54,7 +55,7 @@ void DemoGame::tick(double dt)
 
 	static double explodeTimer = 0;
 	explodeTimer += dt;
-	if (explodeTimer > 2)
+	if (explodeTimer > 2 && demoMeshes.size())
 	{
 		CommonGameFunctions::physicsExplode(demoMeshes.back()->getTransform(), 10000, 1000, 100000 * 150);
 		explodeTimer = -15;
