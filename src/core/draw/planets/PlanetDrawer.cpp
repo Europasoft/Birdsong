@@ -24,8 +24,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-static constexpr auto resolution = 2;
-static constexpr auto radius = 1000.f;
+static constexpr auto presetResolution = 2;
+static constexpr auto presetRadius = 1000.f;
 
 namespace EngineCore
 {
@@ -54,8 +54,6 @@ namespace EngineCore
 		{
 			ctx.rootFaces.push_back(std::make_unique<Quad>());
 			Quad& quad = *ctx.rootFaces.back();
-			//initRootFaceAsLeaf(quad, i, ctx.material);
-			// instead of treating roots as leaves, actually generate children
 
 			// set up quad metadata for root
 			quad.center = { -1.0f, -1.0f }; // using bottom-left as offset
@@ -66,8 +64,8 @@ namespace EngineCore
 			quad.node = std::make_unique<EngineNodeData>(nullptr, device);
 			quad.node->mesh = std::make_unique<Mesh>(device);
 
-			// use generateSubFace instead of generateCubeFace for root too, keeping everything uniform
-			quad.node->mesh->build(Planets::generateSubFace(i, resolution, radius, {quad.center.x, quad.center.y}, quad.size, true));
+			// generate the mesh
+			quad.node->mesh->build(Planets::generateSubFace(i, presetResolution, presetRadius, {quad.center.x, quad.center.y}, quad.size, true));
 
 			Transform tf{};
 			tf.translation.x = 800;
@@ -79,18 +77,78 @@ namespace EngineCore
 
 		// test - just split one of the root faces and its children, for now
 		auto& rootface = *ctx.rootFaces[1];
-		splitQuad(rootface, ctx.material);
+		splitQuad(rootface, ctx.material, presetRadius, presetResolution);
 		for (auto& c : rootface.children)
 		{
-			splitQuad(*c, ctx.material);
+			splitQuad(*c, ctx.material, presetRadius, presetResolution);
 			for (auto& j : c->children)
 			{
-				splitQuad(*j, ctx.material);
+				splitQuad(*j, ctx.material, presetRadius, presetResolution);
 			}
 		}
 	}
 
-	void PlanetDrawer::splitQuad(Quad& quad, std::shared_ptr<Material> material)
+	void PlanetDrawer::updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, float radius, int resolution)
+	{
+		// 1. Estimate 3D center point of this quad on the sphere surface
+		// (You can map quad.center + quad.size * 0.5f from local face space to 3D world space)
+		Vec264 localCenter2D = { quad.center.x + quad.size * 0.5f, quad.center.y + quad.size * 0.5f };
+		Vec64 sphereCenter3D = Planets::projectToSphere(static_cast<uint32_t>(quad.face), localCenter2D, radius);
+
+		// Account for planet scale/transform offset if necessary
+		// float distance = distance(cameraPos, sphereCenter3D * transformScale + transformTranslation);
+		float distance = Vec64::distance(cameraPos, sphereCenter3D);
+
+		// 2. Define your split threshold rule (e.g., split if node size relative to distance is large)
+		// Adjust 'splitThreshold' multiplier to tune when nodes subdivide
+		float splitThreshold = quad.size * 2.5f;
+		bool shouldSplit = (distance < splitThreshold) && (quad.lodLevel < 6); // Max LOD cap e.g. 6
+
+		if (shouldSplit)
+		{
+			if (quad.node) // It's currently a leaf node, split it!
+			{
+				splitQuad(quad, material, radius, resolution);
+			}
+
+			// Recursively evaluate children
+			for (auto& child : quad.children)
+			{
+				updateLOD(*child, cameraPos, material, radius, resolution);
+			}
+		}
+		else
+		{
+			if (!quad.node) // It has children, but we are far enough to merge back
+			{
+				// Check if all children are leaves before merging (prevents popping artifacts)
+				bool allChildrenAreLeaves = true;
+				for (const auto& child : quad.children)
+				{
+					if (!child->node)
+					{
+						allChildrenAreLeaves = false; break;
+					}
+				}
+
+				if (allChildrenAreLeaves)
+				{
+					// Re-create parent node mesh/leaf state and clear children
+					quad.node = std::make_unique<EngineNodeData>(nullptr, device);
+					quad.node->mesh = std::make_unique<Mesh>(device);
+					quad.node->mesh->build(Planets::generateSubFace(static_cast<int>(quad.face), resolution, radius, { quad.center.x, quad.center.y }, quad.size, true));
+
+					// Copy transform from children/planet context
+					quad.node->engineTransform = quad.children[0]->node->engineTransform;
+					quad.node->mesh->setMaterial(material);
+
+					quad.children.clear();
+				}
+			}
+		}
+	}
+
+	void PlanetDrawer::splitQuad(Quad& quad, std::shared_ptr<Material> material, float radius, int resolution)
 	{
 		if (not quad.node) return; // already split
 
@@ -135,20 +193,6 @@ namespace EngineCore
 		quad.children.clear();
 		// re-instantiate quad.node here if you want it to be a leaf again, 
 		// or handle it inside your LOD evaluation loop.
-	}
-
-	void PlanetDrawer::initRootFaceAsLeaf(Quad& quad, uint32_t i, std::shared_ptr<Material> material)
-	{
-		// this is only used if we want the 6 root faces to be leaf nodes themselves, with no children
-		quad.node = std::make_unique<EngineNodeData>(nullptr, device);
-		quad.node->mesh = std::make_unique<Mesh>(device);
-		quad.node->mesh->build(Planets::generateCubeFace(i, 2, 60));
-		Transform tf{};
-		tf.translation.x = 65000;
-		tf.scale = { 500 };
-		tf.sector = { 0, 0, 0 };
-		quad.node->engineTransform = tf;
-		quad.node->mesh->setMaterial(material);
 	}
 
 	PlanetDrawer::~PlanetDrawer() = default;

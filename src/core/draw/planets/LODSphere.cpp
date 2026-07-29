@@ -6,9 +6,9 @@
 namespace EngineCore::Planets
 {
 	// Simple hash function to map patch coordinates to a 32-bit integer
-	uint32_t hashPatch(int face_index, float x_offset, float y_offset, float scale)
+	uint32_t hashPatch(uint32_t faceIndex, double x_offset, double y_offset, double scale)
 	{
-		uint32_t h = static_cast<uint32_t>(face_index);
+		uint32_t h = static_cast<uint32_t>(faceIndex);
 
 		// Convert floats to bits for hashing
 		uint32_t x_bits, y_bits, s_bits;
@@ -25,9 +25,9 @@ namespace EngineCore::Planets
 	}
 
 	// Convert a hash seed into normalized RGB float components [0.1, 0.9] to avoid pure black/white
-	std::array<float, 3> getPatchColor(int face_index, std::array<float, 2> offset, float scale)
+	std::array<float, 3> getPatchColor(uint32_t faceIndex, Vec264 offset, double scale)
 	{
-		uint32_t h = hashPatch(face_index, offset[0], offset[1], scale);
+		uint32_t h = hashPatch(faceIndex, offset.x, offset.y, scale);
 
 		float r = 0.1f + 0.8f * ((h & 0xFF) / 255.0f);
 		float g = 0.1f + 0.8f * (((h >> 8) & 0xFF) / 255.0f);
@@ -42,62 +42,84 @@ namespace EngineCore::Planets
 		return rootColors[i];
 	}
 
-	MeshBuilder generateCubeFace(int face_index, int resolution, float radius)
+	// offset: 2D local face offset, e.g. {-0.5f, 0.5f}
+	// scale: 2D local face size extent for this node (Root is 2.0f, LOD 1 is 1.0f, etc.)
+	MeshBuilder generateSubFace(uint32_t faceIndex, uint32_t resolution, double radius, Vec264 offset, double scale, bool isRootFace)
 	{
 		MeshBuilder mesh = {};
+		// an nxn grid of quads requires (n+1) x (n+1) vertices.
 		mesh.vertices.reserve((resolution + 1) * (resolution + 1));
+		// each quad consists of 2 triangles = 6 indices. nxn quads * 6 = total indices
 		mesh.indices.reserve(resolution * resolution * 6);
 
-		// Face orientation basis vectors (Right, Up, Forward)
-		static const std::array<std::array<float, 3>, 6> rights = { {{0,0,1}, {0,0,-1}, {1,0,0}, {1,0,0}, {1,0,0}, {-1,0,0}} };
-		static const std::array<std::array<float, 3>, 6> ups = { {{0,1,0}, {0,1,0}, {0,0,1}, {0,0,-1}, {0,1,0}, {0,1,0}} };
-		static const std::array<std::array<float, 3>, 6> forwards = { {{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}, {0,0,-1}} };
+		// CUBE FACE BASIS VECTOR DEFINITIONS
+		// orthonormal 3d axes defining the 2d plane coordinate system for each of the 6 cube faces
+		// face layout: +x, -x, +y, -y, +z, -z
+		static const std::array<Vec64, 6> rights = { {{0,0,1}, {0,0,-1}, {1,0,0}, {1,0,0}, {1,0,0}, {-1,0,0}} };
+		static const std::array<Vec64, 6> ups = { {{0,1,0}, {0,1,0}, {0,0,1}, {0,0,-1}, {0,1,0}, {0,1,0}} };
+		static const std::array<Vec64, 6> forwards = { {{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}, {0,0,-1}} };
 
-		const auto& r = rights[face_index];
-		const auto& u = ups[face_index];
-		const auto& f = forwards[face_index];
+		// select the basis vectors corresponding to the specified faceIndex
+		const auto& r = rights[faceIndex]; // local 2D x-axis on cube face
+		const auto& u = ups[faceIndex]; // local 2D y-axis on cube face
+		const auto& f = forwards[faceIndex]; // cube face normal vector (distance = 1 from origin)
 
-		constexpr float PI_OVER_4 = 0.78539816339f;
+		constexpr double PI_OVER_4 = 0.78539816339f; // constant PI / 4 used for equiangular warping: tan(PI/4) = 1, tan(-PI/4) = -1
 
-		// Generate Vertices
-		for (int y = 0; y <= resolution; ++y)
+		// VERTEX GENERATION LOOP
+		for (uint32_t y = 0; y <= resolution; ++y)
 		{
-			float my = (static_cast<float>(y) / resolution) * 2.0f - 1.0f; // [-1, 1]
-			float tan_y = std::tan(my * PI_OVER_4);
+			// convert y loop index to local normalized coordinate [0.0, 1.0]
+			double local_y = static_cast<double>(y) / resolution;
 
-			for (int x = 0; x <= resolution; ++x)
+			// apply scale and quadtree offset to compute coordinate in range [-1.0, 1.0]
+			double my = offset.x + local_y * scale;
+
+			// apply equiangular (tangent) distortion mapping to y axis
+			// this converts uniform linear spacing into uniform angular spacing on the sphere,
+			// preventing area compression/distortion at cube corners
+			double tan_y = std::tan(my * PI_OVER_4);
+
+			for (uint32_t x = 0; x <= resolution; ++x)
 			{
-				float mx = (static_cast<float>(x) / resolution) * 2.0f - 1.0f; // [-1, 1]
-				float tan_x = std::tan(mx * PI_OVER_4);
+				// convert x loop index to local normalized coordinate [0.0, 1.0]
+				double local_x = static_cast<double>(x) / resolution;
 
-				// Point on local unit cube
-				float cx = f[0] + r[0] * tan_x + u[0] * tan_y;
-				float cy = f[1] + r[1] * tan_x + u[1] * tan_y;
-				float cz = f[2] + r[2] * tan_x + u[2] * tan_y;
+				// (map into local face space [-1, 1])
+				// map to cube face range [-1.0, 1.0] using offset and scale
+				double mx = offset.y + local_x * scale;
 
-				// Project to sphere surface
-				float inv_len = 1.0f / std::sqrt(cx * cx + cy * cy + cz * cz);
-				float nx = cx * inv_len;
-				float ny = cy * inv_len;
-				float nz = cz * inv_len;
+				// apply equiangular distortion mapping to x-axis
+				double tan_x = std::tan(mx * PI_OVER_4);
+
+				// construct 3D point (cx, cy, cz) on the surface of the unit cube:
+				// center_point + (right_vector * tan_x) + (up_vector * tan_y)
+				double cx = f.x + r.x * tan_x + u.x * tan_y;
+				double cy = f.y + r.y * tan_x + u.y * tan_y;
+				double cz = f.z + r.z * tan_x + u.z * tan_y;
+
+				
+				// projects point onto unit sphere by using inverse magnitude to normalize the vector
+				double inv_len = 1.0f / std::sqrt(cx * cx + cy * cy + cz * cz);
+				// unit vector pointing outwards from sphere center (also doubles as surface normal)
+				double nx = cx * inv_len;
+				double ny = cy * inv_len;
+				double nz = cz * inv_len;
 
 				Vertex v;
-				v.position[0] = nx * radius;
-				v.position[1] = ny * radius;
-				v.position[2] = nz * radius;
-
-				v.normal[0] = nx;
-				v.normal[1] = ny;
-				v.normal[2] = nz;
-
-				static const std::array<std::array<float, 3>, 6> colors = { {{0.1,0.3,0.2}, {0.0,0.2,0.4}, {0.3,0.1,0.3}, {0.0,0.6,0.2}, {0.7,0.5,0.0}, {0.1,0.9,0.8}} };
-				v.color = { colors[face_index][0], colors[face_index][1], colors[face_index][2] };
+				// scale unit vector by radius to place vertex at actual world-space sphere radius
+				v.position = { nx * radius, ny * radius, nz * radius };
+				v.normal = { nx, ny, nz };
+				auto col = getPatchColor(faceIndex, offset, scale);
+				if (isRootFace) col = getRootPatchColor(faceIndex);
+				v.color = { col[0], col[1], col[2] };
 
 				mesh.vertices.push_back(v);
 			}
 		}
 
-		// Generate Indices
+		// INDEX GENERATION LOOP (TRIANGULATION)
+		// distance in vertex array between adjacent vertical rows — indices are relative to this patch's local mesh
 		int stride = resolution + 1;
 		for (int y = 0; y < resolution; ++y)
 		{
@@ -108,12 +130,10 @@ namespace EngineCore::Planets
 				uint32_t i2 = x + (y + 1) * stride;
 				uint32_t i3 = (x + 1) + (y + 1) * stride;
 
-				// Triangle 1
 				mesh.indices.push_back(i0);
 				mesh.indices.push_back(i2);
 				mesh.indices.push_back(i1);
 
-				// Triangle 2
 				mesh.indices.push_back(i1);
 				mesh.indices.push_back(i2);
 				mesh.indices.push_back(i3);
@@ -123,85 +143,35 @@ namespace EngineCore::Planets
 		return mesh;
 	}
 
-	// offset: 2D local face offset, e.g. {-0.5f, 0.5f}
-	// scale: 2D local face size extent for this node (Root is 2.0f, LOD 1 is 1.0f, etc.)
-	MeshBuilder generateSubFace(int face_index, int resolution, float radius,
-					std::array<float, 2> offset, float scale, bool isRootFace)
+	// uses the same math as the face generator to map a 2D local coordinate back to a 3D point on the unit cube and project it to the sphere radius
+	Vec64 projectToSphere(uint32_t faceIndex, Vec264 localCenter2D, double radius)
 	{
-		MeshBuilder mesh = {};
-		mesh.vertices.reserve((resolution + 1) * (resolution + 1));
-		mesh.indices.reserve(resolution * resolution * 6);
-
 		static const std::array<std::array<float, 3>, 6> rights = { {{0,0,1}, {0,0,-1}, {1,0,0}, {1,0,0}, {1,0,0}, {-1,0,0}} };
 		static const std::array<std::array<float, 3>, 6> ups = { {{0,1,0}, {0,1,0}, {0,0,1}, {0,0,-1}, {0,1,0}, {0,1,0}} };
 		static const std::array<std::array<float, 3>, 6> forwards = { {{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}, {0,0,-1}} };
 
-		const auto& r = rights[face_index];
-		const auto& u = ups[face_index];
-		const auto& f = forwards[face_index];
+		const auto& r = rights[faceIndex];
+		const auto& u = ups[faceIndex];
+		const auto& f = forwards[faceIndex];
 
 		constexpr float PI_OVER_4 = 0.78539816339f;
 
-		for (int y = 0; y <= resolution; ++y)
-		{
-			// 1. Convert grid index to normalized node space [0, 1]
-			float local_y = static_cast<float>(y) / resolution;
+		float mx = localCenter2D.x;
+		float my = localCenter2D.y;
+		float tan_x = std::tan(mx * PI_OVER_4);
+		float tan_y = std::tan(my * PI_OVER_4);
 
-			// 2. Map into local face space [-1, 1] using offset and scale
-			float my = offset[1] + local_y * scale;
-			float tan_y = std::tan(my * PI_OVER_4);
+		// point on local unit cube
+		float cx = f[0] + r[0] * tan_x + u[0] * tan_y;
+		float cy = f[1] + r[1] * tan_x + u[1] * tan_y;
+		float cz = f[2] + r[2] * tan_x + u[2] * tan_y;
 
-			for (int x = 0; x <= resolution; ++x)
-			{
-				float local_x = static_cast<float>(x) / resolution;
+		// project to sphere surface
+		float inv_len = 1.0f / std::sqrt(cx * cx + cy * cy + cz * cz);
+		float nx = cx * inv_len;
+		float ny = cy * inv_len;
+		float nz = cz * inv_len;
 
-				// Map into local face space [-1, 1]
-				float mx = offset[0] + local_x * scale;
-				float tan_x = std::tan(mx * PI_OVER_4);
-
-				// Point on local unit cube
-				float cx = f[0] + r[0] * tan_x + u[0] * tan_y;
-				float cy = f[1] + r[1] * tan_x + u[1] * tan_y;
-				float cz = f[2] + r[2] * tan_x + u[2] * tan_y;
-
-				// Normalize and project to sphere surface
-				float inv_len = 1.0f / std::sqrt(cx * cx + cy * cy + cz * cz);
-				float nx = cx * inv_len;
-				float ny = cy * inv_len;
-				float nz = cz * inv_len;
-
-				Vertex v;
-				v.position = { nx * radius, ny * radius, nz * radius };
-				v.normal = { nx, ny, nz };
-				auto col = getPatchColor(face_index, offset, scale);
-				if (isRootFace) col = getRootPatchColor(face_index);
-				v.color = { col[0], col[1], col[2] };
-
-				mesh.vertices.push_back(v);
-			}
-		}
-
-		// Index generation stays identical — indices are relative to this patch's local mesh
-		int stride = resolution + 1;
-		for (int y = 0; y < resolution; ++y)
-		{
-			for (int x = 0; x < resolution; ++x)
-			{
-				uint32_t i0 = x + y * stride;
-				uint32_t i1 = (x + 1) + y * stride;
-				uint32_t i2 = x + (y + 1) * stride;
-				uint32_t i3 = (x + 1) + (y + 1) * stride;
-
-				mesh.indices.push_back(i0);
-				mesh.indices.push_back(i2);
-				mesh.indices.push_back(i1);
-
-				mesh.indices.push_back(i1);
-				mesh.indices.push_back(i2);
-				mesh.indices.push_back(i3);
-			}
-		}
-
-		return mesh;
+		return Vec64{ nx * radius, ny * radius, nz * radius };
 	}
 }

@@ -63,10 +63,11 @@ namespace EngineCore
 		WorldSystem::World& world;
 		std::vector<std::unique_ptr<PlanetNodeContext>> planets;
 
-		void splitQuad(Quad& quad, std::shared_ptr<Material> material);
+		void updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, float radius, int resolution);
+
+		void splitQuad(Quad& quad, std::shared_ptr<Material> material, float radius, int resolution);
 		void mergeQuad(Quad& quad);
 
-		void initRootFaceAsLeaf(Quad& quad, uint32_t i, std::shared_ptr<Material> material);
 		void recurseDrawQuad(Quad& quad, Material& material, VkCommandBuffer commandBuffer);
 		void drawLeaf(WorldSystem::EngineNodeData& leaf, Material& material, VkCommandBuffer commandBuffer);
 	};

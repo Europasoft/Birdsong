@@ -1,6 +1,6 @@
 #pragma once
 #include "core/engine/MeshData.h"
-
+#include "core/types/CommonTypes.h"
 
 #include <vector>
 #include <cmath>
@@ -8,8 +8,6 @@
 
 namespace EngineCore::Planets
 {
-	// Generates a single face of a quad-sphere at root resolution (LOD 0)
-	MeshBuilder generateCubeFace(int face_index, int resolution, float radius);
-	MeshBuilder generateSubFace(int face_index, int resolution, float radius,
-					std::array<float, 2> offset, float scale, bool isRootFace=false);
+	MeshBuilder generateSubFace(uint32_t faceIndex, uint32_t resolution, double radius, Vec264 offset, double scale, bool isRootFace=false);
+	Vec64 projectToSphere(uint32_t face_index, Vec264 localCenter2D, double radius);
 }

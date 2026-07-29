@@ -133,6 +133,8 @@ public:
 	friend bool operator==(const Vector2D& lh, const Vector2D& rh) { return lh.x == rh.x && lh.y == rh.y; }
 	friend bool operator!=(const Vector2D& lh, const Vector2D& rh) { return !(lh == rh); }
 };
+using Vec2 = Vector2D<VecCompT>;
+using Vec264 = Vector2D<double>;
 
 class VectorInt
 {
