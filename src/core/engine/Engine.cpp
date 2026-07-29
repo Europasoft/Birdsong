@@ -100,7 +100,7 @@ namespace EngineCore
 
 		auto& sceneGlobalDescriptorSet = world->getScene().getSceneGlobalDescriptorSet();
 		meshDrawer = std::make_unique<MeshDrawer>(*device);
-		skyDrawer = std::make_unique<SkyDrawer>(*device, sceneGlobalDescriptorSet, baseFormats, renderSettings.sampleCountMSAA);
+		skyDrawer = std::make_unique<SkyDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
 		fxDrawer = std::make_unique<FxDrawer>(*device, sceneGlobalDescriptorSet, fxFormats, renderer->getFxPassInputImageViews(), renderer->getFxPassInputDepthImageViews());
 		uiDrawer = std::make_unique<InterfaceDrawer>(*device, baseFormats, renderSettings.sampleCountMSAA);
 		debugDrawer = std::make_unique<DebugDrawer>(*device, sceneGlobalDescriptorSet, baseFormats, renderSettings.sampleCountMSAA);
@@ -151,7 +151,7 @@ namespace EngineCore
 		renderer->beginRenderingBase(f.commandBuffer); 
 
 		// render sky sphere
-		skyDrawer->renderSky(f.commandBuffer, f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->transform.translation);
+		skyDrawer->renderSky(f.bufferIndex, f.commandBuffer, f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->transform.translation);
 
 		// render meshes
 		meshDrawer->renderMeshes(f.commandBuffer, *world, f.bufferIndex);

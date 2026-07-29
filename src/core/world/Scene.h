@@ -66,9 +66,7 @@ namespace WorldSystem
 
 		std::shared_ptr<EngineCore::Camera> currentCamera;
 
-		/* temporary demo content */
-		std::unique_ptr<EngineCore::Image> spaceTexture;
-		std::unique_ptr<EngineCore::Image> marsTexture;
+		std::unique_ptr<EngineCore::Image> bgTexture; // default background texture
 
 		Vec lightPos{ -20.f, 100.f, 45.f };
 

@@ -9,6 +9,7 @@
 namespace WorldSystem
 {
 	class EngineNodeData;
+	class World;
 }
 
 namespace EngineCore
@@ -20,15 +21,16 @@ namespace EngineCore
 	class SkyDrawer 
 	{
 	public:
-		SkyDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples);
+		SkyDrawer(EngineDevice& device, WorldSystem::World& world, const RenderingFormats& formats, VkSampleCountFlagBits samples);
 		~SkyDrawer();
 
-		void renderSky(VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, Vec observerPosition);
+		void renderSky(uint32_t frameIndex, VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, Vec observerPosition);
 
 		float skyMeshScale = 1000.f * 10.f;
 
 	private:
 		std::unique_ptr<WorldSystem::EngineNodeData> enodeSky;
+		WorldSystem::World& world;
 		
 	};
 

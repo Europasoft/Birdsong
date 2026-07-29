@@ -241,6 +241,7 @@ namespace EngineCore
 		info.mipLodBias = 0.0f;
 		info.minLod = 0.0f;
 		info.maxLod = 0.0f;
+		info.maxAnisotropy = 16.f;
 
 		if (vkCreateSampler(device.device(), &info, nullptr, &samplerHandleOut) != VK_SUCCESS)
 		{ throw std::runtime_error("failed to create texture sampler"); }

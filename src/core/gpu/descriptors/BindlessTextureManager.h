@@ -28,6 +28,7 @@ namespace EngineCore
 
 		// registers a texture view + sampler and returns its index in the global array
 		uint32_t registerTexture(VkImageView imageView, VkSampler sampler);
+		uint32_t registerTexture(const std::unique_ptr<Image>& image);
 
 		// frees a slot index so it can be reused by a future texture
 		void unregisterTexture(uint32_t slotIndex);

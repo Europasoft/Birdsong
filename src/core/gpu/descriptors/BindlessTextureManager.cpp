@@ -122,6 +122,12 @@ namespace EngineCore
 		return slot;
 	}
 
+	uint32_t BindlessTextureManager::registerTexture(const std::unique_ptr<Image>& image)
+	{
+		assert(image->getView() != VK_NULL_HANDLE && image->sampler != VK_NULL_HANDLE && "no view/sampler created for image");
+		return registerTexture(image->getView(), image->sampler);
+	}
+
 	void BindlessTextureManager::unregisterTexture(uint32_t slotIndex)
 	{
 		// re-point slot to fallback texture to avoid accessing dangling views in GPU memory
