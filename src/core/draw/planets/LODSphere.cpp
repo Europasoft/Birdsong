@@ -1,7 +1,47 @@
 #include "core/draw/planets/LODSphere.h"
 
+#include <cmath>
+#include <cstdint>
+
 namespace EngineCore::Planets
 {
+	// Simple hash function to map patch coordinates to a 32-bit integer
+	uint32_t hashPatch(int face_index, float x_offset, float y_offset, float scale)
+	{
+		uint32_t h = static_cast<uint32_t>(face_index);
+
+		// Convert floats to bits for hashing
+		uint32_t x_bits, y_bits, s_bits;
+		std::memcpy(&x_bits, &x_offset, sizeof(float));
+		std::memcpy(&y_bits, &y_offset, sizeof(float));
+		std::memcpy(&s_bits, &scale, sizeof(float));
+
+		// Murmur/FNV-style bit mixing
+		h ^= x_bits + 0x9e3779b9 + (h << 6) + (h >> 2);
+		h ^= y_bits + 0x9e3779b9 + (h << 6) + (h >> 2);
+		h ^= s_bits + 0x9e3779b9 + (h << 6) + (h >> 2);
+
+		return h;
+	}
+
+	// Convert a hash seed into normalized RGB float components [0.1, 0.9] to avoid pure black/white
+	std::array<float, 3> getPatchColor(int face_index, std::array<float, 2> offset, float scale)
+	{
+		uint32_t h = hashPatch(face_index, offset[0], offset[1], scale);
+
+		float r = 0.1f + 0.8f * ((h & 0xFF) / 255.0f);
+		float g = 0.1f + 0.8f * (((h >> 8) & 0xFF) / 255.0f);
+		float b = 0.1f + 0.8f * (((h >> 16) & 0xFF) / 255.0f);
+
+		return { r, g, b };
+	}
+
+	std::array<float, 3> getRootPatchColor(uint32_t i)
+	{
+		static const std::array<std::array<float, 3>, 6> rootColors = { {{0.05,0.3,0.2}, {0.1,0.9,0.8}, {0.2,0.1,0.0}, {0.0,0.42,0.2}, {0.7,0.5,0.0}, {0.3,0.1,0.3}} };
+		return rootColors[i];
+	}
+
 	MeshBuilder generateCubeFace(int face_index, int resolution, float radius)
 	{
 		MeshBuilder mesh = {};
@@ -86,7 +126,7 @@ namespace EngineCore::Planets
 	// offset: 2D local face offset, e.g. {-0.5f, 0.5f}
 	// scale: 2D local face size extent for this node (Root is 2.0f, LOD 1 is 1.0f, etc.)
 	MeshBuilder generateSubFace(int face_index, int resolution, float radius,
-					std::array<float, 2> offset, float scale)
+					std::array<float, 2> offset, float scale, bool isRootFace)
 	{
 		MeshBuilder mesh = {};
 		mesh.vertices.reserve((resolution + 1) * (resolution + 1));
@@ -133,7 +173,9 @@ namespace EngineCore::Planets
 				Vertex v;
 				v.position = { nx * radius, ny * radius, nz * radius };
 				v.normal = { nx, ny, nz };
-				v.color = { nx, ny, nz };
+				auto col = getPatchColor(face_index, offset, scale);
+				if (isRootFace) col = getRootPatchColor(face_index);
+				v.color = { col[0], col[1], col[2] };
 
 				mesh.vertices.push_back(v);
 			}

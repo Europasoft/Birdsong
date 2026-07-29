@@ -21,12 +21,12 @@ namespace EngineCore
 
 	enum class FaceDirection : uint32_t
 	{
-		X_PLUS,
-		X_MINUS,
-		Y_PLUS,
-		Y_MINUS,
-		Z_PLUS,
-		Z_MINUS
+		A,
+		B,
+		C,
+		D,
+		E,
+		F
 	};
 
 	struct Quad
@@ -62,6 +62,9 @@ namespace EngineCore
 		EngineDevice& device;
 		WorldSystem::World& world;
 		std::vector<std::unique_ptr<PlanetNodeContext>> planets;
+
+		void splitQuad(Quad& quad, std::shared_ptr<Material> material);
+		void mergeQuad(Quad& quad);
 
 		void initRootFaceAsLeaf(Quad& quad, uint32_t i, std::shared_ptr<Material> material);
 		void recurseDrawQuad(Quad& quad, Material& material, VkCommandBuffer commandBuffer);
