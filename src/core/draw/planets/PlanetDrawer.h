@@ -1,6 +1,7 @@
 #pragma once
 #include "core/gpu/Material.h"
 #include "core/include/shared/Transform.h"
+#include "core/types/CommonTypes.h"
 
 #include "core/types/vk.h"
 
@@ -18,9 +19,31 @@ namespace EngineCore
 	class EngineDevice;
 	class Material;
 
+	enum class FaceDirection : uint32_t
+	{
+		X_PLUS,
+		X_MINUS,
+		Y_PLUS,
+		Y_MINUS,
+		Z_PLUS,
+		Z_MINUS
+	};
+
+	struct Quad
+	{
+		Vector2D<float> center; // local 2D face coordinates
+		float size;  // extent in 2D space
+		int lodLevel;
+		FaceDirection face; // +X, -X, +Y, etc.
+
+		std::vector<std::unique_ptr<Quad>> children;
+
+		std::unique_ptr<WorldSystem::EngineNodeData> node; // mesh geometry (only non-null if this node is a leaf)
+	};
+
 	struct PlanetNodeContext
 	{
-		std::vector<std::unique_ptr<WorldSystem::EngineNodeData>> faces;
+		std::vector<std::unique_ptr<Quad>> rootFaces;
 		std::shared_ptr<Material> material;
 	};
 
@@ -39,6 +62,10 @@ namespace EngineCore
 		EngineDevice& device;
 		WorldSystem::World& world;
 		std::vector<std::unique_ptr<PlanetNodeContext>> planets;
+
+		void initRootFaceAsLeaf(Quad& quad, uint32_t i, std::shared_ptr<Material> material);
+		void recurseDrawQuad(Quad& quad, Material& material, VkCommandBuffer commandBuffer);
+		void drawLeaf(WorldSystem::EngineNodeData& leaf, Material& material, VkCommandBuffer commandBuffer);
 	};
 
 }

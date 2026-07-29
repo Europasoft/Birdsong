@@ -119,7 +119,7 @@ void main()
     // Simple sine wave based on position to simulate terrain bumps
     float wave = sin(sphereNormal.x * 10.0) * cos(sphereNormal.y * 10.0);
     float planetRadius = 100.0;
-    float terrainAmplitude = 5.0;
+    float terrainAmplitude = 0.0;
 
     vec3 displacedPos = sphereNormal * (planetRadius + (wave * terrainAmplitude));
 
@@ -129,4 +129,5 @@ void main()
     fragPositionWS = (push.transform * vec4(displacedPos, 1.0)).xyz;
     fragUV = uv;
     fragColor = color;
+
 }
