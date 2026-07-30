@@ -5,48 +5,20 @@
 
 namespace EngineCore::Planets
 {
-	// Simple hash function to map patch coordinates to a 32-bit integer
-	uint32_t hashPatch(uint32_t faceIndex, double x_offset, double y_offset, double scale)
+	std::array<float, 3> getPatchColor(uint32_t i)
 	{
-		uint32_t h = static_cast<uint32_t>(faceIndex);
-
-		// Convert floats to bits for hashing
-		uint32_t x_bits, y_bits, s_bits;
-		std::memcpy(&x_bits, &x_offset, sizeof(float));
-		std::memcpy(&y_bits, &y_offset, sizeof(float));
-		std::memcpy(&s_bits, &scale, sizeof(float));
-
-		// Murmur/FNV-style bit mixing
-		h ^= x_bits + 0x9e3779b9 + (h << 6) + (h >> 2);
-		h ^= y_bits + 0x9e3779b9 + (h << 6) + (h >> 2);
-		h ^= s_bits + 0x9e3779b9 + (h << 6) + (h >> 2);
-
-		return h;
-	}
-
-	// Convert a hash seed into normalized RGB float components [0.1, 0.9] to avoid pure black/white
-	std::array<float, 3> getPatchColor(uint32_t faceIndex, Vec264 offset, double scale)
-	{
-		uint32_t h = hashPatch(faceIndex, offset.x, offset.y, scale);
-
-		float r = 0.1f + 0.8f * ((h & 0xFF) / 255.0f);
-		float g = 0.1f + 0.8f * (((h >> 8) & 0xFF) / 255.0f);
-		float b = 0.1f + 0.8f * (((h >> 16) & 0xFF) / 255.0f);
-
-		return { r, g, b };
-	}
-
-	std::array<float, 3> getRootPatchColor(uint32_t i)
-	{
-		static const std::array<std::array<float, 3>, 6> rootColors = { {{0.05,0.3,0.2}, {0.1,0.9,0.8}, {0.2,0.1,0.0}, {0.0,0.42,0.2}, {0.7,0.5,0.0}, {0.3,0.1,0.3}} };
-		return rootColors[i];
+		static const std::array<std::array<float, 3>, 7> colors = { {{0.05,0.05,0.5}, {0.1,0.9,0.8}, {0.1,0.1,0.4}, {0.0,0.3,0.2}, {0.7,0.2,0.0}, {0.3,0.1,0.3}, {0.95, 0.75, 0.20}} };
+		return colors[i % colors.size()];
 	}
 
 	// offset: 2D local face offset, e.g. {-0.5f, 0.5f}
 	// scale: 2D local face size extent for this node (Root is 2.0f, LOD 1 is 1.0f, etc.)
-	MeshBuilder generateSubFace(uint32_t faceIndex, uint32_t resolution, double radius, Vec264 offset, double scale, bool isRootFace)
+	LargeGeometry generateSubFace(uint32_t faceIndex, uint32_t resolution, double radius, Vec264 offset, double scale, uint32_t lodLevel, bool isRootFace)
 	{
-		MeshBuilder mesh = {};
+		static uint32_t debugColorIdx = 0;
+		debugColorIdx++;
+
+		LargeGeometry mesh = {};
 		// an nxn grid of quads requires (n+1) x (n+1) vertices.
 		mesh.vertices.reserve((resolution + 1) * (resolution + 1));
 		// each quad consists of 2 triangles = 6 indices. nxn quads * 6 = total indices
@@ -85,6 +57,8 @@ namespace EngineCore::Planets
 				// convert x loop index to local normalized coordinate [0.0, 1.0]
 				double local_x = static_cast<double>(x) / resolution;
 
+				// !! TODO: ASAP: looks like x and y  are flipped here:
+
 				// (map into local face space [-1, 1])
 				// map to cube face range [-1.0, 1.0] using offset and scale
 				double mx = offset.y + local_x * scale;
@@ -102,16 +76,17 @@ namespace EngineCore::Planets
 				// projects point onto unit sphere by using inverse magnitude to normalize the vector
 				double inv_len = 1.0f / std::sqrt(cx * cx + cy * cy + cz * cz);
 				// unit vector pointing outwards from sphere center (also doubles as surface normal)
+				Vec64 n = { cx * inv_len, cy * inv_len, cz * inv_len };
 				double nx = cx * inv_len;
 				double ny = cy * inv_len;
 				double nz = cz * inv_len;
 
-				Vertex v;
+				LargeVertex v;
 				// scale unit vector by radius to place vertex at actual world-space sphere radius
-				v.position = { nx * radius, ny * radius, nz * radius };
-				v.normal = { nx, ny, nz };
-				auto col = getPatchColor(faceIndex, offset, scale);
-				if (isRootFace) col = getRootPatchColor(faceIndex);
+				v.position = n * radius;
+				v.normal = { static_cast<float>(n.x), static_cast<float>(n.y), static_cast<float>(n.z) };
+
+				auto col = getPatchColor(debugColorIdx);
 				v.color = { col[0], col[1], col[2] };
 
 				mesh.vertices.push_back(v);
@@ -173,5 +148,33 @@ namespace EngineCore::Planets
 		float nz = cz * inv_len;
 
 		return Vec64{ nx * radius, ny * radius, nz * radius };
+	}
+
+	EngineCore::MeshBuilder LargeGeometry::toSinglePrecision() const
+	{
+		EngineCore::MeshBuilder m = {};
+		m.vertices.reserve(vertices.size());
+		m.indices.reserve(indices.size());
+		for (const auto& v : vertices)
+		{
+			Vertex vert{};
+			vert.position.x = static_cast<float>(v.position.x);
+			vert.position.y = static_cast<float>(v.position.y);
+			vert.position.z = static_cast<float>(v.position.z);
+			vert.normal.x = v.normal.x;
+			vert.normal.y = v.normal.y;
+			vert.normal.z = v.normal.z;
+			vert.color.x = v.color.x;
+			vert.color.y = v.color.y;
+			vert.color.z = v.color.z;
+			vert.uv = { 0, 0 };
+			m.vertices.push_back(vert);
+		}
+		for (const uint32_t& i : indices)
+		{
+			m.indices.push_back(i);
+		}
+
+		return m;
 	}
 }

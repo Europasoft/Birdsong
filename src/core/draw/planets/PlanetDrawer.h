@@ -19,6 +19,12 @@ namespace EngineCore
 	class EngineDevice;
 	class Material;
 
+	struct ResRad
+	{
+		uint32_t resolution;
+		double radius;
+	};
+
 	enum class FaceDirection : uint32_t
 	{
 		A,
@@ -33,7 +39,7 @@ namespace EngineCore
 	{
 		Vector2D<float> center; // local 2D face coordinates
 		float size;  // extent in 2D space
-		int lodLevel;
+		uint32_t lodLevel;
 		FaceDirection face; // +X, -X, +Y, etc.
 
 		std::vector<std::unique_ptr<Quad>> children;
@@ -56,20 +62,29 @@ namespace EngineCore
 		PlanetDrawer(const PlanetDrawer&) = delete;
 		PlanetDrawer& operator=(const PlanetDrawer&) = delete;
 
-		void render(VkCommandBuffer commandBuffer, uint32_t frameIndex);
+		void regenerate();
+
+		void render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt);
 
 	private:
 		EngineDevice& device;
 		WorldSystem::World& world;
 		std::vector<std::unique_ptr<PlanetNodeContext>> planets;
 
-		void updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, float radius, int resolution);
+		VkCommandBuffer cmdBuffer = VK_NULL_HANDLE;
+		Transform camTransform;
+		double delta = 0.0;
+		double currentXoffset = 800.f;
+		ResRad rr = ResRad{ .resolution = 8, .radius = 100 };
+		double tempTimer = 0.6;
 
-		void splitQuad(Quad& quad, std::shared_ptr<Material> material, float radius, int resolution);
+		void updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, ResRad& r);
+
+		void splitQuad(Quad& quad, std::shared_ptr<Material> material, ResRad& r);
 		void mergeQuad(Quad& quad);
 
-		void recurseDrawQuad(Quad& quad, Material& material, VkCommandBuffer commandBuffer);
-		void drawLeaf(WorldSystem::EngineNodeData& leaf, Material& material, VkCommandBuffer commandBuffer);
+		void recurseDrawQuad(Quad& quad, Material& material);
+		void drawLeaf(WorldSystem::EngineNodeData& leaf, Material& material);
 	};
 
 }

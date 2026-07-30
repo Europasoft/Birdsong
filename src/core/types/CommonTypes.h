@@ -71,6 +71,13 @@ public:
 	Vector3D<float> operator+=(const float& f) { *this = *this + f; return *this; } // Vector += float
 	Vector3D<float> operator-=(const float& f) { *this = *this - f; return *this; } // Vector -= float
 	Vector3D<float> operator*=(const float& f) { *this = *this * f; return *this; } // Vector *= float
+
+	Vector3D<double> operator+(const double& f) const { return Vector3D{ x + f, y + f, z + f }; } // Vector + double
+	Vector3D<double> operator-(const double& f) const { return Vector3D{ x - f, y - f, z - f }; } // Vector - double
+	Vector3D<double> operator*(const double& f) const { return Vector3D{ x * f, y * f, z * f }; } // Vector * double
+	Vector3D<double> operator+=(const double& f) { *this = *this + f; return *this; } // Vector += double
+	Vector3D<double> operator-=(const double& f) { *this = *this - f; return *this; } // Vector -= double
+	Vector3D<double> operator*=(const double& f) { *this = *this * f; return *this; } // Vector *= double
 	
 
 	static auto dot(const Vector3D<T>& a, const Vector3D<T>& b) 

@@ -65,9 +65,9 @@ namespace WorldSystem
 		using namespace EngineCore;
 
 		// create a basic camera
-		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 10, .farDistance = 10000 * 100 });
+		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 10, .farDistance = 16000 * 100 });
 		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
-		currentCamera->transform.translation = { 0.f, 0.f, 150.f };
+		currentCamera->transform.translation = { 0.f, 0.f, 0.f };
 
 		// scene global descriptors
 		UBO_Struct ubo1{};
@@ -215,6 +215,7 @@ namespace WorldSystem
 	void Scene::setLocalSectorCoordinate(const SectorCoord& coordNew)
 	{
 		*localSectorCoord.get() = coordNew;
+		currentCamera->transform.sector = coordNew;
 	}
 
 	Vec Scene::sectorToAbsolute(const SectorCoord& sector, Vec offset)

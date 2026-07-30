@@ -114,20 +114,24 @@ float snoise(vec3 v)
 
 void main()
 {
+     // 1. Calculate the sphere normal directly from the CPU position (unit vector pointing out)
     vec3 sphereNormal = normalize(position.xyz);
     
-    // Simple sine wave based on position to simulate terrain bumps
+    // 2. Derive the actual radius computed by the CPU (length of incoming position)
+    float planetRadius = length(position.xyz);
+    
+    // 3. Simple sine wave terrain calculation
     float wave = sin(sphereNormal.x * 10.0) * cos(sphereNormal.y * 10.0);
-    float planetRadius = 100.0;
-    float terrainAmplitude = 0.0;
+    float terrainAmplitude = 3.0; // Set to > 0.0 if you want terrain height
 
+    // 4. Displace using the ACTUAL CPU radius instead of a hardcoded 100.0
     vec3 displacedPos = sphereNormal * (planetRadius + (wave * terrainAmplitude));
 
+    // 5. Final transformations
     gl_Position = ubo1.projectionViewMatrix * push.transform * vec4(displacedPos, 1.0);
     
     fragNormalWS = normalize(mat3(push.normalMatrix) * sphereNormal);
     fragPositionWS = (push.transform * vec4(displacedPos, 1.0)).xyz;
     fragUV = uv;
     fragColor = color;
-
 }

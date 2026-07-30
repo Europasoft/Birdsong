@@ -24,8 +24,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-static constexpr auto presetResolution = 2;
-static constexpr auto presetRadius = 1000.f;
+#include <iostream>
 
 namespace EngineCore
 {
@@ -48,8 +47,16 @@ namespace EngineCore
 		ctx.material = std::make_shared<Material>(matInfo, device);
 		ctx.material->finalize();
 
+		regenerate();
+	}
+
+	void PlanetDrawer::regenerate()
+	{
+		vkDeviceWaitIdle(device.device()); // STRICTLY TEMPORARY
+		PlanetNodeContext& ctx = *planets.back();
+		ctx.rootFaces.clear();
+		vkDeviceWaitIdle(device.device()); // STRICTLY TEMPORARY
 		// create each root face
-		uint32_t i = 0;
 		for (uint32_t i = 0; i < 6; i++)
 		{
 			ctx.rootFaces.push_back(std::make_unique<Quad>());
@@ -65,35 +72,39 @@ namespace EngineCore
 			quad.node->mesh = std::make_unique<Mesh>(device);
 
 			// generate the mesh
-			quad.node->mesh->build(Planets::generateSubFace(i, presetResolution, presetRadius, {quad.center.x, quad.center.y}, quad.size, true));
+			quad.node->mesh->build(Planets::generateSubFace(i, rr.resolution, rr.radius, { quad.center.x, quad.center.y }, quad.size, true).toSinglePrecision());
 
 			Transform tf{};
-			tf.translation.x = 800;
-			tf.scale = { 1 };
+			tf.translation.x = currentXoffset;
 			tf.sector = { 0, 0, 0 };
+			tf.scale = { 1 };
 			quad.node->engineTransform = tf;
 			quad.node->mesh->setMaterial(ctx.material);
 		}
 
 		// test - just split one of the root faces and its children, for now
 		auto& rootface = *ctx.rootFaces[1];
-		splitQuad(rootface, ctx.material, presetRadius, presetResolution);
+		splitQuad(rootface, ctx.material, rr);
 		for (auto& c : rootface.children)
 		{
-			splitQuad(*c, ctx.material, presetRadius, presetResolution);
+			splitQuad(*c, ctx.material, rr);
 			for (auto& j : c->children)
 			{
-				splitQuad(*j, ctx.material, presetRadius, presetResolution);
+				splitQuad(*j, ctx.material, rr);
+				for (auto& k : j->children)
+				{
+					splitQuad(*k, ctx.material, rr);
+				}
 			}
 		}
 	}
 
-	void PlanetDrawer::updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, float radius, int resolution)
+	void PlanetDrawer::updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, ResRad& r)
 	{
 		// 1. Estimate 3D center point of this quad on the sphere surface
 		// (You can map quad.center + quad.size * 0.5f from local face space to 3D world space)
 		Vec264 localCenter2D = { quad.center.x + quad.size * 0.5f, quad.center.y + quad.size * 0.5f };
-		Vec64 sphereCenter3D = Planets::projectToSphere(static_cast<uint32_t>(quad.face), localCenter2D, radius);
+		Vec64 sphereCenter3D = Planets::projectToSphere(static_cast<uint32_t>(quad.face), localCenter2D, r.radius);
 
 		// Account for planet scale/transform offset if necessary
 		// float distance = distance(cameraPos, sphereCenter3D * transformScale + transformTranslation);
@@ -108,13 +119,13 @@ namespace EngineCore
 		{
 			if (quad.node) // It's currently a leaf node, split it!
 			{
-				splitQuad(quad, material, radius, resolution);
+				splitQuad(quad, material, r);
 			}
 
 			// Recursively evaluate children
 			for (auto& child : quad.children)
 			{
-				updateLOD(*child, cameraPos, material, radius, resolution);
+				updateLOD(*child, cameraPos, material, r);
 			}
 		}
 		else
@@ -136,7 +147,7 @@ namespace EngineCore
 					// Re-create parent node mesh/leaf state and clear children
 					quad.node = std::make_unique<EngineNodeData>(nullptr, device);
 					quad.node->mesh = std::make_unique<Mesh>(device);
-					quad.node->mesh->build(Planets::generateSubFace(static_cast<int>(quad.face), resolution, radius, { quad.center.x, quad.center.y }, quad.size, true));
+					quad.node->mesh->build(Planets::generateSubFace(static_cast<int>(quad.face), r.resolution, r.radius, { quad.center.x, quad.center.y }, quad.size, quad.lodLevel, true).toSinglePrecision());
 
 					// Copy transform from children/planet context
 					quad.node->engineTransform = quad.children[0]->node->engineTransform;
@@ -148,7 +159,7 @@ namespace EngineCore
 		}
 	}
 
-	void PlanetDrawer::splitQuad(Quad& quad, std::shared_ptr<Material> material, float radius, int resolution)
+	void PlanetDrawer::splitQuad(Quad& quad, std::shared_ptr<Material> material, ResRad& r)
 	{
 		if (not quad.node) return; // already split
 
@@ -177,7 +188,7 @@ namespace EngineCore
 			// build child mesh
 			child.node = std::make_unique<EngineNodeData>(nullptr, device);
 			child.node->mesh = std::make_unique<Mesh>(device);
-			child.node->mesh->build(Planets::generateSubFace(static_cast<int>(child.face), resolution, radius, { child.center.x, child.center.y }, child.size));
+			child.node->mesh->build(Planets::generateSubFace(static_cast<int>(child.face), r.resolution, r.radius, { child.center.x, child.center.y }, child.size, child.lodLevel).toSinglePrecision());
 
 			// copy transform properties from parent
 			child.node->engineTransform = quad.node->engineTransform;
@@ -197,10 +208,32 @@ namespace EngineCore
 
 	PlanetDrawer::~PlanetDrawer() = default;
 
-	void PlanetDrawer::render(VkCommandBuffer commandBuffer, uint32_t frameIndex)
+	void PlanetDrawer::render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt)
 	{
+		delta = dt;
+		cmdBuffer = commandBuffer;
+		camTransform = cameraTransform;
 		Scene& scene = world.getScene();
 		const auto sets = scene.getDescriptorSets(frameIndex);
+		
+		// experiment: grow and move further away
+		/*if (tempTimer < 900)
+		{
+			tempTimer -= delta;
+		}
+		if (tempTimer <= 0)
+		{
+			const float growBy = 100 * 1000 * 5000;
+			rr.radius += growBy;
+			currentXoffset += growBy;
+			//if ((rr.radius * 0.00001) >= 80000) { rr.radius = 100 * 1000 * 80000; }
+		
+			tempTimer = 0.6;
+			regenerate();
+		
+			if ((rr.radius * 0.00001) >= 80000) { tempTimer = 999; }
+			std::cout << "radius: " << rr.radius * 0.00001 << " km\n";
+		}*/
 
 		for (const auto& planetPtr : planets)
 		{
@@ -211,39 +244,40 @@ namespace EngineCore
 
 			for (const auto& quad : planet.rootFaces)
 			{
-				recurseDrawQuad(*quad, *planet.material, commandBuffer);
+				recurseDrawQuad(*quad, *planet.material);
 			}
 		}
 	}
 
-	void PlanetDrawer::recurseDrawQuad(Quad& quad, Material& material, VkCommandBuffer commandBuffer)
+	void PlanetDrawer::recurseDrawQuad(Quad& quad, Material& material)
 	{
 		if (not quad.node)
 		{
 			for (auto& subQuad : quad.children)
 			{
-				recurseDrawQuad(*subQuad, material, commandBuffer);
+				recurseDrawQuad(*subQuad, material);
 			}
 		}
 		else
 		{
-			drawLeaf(*quad.node, material, commandBuffer);
+			drawLeaf(*quad.node, material);
 		}
 	}
 
-	void PlanetDrawer::drawLeaf(EngineNodeData& leaf, Material& material, VkCommandBuffer commandBuffer)
+	void PlanetDrawer::drawLeaf(EngineNodeData& leaf, Material& material)
 	{
 		const Transform& t = leaf.engineTransform;
+		// calculate position relative to player's sector
 		const Vec meshPosRelative = WorldSystem::calculateRelative(t.translation, t.sector, world.getScene().getLocalSectorCoordinate());
 
 		ShaderPushConstants::EngineMeshPushConstants push{};
 		push.transform = EngineCore::cglm::makeMatrixQ(t.rotation, t.rotation_w, t.scale, meshPosRelative);
 		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 
-		material.writePushConstants(commandBuffer, push);
+		material.writePushConstants(cmdBuffer, push);
 		// record mesh draw command
-		leaf.mesh->bind(commandBuffer);
-		leaf.mesh->draw(commandBuffer);
+		leaf.mesh->bind(cmdBuffer);
+		leaf.mesh->draw(cmdBuffer);
 	}
 
 }
