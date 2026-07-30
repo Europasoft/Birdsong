@@ -106,4 +106,31 @@ namespace EngineCore
 		return invalidate(alignmentSize, index * alignmentSize);
 	}
 
+
+	Fence::Fence(EngineDevice& device)
+		: device(device)
+	{
+		VkFenceCreateInfo i = {};
+		i.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		i.flags = 0; // start unsignaled
+		const VkResult r = vkCreateFence(device.device(), &i, nullptr, &fence);
+		assert(r == VK_SUCCESS && "failed to create VkFence");
+	}
+
+	Fence::~Fence()
+	{
+		assert(wasSignaled() && "cannot destroy fence before associated commands finish");
+		vkDestroyFence(device.device(), fence, nullptr);
+	}
+
+	bool Fence::wasSignaled() const
+	{
+		return vkWaitForFences(device.device(), 1, &fence, VK_TRUE, 0) != VK_TIMEOUT;
+	}
+
+    bool Fence::wait(uint32_t milliseconds) const
+    {
+		return vkWaitForFences(device.device(), 1, &fence, VK_TRUE, static_cast<uint64_t>(milliseconds) * 1000000) != VK_TIMEOUT;
+    }
+
 }

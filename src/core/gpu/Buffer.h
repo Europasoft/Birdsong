@@ -4,6 +4,24 @@
 
 namespace EngineCore 
 {
+	class Fence
+	{
+	public:
+		Fence(EngineDevice& device);
+		~Fence();
+
+		Fence(const Fence&) = delete;
+		Fence& operator=(const Fence&) = delete;
+
+		bool wasSignaled() const;
+		explicit operator bool() const noexcept { return wasSignaled(); }
+		bool wait(uint32_t milliseconds) const;
+		VkFence getFence() const { return fence; }
+	private:
+		EngineDevice& device;
+		VkFence fence = VK_NULL_HANDLE;
+	};
+
 	class GBuffer 
 	{
 	public:

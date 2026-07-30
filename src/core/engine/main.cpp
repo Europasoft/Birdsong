@@ -15,7 +15,7 @@ int main()
 	}
 	catch (const std::exception& e) 
 	{ 
-		std::cout << "fatal exception in main: " << e.what() << '\n';
+		std::cout << "\033[31m" << " Fatal exception in main: " << e.what() << "\033[0m" << '\n';
 		return 1; 
 	}
 	return 0;
