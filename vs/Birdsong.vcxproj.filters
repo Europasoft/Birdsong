@@ -268,10 +268,10 @@
     <ClCompile Include="..\src\core\nodes\MeshCache.cpp">
       <Filter>core\nodes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\draw\planets\LODSphere.cpp">
+    <ClCompile Include="..\src\core\draw\planets\PlanetDrawer.cpp">
       <Filter>core\draw\planets</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\draw\planets\PlanetDrawer.cpp">
+    <ClCompile Include="..\src\core\draw\planets\TerrainPatch.cpp">
       <Filter>core\draw\planets</Filter>
     </ClCompile>
   </ItemGroup>
@@ -567,10 +567,10 @@
     <ClInclude Include="..\src\core\nodes\MeshCache.h">
       <Filter>core\nodes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\draw\planets\LODSphere.h">
+    <ClInclude Include="..\src\core\draw\planets\PlanetDrawer.h">
       <Filter>core\draw\planets</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\core\draw\planets\PlanetDrawer.h">
+    <ClInclude Include="..\src\core\draw\planets\TerrainPatch.h">
       <Filter>core\draw\planets</Filter>
     </ClInclude>
   </ItemGroup>

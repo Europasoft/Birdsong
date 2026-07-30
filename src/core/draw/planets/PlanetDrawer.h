@@ -18,39 +18,15 @@ namespace EngineCore
 {
 	class EngineDevice;
 	class Material;
+	class TerrainPatch;
 
-	struct ResRad
+	struct Planet
 	{
-		uint32_t resolution;
-		double radius;
-	};
-
-	enum class FaceDirection : uint32_t
-	{
-		A,
-		B,
-		C,
-		D,
-		E,
-		F
-	};
-
-	struct Quad
-	{
-		Vector2D<float> center; // local 2D face coordinates
-		float size;  // extent in 2D space
-		uint32_t lodLevel;
-		FaceDirection face; // +X, -X, +Y, etc.
-
-		std::vector<std::unique_ptr<Quad>> children;
-
-		std::unique_ptr<WorldSystem::EngineNodeData> node; // mesh geometry (only non-null if this node is a leaf)
-	};
-
-	struct PlanetNodeContext
-	{
-		std::vector<std::unique_ptr<Quad>> rootFaces;
+		std::vector<std::unique_ptr<TerrainPatch>> roots;
 		std::shared_ptr<Material> material;
+		Transform centerTransform{};
+		uint32_t resolution = 0;
+		double radius = 0;
 	};
 
 	class PlanetDrawer
@@ -62,29 +38,26 @@ namespace EngineCore
 		PlanetDrawer(const PlanetDrawer&) = delete;
 		PlanetDrawer& operator=(const PlanetDrawer&) = delete;
 
-		void regenerate();
+		void regenerate(Planet& planet);
 
 		void render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt);
 
 	private:
 		EngineDevice& device;
 		WorldSystem::World& world;
-		std::vector<std::unique_ptr<PlanetNodeContext>> planets;
+		std::vector<std::unique_ptr<Planet>> planets;
 
 		VkCommandBuffer cmdBuffer = VK_NULL_HANDLE;
 		Transform camTransform;
 		double delta = 0.0;
 		double currentXoffset = 800.f;
-		ResRad rr = ResRad{ .resolution = 8, .radius = 100 };
 		double tempTimer = 0.6;
 
-		void updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, ResRad& r);
+		//void updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, ResRad& r);
+		//void mergeQuad(Quad& quad);
 
-		void splitQuad(Quad& quad, std::shared_ptr<Material> material, ResRad& r);
-		void mergeQuad(Quad& quad);
-
-		void recurseDrawQuad(Quad& quad, Material& material);
-		void drawLeaf(WorldSystem::EngineNodeData& leaf, Material& material);
+		void drawRecursive(TerrainPatch& patch, Planet& planet);
+		void drawLeafPatch(TerrainPatch& patch, Planet& planet);
 	};
 
 }

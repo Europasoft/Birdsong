@@ -163,8 +163,8 @@
     <ClInclude Include="..\src\core\draw\FxDrawer.h" />
     <ClInclude Include="..\src\core\draw\InterfaceDrawer.h" />
     <ClInclude Include="..\src\core\draw\MeshDrawer.h" />
-    <ClInclude Include="..\src\core\draw\planets\LODSphere.h" />
     <ClInclude Include="..\src\core\draw\planets\PlanetDrawer.h" />
+    <ClInclude Include="..\src\core\draw\planets\TerrainPatch.h" />
     <ClInclude Include="..\src\core\draw\SkyDrawer.h" />
     <ClInclude Include="..\src\core\engine\Camera.h" />
     <ClInclude Include="..\src\core\engine\Engine.h" />
@@ -263,8 +263,8 @@
     <ClCompile Include="..\src\core\draw\FxDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\InterfaceDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\MeshDrawer.cpp" />
-    <ClCompile Include="..\src\core\draw\planets\LODSphere.cpp" />
     <ClCompile Include="..\src\core\draw\planets\PlanetDrawer.cpp" />
+    <ClCompile Include="..\src\core\draw\planets\TerrainPatch.cpp" />
     <ClCompile Include="..\src\core\draw\SkyDrawer.cpp" />
     <ClCompile Include="..\src\core\engine\Camera.cpp" />
     <ClCompile Include="..\src\core\engine\Engine.cpp" />
