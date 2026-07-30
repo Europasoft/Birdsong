@@ -10,7 +10,6 @@ class EngineApplication; // forward-declaration
 
 namespace EngineCore 
 {
-
 	struct SwapChainSupportDetails 
 	{
 		VkSurfaceCapabilitiesKHR capabilities;
@@ -44,7 +43,7 @@ namespace EngineCore
 		EngineDevice(EngineDevice&&) = delete;
 
 		VkCommandPool getCommandPool() { return commandPool; }
-		VkDevice device() { return device_; }
+		VkDevice device() const { return device_; }
 		VkSurfaceKHR surface() { return surface_; }
 		VkQueue graphicsQueue() { return graphicsQueue_; }
 		VkQueue presentQueue() { return presentQueue_; }
