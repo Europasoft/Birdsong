@@ -17,6 +17,8 @@ You will also need to install the [Vulkan SDK](https://vulkan.lunarg.com/sdk/hom
 3. Compile the demo shaders: this is done with the Python script in `Src/Core/DevResources/Shaders/CompileShaders.py`<br>(you will need to edit the paths inside this script before running it).
 4. Launch Birdsong.exe
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/31981752-a48f-44c0-98a5-0030f2cd7f90" />
+
 ## File structure
 ```text
 src/
@@ -38,9 +40,8 @@ src/
 ├── deps/               Git submodules of other repos required by the engine.
 └── thirdparty/         Bundled third party libraries.
 ```
+
 <img width="2055" height="820" alt="chrome_FB1lYEoXki" src="https://github.com/user-attachments/assets/9ec4f855-344c-404b-b7dc-3cfac14cd797" />
-<br>
-<img width="1208" height="893" alt="Birdsong_KQpQerGNSI" src="https://github.com/user-attachments/assets/ef25b3e9-230e-44ea-b197-1aef83ea2a7b" />
 
 
 
