@@ -114,25 +114,10 @@ namespace EngineCore
 
 		inputSys.captureMouseCursor(true);
 
-		// add binding for forwards (and backwards) movement
-		uint32_t fwdAxisIndex = inputSys.addBinding(KeyBinding(GLFW_KEY_W, 1.f), "kbForwardAxis");
-		inputSys.addBinding(KeyBinding(GLFW_KEY_S, -1.f), fwdAxisIndex);
-		// right/left
-		uint32_t rightAxisIndex = inputSys.addBinding(KeyBinding(GLFW_KEY_D, 1.f), "kbRightAxis");
-		inputSys.addBinding(KeyBinding(GLFW_KEY_A, -1.f), rightAxisIndex);
-		// up/down
-		uint32_t upAxisIndex = inputSys.addBinding(KeyBinding(GLFW_KEY_R, 1.f), "kbUpAxis");
-		inputSys.addBinding(KeyBinding(GLFW_KEY_F, -1.f), upAxisIndex);
-		// move faster
-		inputSys.addBinding(KeyBinding(GLFW_KEY_LEFT_SHIFT, 1.f), "kbFasterAxis");
-		// test value, used for something
-		uint32_t testAxisIndex = inputSys.addBinding(KeyBinding(GLFW_KEY_UP, 1.f), "kbUpAxis");
-		inputSys.addBinding(KeyBinding(GLFW_KEY_DOWN, -1.f), testAxisIndex);
-		// g, x, y, and z -buttons
-		inputSys.addBinding(KeyBinding(GLFW_KEY_G, 1.f), "kbG-keyAxis");
-		inputSys.addBinding(KeyBinding(GLFW_KEY_X, 1.f), "kbX-keyAxis");
-		inputSys.addBinding(KeyBinding(GLFW_KEY_Y, 1.f), "kbY-keyAxis");
-		inputSys.addBinding(KeyBinding(GLFW_KEY_Z, 1.f), "kbZ-keyAxis");
+		moveForwardInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_W, 1), KeyBinding(GLFW_KEY_S, -1) });
+		moveSidewaysInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_D, 1), KeyBinding(GLFW_KEY_A, -1) });
+		moveUpDownInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_R, 1), KeyBinding(GLFW_KEY_F, -1) });
+		moveFasterInput = inputSys.addInputAxis().addKeyBinding(KeyBinding(GLFW_KEY_LEFT_SHIFT));
 	}
 
 	void EngineApplication::onSwapchainCreated()
@@ -175,19 +160,18 @@ namespace EngineCore
 
 	void EngineApplication::inputTick(double delta)
 	{
-		window->input.resetInputValues(); // reset input values
-		window->input.updateBoundInputs(); // get new input states
+		window->input.updateInputs(); // get new input state
 		window->pollEvents(delta); // process events in window queue
 	}
 
 	void EngineApplication::moveCamera(Camera& camera)
 	{
-		auto mf = window->input.getAxisValue(0);
-		auto mr = window->input.getAxisValue(1);
-		auto mu = window->input.getAxisValue(2);
-		auto xs = window->input.getAxisValue(3) > 0 ? true : false;
-		auto lookInput = window->input.getMouseDelta();
-		camera.moveInPlaneXY(lookInput, mf, mr, mu, xs, static_cast<float>(engineClock.getDelta()));
+		float forward = moveForwardInput;
+		float side = moveSidewaysInput;
+		float up = moveUpDownInput;
+		float faster = moveFasterInput;
+		auto mouse = window->input.getMouseDelta();
+		camera.moveInPlaneXY(mouse, forward, side, up, faster, static_cast<float>(engineClock.getDelta()));
 	}
 
 	//glm::vec3 EngineApplication::unproject(glm::vec3 point)

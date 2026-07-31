@@ -277,6 +277,9 @@
     <ClCompile Include="..\src\core\gpu\SingleTimeCommands.cpp">
       <Filter>core\gpu</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\input\InputInclude.cpp">
+      <Filter>core\input</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -578,6 +581,9 @@
     </ClInclude>
     <ClInclude Include="..\src\core\gpu\SingleTimeCommands.h">
       <Filter>core\gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\input\InputInclude.h">
+      <Filter>core\input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

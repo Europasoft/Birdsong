@@ -3,6 +3,7 @@
 #include "core/gpu/Descriptors.h"
 #include "core/engine/EngineSettings.h"
 #include "core/engine/EngineClock.h"
+#include "core/input/InputInclude.h"
 
 #include <memory>
 #include <vector>
@@ -89,7 +90,10 @@ namespace EngineCore
 		Vec mouseMoveObjectOriginalLocation;
 		bool movingObjectWithCursor = true;
 
-		
+		InputAxisHandle moveForwardInput;
+		InputAxisHandle moveSidewaysInput;
+		InputAxisHandle moveUpDownInput;
+		InputAxisHandle moveFasterInput;
 
 	};
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "core/input/InputInclude.h"
 
 #include <vector>
 #include <string>
@@ -15,71 +16,30 @@ namespace EngineCore
 	// forward declaration, real class declared below
 	class InputSystem;
 
-	enum class InputBindingType { Axis, Event }; // TODO: implement event bindings
-
-	class KeyBinding
+	class InputAxis
 	{
 	public:
-		// axis binding constructor
-		KeyBinding(uint32_t bindKey, float axisInfluence = 1.f);
-		// event binding constructor
-		KeyBinding(uint32_t bindKey);
-		
-		const int32_t& getKey() { return key; }
-		const InputBindingType& getBindingType() { return bindingType; }
-		void execute(InputSystem& context);
-		bool consumesKeyEvents = true;
-
-		float axisValueInfluence = 1.f;
-		int32_t axisIndex = -1;
+		InputAxis(const std::string& name = "") : name(name) {};
 
 	private:
-		int32_t key = -2;
-		InputBindingType bindingType;
-		
-	};
+		friend InputAxisHandle;
+		friend InputSystem;
 
-	struct InputAxis 
-	{
-		InputAxis() { name = "input_axis"; }
-		InputAxis(const std::string& nameIn) { name = nameIn; }
 		float value = 0.f;
 		std::string name;
-
-		std::vector<float> influences;
-		void applyInfluences() 
-		{
-			if (influences.empty()) { return; }
-			float sum = 0.f;
-			for (auto& inf : influences) { sum += inf; }
-			if (sum != 0.f) { value = sum; }
-			else { value = 0.f; }
-			influences.clear();
-		}
+		std::vector<KeyBinding> keyBindings;
 	};
 
+	
 	class InputSystem 
 	{
 	public:
 		InputSystem(EngineWindow* window);
 		~InputSystem();
 
-		//void keyPressedCallback(const int& key, const int& scancode, const int& action, const int& mods);
-		void mousePosUpdatedCallback(const double& x, const double& y);
+		InputAxisHandle addInputAxis(const std::string& name = "");
 
-		//	returns the axis index if the binding is an axis input
-		uint32_t addBinding(KeyBinding binding, const std::string& newAxisName);
-		// add another binding to an existing axis
-		void addBinding(KeyBinding binding, const uint32_t& axisIndex);
-		// add an event binding, returns a binding index
-		uint32_t addBinding(KeyBinding binding);
-
-
-		float getAxisValue(const uint32_t& index);
-		void setAxisValue(const uint32_t& index, const float& v);
-		void resetInputValues();
-
-		void updateBoundInputs();
+		void updateInputs();
 
 		// disables the system cursor, allowing for raw mouse input (use capture=false to release)
 		void captureMouseCursor(const bool& capture = true);
@@ -87,11 +47,11 @@ namespace EngineCore
 		const Vector2D<double>& getMouseDelta() const;
 		const Vector2D<double>& getMousePosition() const;
 
+		void mousePosUpdatedCallback(const double& x, const double& y);
+
 	private:
 		EngineWindow* parentWindow;
-		std::vector<KeyBinding> bindings;
-		std::vector<InputAxis> axisValues;
-		std::vector<bool> eventBindings;
+		std::vector<std::shared_ptr<InputAxis>> axes;
 		struct Mouse;
 		std::unique_ptr<Mouse> mouse;
 	};

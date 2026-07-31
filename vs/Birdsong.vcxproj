@@ -191,6 +191,7 @@
     <ClInclude Include="..\src\core\include\shared\INode.h" />
     <ClInclude Include="..\src\core\include\shared\Transform.h" />
     <ClInclude Include="..\src\core\input\Input.h" />
+    <ClInclude Include="..\src\core\input\InputInclude.h" />
     <ClInclude Include="..\src\core\nodes\EMesh.h" />
     <ClInclude Include="..\src\core\nodes\EngineNodeData.h" />
     <ClInclude Include="..\src\core\nodes\MeshCache.h" />
@@ -286,6 +287,7 @@
     <ClCompile Include="..\src\core\gpu\SingleTimeCommands.cpp" />
     <ClCompile Include="..\src\core\gpu\Swapchain.cpp" />
     <ClCompile Include="..\src\core\input\Input.cpp" />
+    <ClCompile Include="..\src\core\input\InputInclude.cpp" />
     <ClCompile Include="..\src\core\nodes\EMesh.cpp" />
     <ClCompile Include="..\src\core\nodes\EngineNodeData.cpp" />
     <ClCompile Include="..\src\core\nodes\MeshCache.cpp" />
