@@ -7,6 +7,7 @@ namespace EngineCore
 {
 	class InputSystem;
 	class InputAxis;
+	class InputEvent;
 
 	class KeyBinding
 	{
@@ -16,6 +17,8 @@ namespace EngineCore
 
 	private:
 		friend InputSystem;
+		friend InputAxis;
+		friend InputEvent;
 
 		int32_t key = -2;
 		float influence;
@@ -24,24 +27,36 @@ namespace EngineCore
 	class InputAxisHandle
 	{
 	public:
-		InputAxisHandle() : axis(nullptr)
-		{};
-	private:
+		InputAxisHandle() : axis(nullptr) {};
+	protected:
 		friend InputSystem;
-		InputAxisHandle(std::shared_ptr<InputAxis> axis) : axis(axis)
-		{};
+		InputAxisHandle(std::shared_ptr<InputAxis> axis) : axis(axis) {};
 
 	public:
+		float getValue() const noexcept;
 		InputAxisHandle& addKeyBinding(KeyBinding keyBinding);
 		InputAxisHandle& addKeyBinding(const std::vector<KeyBinding>& keyBindings);
-		float getValue() const noexcept;
 		operator float() const noexcept
 		{
 			return getValue();
 		}
 
-	private:
+	protected:
 		std::shared_ptr<InputAxis> axis;
+	};
+
+	enum class EInputEvent : uint32_t { COMBO, ANY };
+
+	class InputEventHandle : public InputAxisHandle
+	{
+	public:
+		using InputAxisHandle::InputAxisHandle;
+		float getValue() = delete;
+		InputEventHandle& addKeyBinding(KeyBinding keyBinding);
+		InputEventHandle& addKeyBinding(const std::vector<KeyBinding>& keyBindings);
+
+
+		bool consume();
 	};
 
 

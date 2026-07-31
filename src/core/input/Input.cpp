@@ -16,6 +16,13 @@ namespace EngineCore
 		return handle;
 	}
 
+	InputEventHandle InputSystem::addInputEvent(EInputEvent trigger, const std::string& name)
+	{
+		axes.push_back(std::make_unique<InputEvent>(trigger, name));
+		InputEventHandle handle{ axes.back() };
+		return handle;
+	}
+
 	struct InputSystem::Mouse
 	{
 		Vector2D<double> mousePosition{0};
@@ -82,11 +89,40 @@ namespace EngineCore
 		assert(parentWindow->getGLFWwindow() && "input system: could not access glfw window");
 		for (std::shared_ptr<InputAxis> axis : axes)
 		{
-			axis->value = 0;
-			for (const KeyBinding& binding : axis->keyBindings)
+			axis->onUpdate(parentWindow);
+		}
+	}
+
+	void InputAxis::onUpdate(EngineWindow* window)
+	{
+		value = 0;
+		for (const KeyBinding& binding : keyBindings)
+		{
+			const bool pressed = glfwGetKey(window->getGLFWwindow(), binding.key) == GLFW_PRESS;
+			value += pressed ? binding.influence : 0;
+		}
+	}
+
+	void InputEvent::onUpdate(EngineWindow* window)
+	{
+		if (value != 0) return;
+
+		if (trigger == EInputEvent::COMBO)
+		{
+			// all bound keys must be pressed to fire the event
+			for (const KeyBinding& binding : keyBindings)
 			{
-				const bool pressed = glfwGetKey(parentWindow->getGLFWwindow(), binding.key) == GLFW_PRESS;
-				axis->value += pressed ? binding.influence : 0;
+				if (glfwGetKey(window->getGLFWwindow(), binding.key) != GLFW_PRESS) return;
+			}
+			value = 1;
+		}
+		else if (trigger == EInputEvent::ANY)
+		{
+			// any bound key may fire the event
+			for (const KeyBinding& binding : keyBindings)
+			{
+				if (glfwGetKey(window->getGLFWwindow(), binding.key) != GLFW_PRESS) continue;
+				value = 1;
 			}
 		}
 	}

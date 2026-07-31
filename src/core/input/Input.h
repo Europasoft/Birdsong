@@ -16,20 +16,33 @@ namespace EngineCore
 	// forward declaration, real class declared below
 	class InputSystem;
 
+	// an input axis accumulates current values from its bound keys, resulting in a total sum
 	class InputAxis
 	{
 	public:
 		InputAxis(const std::string& name = "") : name(name) {};
+		virtual void onUpdate(EngineWindow* window);
 
-	private:
+	protected:
 		friend InputAxisHandle;
-		friend InputSystem;
+		friend InputEventHandle;
 
 		float value = 0.f;
 		std::string name;
 		std::vector<KeyBinding> keyBindings;
 	};
 
+	// input events are like axes, but they keep their value until explicitly "consumed", they may also require a key combo
+	class InputEvent : public InputAxis
+	{
+	public:
+		InputEvent(EInputEvent trigger, const std::string& name = "") : InputAxis(name), trigger(trigger) {};
+
+	protected:
+		EInputEvent trigger;
+
+		virtual void onUpdate(EngineWindow* window) override;
+	};
 	
 	class InputSystem 
 	{
@@ -38,6 +51,7 @@ namespace EngineCore
 		~InputSystem();
 
 		InputAxisHandle addInputAxis(const std::string& name = "");
+		InputEventHandle addInputEvent(EInputEvent trigger = EInputEvent::COMBO, const std::string& name = "");
 
 		void updateInputs();
 

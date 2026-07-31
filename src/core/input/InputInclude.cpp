@@ -20,4 +20,23 @@ namespace EngineCore
 		return axis->value;
 	}
 
+	InputEventHandle& InputEventHandle::addKeyBinding(KeyBinding keyBinding)
+	{
+		InputAxisHandle::addKeyBinding(keyBinding);
+		return *this;
+	}
+
+	InputEventHandle& InputEventHandle::addKeyBinding(const std::vector<KeyBinding>& keyBindings)
+	{
+		InputAxisHandle::addKeyBinding(keyBindings);
+		return *this;
+	}
+
+	bool InputEventHandle::consume()
+	{
+		if (axis->value == 0) return false;
+		axis->value = 0; // reset
+		return true;
+	}
+
 }
