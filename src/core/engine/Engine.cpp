@@ -73,17 +73,6 @@ namespace EngineCore
 		while (not (window->getCloseWindow() || exitApplication))
 		{
 			inputTick(f.delta);
-			// hack: skip drawing for a few frames and just poll window events, required to make fullscreen switching work
-			if (window->fullscreenChangedCounter > 0) 
-			{
-				using namespace std::chrono_literals;
-				window->fullscreenChangedCounter = 0;
-				for (uint32_t i = 0; i < 2; i++)
-				{
-					std::this_thread::sleep_for(200ms);
-					window->pollEvents(1);
-				}
-			}
 
 			f.scene = &world->getScene();
 			f.camera = &f.scene->getCurrentCamera();
@@ -177,13 +166,14 @@ namespace EngineCore
 	{
 		window->input.updateInputs(); // get new input state
 		window->pollEvents(delta); // process events in window queue
+		window->refreshFullscreenState();
 
 		exitApplication = exitApplicationEvent.consume();
+		if (toggleFullscreenEvent.consume()) 
 		{
 			vkDeviceWaitIdle(device->device());
-			if (toggleFullscreenEvent.consume()) window->toggleFullscreen();
+			window->toggleFullscreen();
 		}
-
 	}
 
 	void EngineApplication::moveCamera(Camera& camera)

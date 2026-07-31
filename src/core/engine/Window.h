@@ -40,13 +40,14 @@ namespace EngineCore
 
 		static void mouseButtonCallbackHandler(GLFWwindow* window, int button, int action, int mods);
 
-		void toggleFullscreen();
-
 		// mouse/keyboard events
 		InputSystem input{ this };
 
-		// after switching to fullscreen, skip rendering for a few frames and just poll events
-		uint32_t fullscreenChangedCounter = 0;
+		void toggleFullscreen();
+		void refreshFullscreenState();
+
+		enum class EFullScreenState : uint32_t { WINDOWED, SWITCHING_FULL, FULLSCREEN, SWITCHING_WIN };
+		EFullScreenState fullscreenState;
 
 	private:
 		// window initialization using GLFW (on construct)

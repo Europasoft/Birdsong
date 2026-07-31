@@ -35,6 +35,7 @@ namespace EngineCore
 		glfwSetKeyCallback(getGLFWwindow(), keypressCallbackHandler);
 		glfwSetCursorPosCallback(getGLFWwindow(), mousePosCallbackHandler);
 		glfwSetMouseButtonCallback(getGLFWwindow(), mouseButtonCallbackHandler);
+		fullscreenState = EFullScreenState::WINDOWED;
 	}
 
 	void EngineWindow::createWindowSurface(VkInstance inst, VkSurfaceKHR* surface)
@@ -114,9 +115,8 @@ namespace EngineCore
 		
 	void EngineWindow::toggleFullscreen()
 	{
-		isFullscreen = !isFullscreen;
-		fullscreenChangedCounter = 20;
-		if (isFullscreen)
+		glfwWaitEvents();
+		if (fullscreenState != EFullScreenState::FULLSCREEN)
 		{
 			// save current windowed metrics
 			glfwGetWindowPos(windowPtr, &windowedX, &windowedY);
@@ -128,22 +128,46 @@ namespace EngineCore
 			int monitorX = 0, monitorY = 0;
 			glfwGetMonitorPos(primary, &monitorX, &monitorY);
 
-			// remove decorations before moving/resizing
+			// remove decorations (border, buttons)
 			glfwSetWindowAttrib(windowPtr, GLFW_DECORATED, GLFW_FALSE);
 
-			// move and resize as a standard borderless window
-			glfwSetWindowPos(windowPtr, monitorX, monitorY);
-			glfwSetWindowSize(windowPtr, mode->width, mode->height);
+			// finish switching on next tick, need to give the OS time to remove decorations first
+			fullscreenState = EFullScreenState::SWITCHING_FULL;
 		}
 		else
 		{
-			// restore window decorations
-			glfwSetWindowAttrib(windowPtr, GLFW_DECORATED, GLFW_TRUE);
+			glfwSetWindowMonitor(windowPtr, NULL, windowedX, windowedY, windowedWidth, windowedHeight, GLFW_DONT_CARE);
+			// finish switching on next tick, and the one after that
+			fullscreenState = EFullScreenState::SWITCHING_WIN;
+		}
+		glfwWaitEvents();
+	}
 
-			// restore saved windowed size and position
+	void EngineWindow::refreshFullscreenState()
+	{
+		if (fullscreenState == EFullScreenState::FULLSCREEN || fullscreenState == EFullScreenState::WINDOWED)
+			return;
+
+		glfwWaitEvents();
+		if (fullscreenState == EFullScreenState::SWITCHING_FULL)
+		{
+			// fullscreen as a borderless window
+			GLFWmonitor* primary = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(primary);
+			int monitorX = 0, monitorY = 0;
+			glfwGetMonitorPos(primary, &monitorX, &monitorY);
+			glfwSetWindowPos(windowPtr, monitorX, monitorY);
+			glfwSetWindowSize(windowPtr, mode->width, mode->height);
+			fullscreenState = EFullScreenState::FULLSCREEN;
+		}
+		else if (fullscreenState == EFullScreenState::SWITCHING_WIN)
+		{
+			glfwSetWindowAttrib(windowPtr, GLFW_DECORATED, GLFW_TRUE);
 			glfwSetWindowSize(windowPtr, windowedWidth, windowedHeight);
 			glfwSetWindowPos(windowPtr, windowedX, windowedY);
+			fullscreenState = EFullScreenState::WINDOWED;
 		}
+		glfwWaitEvents();
 	}
 
 
