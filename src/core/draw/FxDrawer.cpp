@@ -12,8 +12,6 @@
 
 namespace EngineCore
 {
-	FxDrawer::~FxDrawer() = default;
-
 	FxDrawer::FxDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats,
 						const std::vector<VkImageView>& inputImageViews, 
 						const std::vector<VkImageView>& inputDepthImageViews)
@@ -122,6 +120,9 @@ namespace EngineCore
 		return attachmentSampler;
 	}
 
-
+	FxDrawer::~FxDrawer()
+	{
+		vkDestroySampler(device.device(), attachmentSampler, nullptr);
+	}
 
 }
