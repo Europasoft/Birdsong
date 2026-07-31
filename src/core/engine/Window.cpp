@@ -4,12 +4,14 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <iostream>
 
 namespace EngineCore
 {
 
 	EngineWindow::EngineWindow(int w, int h, std::string name) : width{ w }, height{ h }, wndName{ name }
 	{
+		glfwInit();
 		initWindow();
 	}
 
@@ -21,7 +23,6 @@ namespace EngineCore
 
 	void EngineWindow::initWindow() 
 	{
-		glfwInit();
 		/* the call below prevents an OpenGL context from being created (since we're using Vulkan) 
 		* otherwise can cause error with glfwCreateWindowSurface returning VK_ERROR_NATIVE_WINDOW_IN_USE_KHR */
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -110,5 +111,41 @@ namespace EngineCore
 		if (action != GLFW_PRESS) { return; }
 
 	}
+		
+	void EngineWindow::toggleFullscreen()
+	{
+		isFullscreen = !isFullscreen;
+		fullscreenChangedCounter = 20;
+		if (isFullscreen)
+		{
+			// save current windowed metrics
+			glfwGetWindowPos(windowPtr, &windowedX, &windowedY);
+			glfwGetWindowSize(windowPtr, &windowedWidth, &windowedHeight);
+
+			// query target monitor bounds
+			GLFWmonitor* primary = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(primary);
+			int monitorX = 0, monitorY = 0;
+			glfwGetMonitorPos(primary, &monitorX, &monitorY);
+
+			// remove decorations before moving/resizing
+			glfwSetWindowAttrib(windowPtr, GLFW_DECORATED, GLFW_FALSE);
+
+			// move and resize as a standard borderless window
+			glfwSetWindowPos(windowPtr, monitorX, monitorY);
+			glfwSetWindowSize(windowPtr, mode->width, mode->height);
+		}
+		else
+		{
+			// restore window decorations
+			glfwSetWindowAttrib(windowPtr, GLFW_DECORATED, GLFW_TRUE);
+
+			// restore saved windowed size and position
+			glfwSetWindowSize(windowPtr, windowedWidth, windowedHeight);
+			glfwSetWindowPos(windowPtr, windowedX, windowedY);
+		}
+	}
+
+
 
 }

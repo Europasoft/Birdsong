@@ -94,6 +94,9 @@ namespace EngineCore
 		InputAxisHandle moveSidewaysInput;
 		InputAxisHandle moveUpDownInput;
 		InputAxisHandle moveFasterInput;
+		InputEventHandle toggleFullscreenEvent;
+		InputEventHandle exitApplicationEvent;
+		bool exitApplication = false;
 
 	};
 

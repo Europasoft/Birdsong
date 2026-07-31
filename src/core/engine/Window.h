@@ -40,8 +40,13 @@ namespace EngineCore
 
 		static void mouseButtonCallbackHandler(GLFWwindow* window, int button, int action, int mods);
 
+		void toggleFullscreen();
+
 		// mouse/keyboard events
 		InputSystem input{ this };
+
+		// after switching to fullscreen, skip rendering for a few frames and just poll events
+		uint32_t fullscreenChangedCounter = 0;
 
 	private:
 		// window initialization using GLFW (on construct)
@@ -51,6 +56,7 @@ namespace EngineCore
 		int width;
 		int height;
 		bool framebufferResized = false;
+		bool isFullscreen = false;
 
 		// pointer to the GL Framework window object
 		GLFWwindow* windowPtr;
@@ -58,6 +64,12 @@ namespace EngineCore
 		std::string wndName;
 
 		void updateFpsInTitle(double delta) const;
+
+		int windowedX;
+		int windowedY;
+		int windowedWidth;
+		int windowedHeight;
+		
 	};
 
 }

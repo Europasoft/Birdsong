@@ -17,6 +17,8 @@
 #include <array>
 #include <iostream>
 #include <string>
+#include <chrono>
+#include <thread>
 
 #include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 #define GLM_FORCE_RADIANS
@@ -68,9 +70,20 @@ namespace EngineCore
 	{
 		// window event loop
 		EngineApplication::FrameContext f = {};
-		while (!window->getCloseWindow())
+		while (not (window->getCloseWindow() || exitApplication))
 		{
 			inputTick(f.delta);
+			// hack: skip drawing for a few frames and just poll window events, required to make fullscreen switching work
+			if (window->fullscreenChangedCounter > 0) 
+			{
+				using namespace std::chrono_literals;
+				window->fullscreenChangedCounter = 0;
+				for (uint32_t i = 0; i < 2; i++)
+				{
+					std::this_thread::sleep_for(200ms);
+					window->pollEvents(1);
+				}
+			}
 
 			f.scene = &world->getScene();
 			f.camera = &f.scene->getCurrentCamera();
@@ -118,6 +131,8 @@ namespace EngineCore
 		moveSidewaysInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_D, 1), KeyBinding(GLFW_KEY_A, -1) });
 		moveUpDownInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_R, 1), KeyBinding(GLFW_KEY_F, -1) });
 		moveFasterInput = inputSys.addInputAxis().addKeyBinding(KeyBinding(GLFW_KEY_LEFT_SHIFT));
+		exitApplicationEvent = inputSys.addInputEvent().addKeyBinding(KeyBinding(GLFW_KEY_ESCAPE));
+		toggleFullscreenEvent = inputSys.addInputEvent(EInputEvent::COMBO).addKeyBinding({ KeyBinding(GLFW_KEY_LEFT_ALT), KeyBinding(GLFW_KEY_ENTER) });
 	}
 
 	void EngineApplication::onSwapchainCreated()
@@ -162,6 +177,13 @@ namespace EngineCore
 	{
 		window->input.updateInputs(); // get new input state
 		window->pollEvents(delta); // process events in window queue
+
+		exitApplication = exitApplicationEvent.consume();
+		{
+			vkDeviceWaitIdle(device->device());
+			if (toggleFullscreenEvent.consume()) window->toggleFullscreen();
+		}
+
 	}
 
 	void EngineApplication::moveCamera(Camera& camera)
