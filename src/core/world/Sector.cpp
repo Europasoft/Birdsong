@@ -27,25 +27,6 @@ namespace WorldSystem
 	Sector::~Sector() 
 	{}
 
-	Vec calculateRelative(Vec subjectLocalCoords, SectorCoord subjectSector, SectorCoord referenceSector)
-	{
-		// very specific order of operations, to avoid floating point inaccuracy
-		auto calculateRelativeCoord = [&](float localCoord, SectorInt localSectorCoord, SectorInt referenceSectorCoord)
-		{
-			const SectorInt sectorDelta = localSectorCoord - referenceSectorCoord; // distance measured in sectors
-			const double distanceDelta = static_cast<double>(sectorDelta) * static_cast<double>(Sector::SECTOR_SIZE); // actual world distance
-			const double relative = static_cast<double>(localCoord) + distanceDelta;
-			return static_cast<float>(relative);
-		};
-
-		return Vec
-			{
-				calculateRelativeCoord(subjectLocalCoords.x, subjectSector.x, referenceSector.x),
-				calculateRelativeCoord(subjectLocalCoords.y, subjectSector.y, referenceSector.y),
-				calculateRelativeCoord(subjectLocalCoords.z, subjectSector.z, referenceSector.z)
-			};
-	}
-
 	NodeContainer& Sector::nodes() const
 	{
 		return *nodesContainer.get();

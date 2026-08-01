@@ -54,7 +54,4 @@ namespace WorldSystem
 
 	};
 
-	// transforms a position from its native local sector frame into a 3D coordinate relative to a target reference sector's origin
-	Vec calculateRelative(Vec subjectLocalCoords, SectorCoord subjectSector, SectorCoord referenceSector);
-
 }

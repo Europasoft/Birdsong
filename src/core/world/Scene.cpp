@@ -19,6 +19,7 @@
 #include "core/types/glm_conversions.h"
 #include "core/include/shared/Transform.h"
 #include "core/nodes/MeshCache.h"
+#include "core/types/Math.h"
 
 
 #include "deps/box3d-cpp/include/b3cpp.h"
@@ -115,7 +116,8 @@ namespace WorldSystem
 			for (EngineNodeData* eNode : sector->nodes().getMeshes())
 			{
 				const Transform& t = eNode->engineTransform;
-				const Vec meshPosRelative = WorldSystem::calculateRelative(t.translation, t.sector, getLocalSectorCoordinate());
+				// transforms the position from its local sector frame into the sector frame where the camera is
+				const Vec meshPosRelative = Math::calculateRelativePositionForRendering(t, getLocalSectorCoordinate());
 				const auto modelMatrix = EngineCore::cglm::makeMatrixQ(t.rotation, t.rotation_w, t.scale, meshPosRelative);
 				const auto normalMatrix = glm::transpose(glm::inverse(modelMatrix));
 				

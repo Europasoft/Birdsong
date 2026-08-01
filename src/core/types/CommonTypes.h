@@ -100,7 +100,9 @@ public:
 		}
 		return false;
 	}
-	const T& getMagnitude() const { return std::sqrt(x * x + y * y + z * z); }
+	// using hypotenuse instead of ^2, sum, sqrt prevents overflow/underflow
+	const T& getMagnitude() const { return std::hypot(x, y, z); }
+	const T& getLength() const { return getMagnitude(); }
 	static float distanceSquared(const Vector3D<T>& a, const Vector3D<T>& b) { return pow(b.x - a.x,2) + pow(b.y - a.y,2) + pow(b.z - a.z,2); }
 	static float distance(const Vector3D<T>& a, const Vector3D<T>& b) { return sqrt(distanceSquared(a, b)); }
 	static auto direction(Vector3D<float> a, Vector3D<float> b) { return Vector3D<float>(b - a).getNormalized(); }

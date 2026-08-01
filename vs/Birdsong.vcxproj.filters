@@ -280,6 +280,9 @@
     <ClCompile Include="..\src\core\input\InputInclude.cpp">
       <Filter>core\input</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\types\Math.cpp">
+      <Filter>core\types</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -584,6 +587,9 @@
     </ClInclude>
     <ClInclude Include="..\src\core\input\InputInclude.h">
       <Filter>core\input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\types\Math.h">
+      <Filter>core\types</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
