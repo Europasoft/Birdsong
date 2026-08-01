@@ -1,3 +1,4 @@
+// Copyright 2026 Simon Liimatainen. All rights reserved.
 #pragma once
 #include "core/types/CommonTypes.h"
 #include "core/engine/MeshData.h"
@@ -18,6 +19,7 @@ namespace EngineCore
 	class EngineDevice;
 	class Material;
 	class GBuffer;
+	class SingleTimeCommands;
 
 	enum class ETerrainPatchFaceDirection : uint32_t { A, B, C, D, E, F };
 
@@ -28,18 +30,31 @@ namespace EngineCore
 		Vec color{};
 	};
 
+	struct TerrainPatchBuffers
+	{
+		// GPU geometry buffers - only need one for each, since data is only written once
+		std::unique_ptr<EngineCore::GBuffer> vertexBuffer = nullptr;
+		std::unique_ptr<EngineCore::GBuffer> indexBuffer = nullptr;
+		std::unique_ptr<EngineCore::GBuffer> stagingBuffer1 = nullptr;
+		std::unique_ptr<EngineCore::GBuffer> stagingBuffer2 = nullptr;
+	};
+
+
 	class TerrainPatch
 	{
 	public:
 		TerrainPatch(EngineDevice& device, uint32_t resolution, double radius);
 		~TerrainPatch();
 
+		// only leaf nodes have valid geometry, but data may be pending or waiting to be freed
+		enum class EState : uint32_t { PARENT, PARENT_PENDING_FREE, LEAF, LEAF_PENDING_LOAD };
+
 	public:
 		// public data
 		Vector2D<float> center; // local 2D face coordinates
-		float size;  // extent in 2D space
-		uint32_t lodLevel; // how deep inside the quadtree this patch is
-		ETerrainPatchFaceDirection face; // +X, -X, +Y, etc.
+		float size = 0;  // extent in 2D space
+		uint32_t lodLevel = 0; // how deep inside the quadtree this patch is
+		ETerrainPatchFaceDirection face = ETerrainPatchFaceDirection::A; // +X, -X, +Y, etc.
 
 		std::vector<std::unique_ptr<TerrainPatch>> children;
 
@@ -49,11 +64,8 @@ namespace EngineCore
 	public:
 		// public functions
 
-		// split into 4 child patches (turning this leaf node into a container node)
-		void split();
-
-		// only leaf nodes have geometry and buffers
-		bool isLeafNode() const;
+		// split into 4 child patches (turning this leaf node into a parent node)
+		bool split(uint32_t frameIndex);
 
 		// create the patch vertices on CPU
 		void generateGeometry();
@@ -61,26 +73,45 @@ namespace EngineCore
 		// copy the geometry into GPU memory
 		void geometryToGPU();
 
-		// to draw the final geometry
-		void bindAndDraw(VkCommandBuffer commandBuffer) const;
+		bool updateReadiness();
+
+		// bind and draw the final geometry if it is ready
+		void draw(VkCommandBuffer commandBuffer);
+	
+		EState getState() const
+		{ 
+			return state; 
+		}
+		bool isParent() const
+		{
+			return (state == EState::PARENT || state == EState::PARENT_PENDING_FREE);
+		}
+		bool canFreeOnFrame(uint32_t i) const;
+		void freeBuffers();
+
+		//std::unique_ptr<TerrainPatchBuffers>&& stealBuffers();
 
 	private:
 		// private data
 
 		EngineDevice& device;
 
+		EState state = EState::PARENT;
+		uint32_t freeBuffersOnFrame = -1;
+
 		// CPU geometry buffers
 		std::vector<LargeVertex> vertices{};
 		std::vector<uint32_t> indices{};
 
-		// GPU geometry buffers - only need one for each, since data is only written once
-		std::unique_ptr<EngineCore::GBuffer> vertexBuffer = nullptr;
-		std::unique_ptr<EngineCore::GBuffer> indexBuffer = nullptr;
+		// GPU geometry buffers
+		std::unique_ptr<TerrainPatchBuffers> buffers;
+
+
+		std::unique_ptr<SingleTimeCommands> singleTimeCommands;
 
 	private:
 		// private functions
 		void createGPUBuffers();
-		void destroyGPUBuffers();
 		std::vector<Vertex> toSinglePrecision() const;
 
 	};

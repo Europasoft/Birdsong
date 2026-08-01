@@ -1,19 +1,21 @@
+// Copyright 2026 Simon Liimatainen. All rights reserved.
 #include "core/draw/planets/PlanetDrawer.h"
 #include "core/draw/planets/TerrainPatch.h"
 #include "core/gpu/Device.h"
 #include "core/gpu/Material.h"
 #include "core/include/shared/Transform.h"
 #include "core/types/glm_conversions.h"
+#include "core/types/Math.h"
 
 #include "core/engine/Camera.h"
 #include "core/world/World.h"
 #include "core/world/Scene.h"
 #include "core/world/Sector.h"
-//#include "core/draw/planets/LODSphere.h"
 
 #include <stdexcept>
 #include <array>
 #include <limits>
+#include <utility>
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -21,7 +23,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
+#include <cmath>
 #include <iostream>
+#include "core/engine/EngineClock.h"
 
 namespace EngineCore
 {
@@ -40,7 +44,7 @@ namespace EngineCore
 		ShaderFilePaths shaders(makePath("shaders/compiled/planet.vert.spv"), makePath("shaders/compiled/planet.frag.spv"));
 		auto layouts = world.getScene().getDescriptorSetLayouts();
 		MaterialCreateInfo matInfo(shaders, layouts, samples, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO);
-		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_FILL;
+		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_LINE;
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		planet.material = std::make_shared<Material>(matInfo, device);
 		planet.material->finalize();
@@ -50,9 +54,12 @@ namespace EngineCore
 
 	void PlanetDrawer::regenerate(Planet& planet)
 	{
-		vkDeviceWaitIdle(device.device()); // STRICTLY TEMPORARY
+		for (auto& terrainPatch : planet.roots)
+		{
+			// move previous geometry buffers (if present) to be deleted on a later frame
+			junkPile.push_back(std::make_unique<JunkPileItem>(std::move(terrainPatch), currentFrameIndex));
+		}
 		planet.roots.clear();
-		vkDeviceWaitIdle(device.device()); // STRICTLY TEMPORARY
 
 		// create each root face
 		for (uint32_t i = 0; i < 6; i++)
@@ -69,26 +76,33 @@ namespace EngineCore
 			root.generateGeometry();
 			root.geometryToGPU();
 
-			planet.centerTransform.translation.x = currentXoffset;
-			planet.centerTransform.sector = { 0, 0, 0 };
-			planet.centerTransform.scale = { 1 };
+			//planet.centerTransform.translation.x = currentXoffset;
+			planet.transform.sector = { 0, 0, 0 };
 		}
 
-		// test - just split one of the root faces and its children, for now
 		TerrainPatch& root1 = *planet.roots[1];
-		root1.split();
-		for (auto& c : root1.children)
-		{
-			c->split();
-			for (auto& j : c->children)
-			{
-				j->split();
-				for (auto& k : j->children)
-				{
-					k->split();
-				}
-			}
-		}
+		//while (not root1.updateReadiness())
+		//{
+		//	std::cout << "patch still loading...\n";
+		//	continue;
+		//}
+
+		EngineClock clock{};
+		// test - just split one of the root faces and its children, for now
+		//root1.split();
+		//for (auto& c : root1.children)
+		//{
+		//	c->split();
+		//	for (auto& j : c->children)
+		//	{
+		//		j->split();
+		//		for (auto& k : j->children)
+		//		{
+		//			k->split();
+		//		}
+		//	}
+		//}
+		std::cout << "====================== split all took " << clock.getElapsed() << " seconds\n";
 	}
 
 	/*void PlanetDrawer::updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, ResRad& r)
@@ -162,30 +176,14 @@ namespace EngineCore
 
 	void PlanetDrawer::render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt)
 	{
+		currentFrameIndex = frameIndex;
 		delta = dt;
 		cmdBuffer = commandBuffer;
 		camTransform = cameraTransform;
 		Scene& scene = world.getScene();
 		const auto sets = scene.getDescriptorSets(frameIndex);
-		
-		// experiment: grow and move further away
-		/*if (tempTimer < 900)
-		{
-			tempTimer -= delta;
-		}
-		if (tempTimer <= 0)
-		{
-			const float growBy = 100 * 1000 * 5000;
-			rr.radius += growBy;
-			currentXoffset += growBy;
-			//if ((rr.radius * 0.00001) >= 80000) { rr.radius = 100 * 1000 * 80000; }
-		
-			tempTimer = 0.6;
-			regenerate();
-		
-			if ((rr.radius * 0.00001) >= 80000) { tempTimer = 999; }
-			std::cout << "radius: " << rr.radius * 0.00001 << " km\n";
-		}*/
+
+		cleanJunkPile(); // called at the start, ensures that we don't delete any of the geometry created this exact frame
 
 		for (const auto& planet : planets)
 		{
@@ -205,7 +203,7 @@ namespace EngineCore
 
 	void PlanetDrawer::drawRecursive(TerrainPatch& patch, Planet& planet)
 	{
-		if (not patch.isLeafNode())
+		if (patch.isParent())
 		{
 			for (auto& childPatch : patch.children)
 			{
@@ -220,17 +218,119 @@ namespace EngineCore
 
 	void PlanetDrawer::drawLeafPatch(TerrainPatch& patch, Planet& planet)
 	{
-		const Transform& t = planet.centerTransform;
-		// calculate position relative to player's sector
-		const Vec meshPosRelative = WorldSystem::calculateRelative(t.translation, t.sector, world.getScene().getLocalSectorCoordinate());
+		if (not patch.updateReadiness()) return;
+
+		const Vec64 rel = Math::calculateRelativeCoordsXYZ(camTransform, planet.transform);
+		const double distance = rel.getLength();
+		Vec position;
+		if (distance < finalDrawDistance) [[unlikely]]
+		{
+			// this usually won't happen, unless the "planet" is tiny, or we go underground
+			position = Math::calculateRelativePositionForRendering(planet.transform, camTransform.sector);
+		}
+		else [[likely]]
+		{
+			// generate new position relative to player's sector, pinned to a certain distance so it stays closer than the far clip plane
+			Vec direction =
+			{
+				static_cast<float>(rel.x / distance),
+				static_cast<float>(rel.y / distance),
+				static_cast<float>(rel.z / distance)
+			};
+			position = camTransform.translation + direction * finalDrawDistance;
+		}
 
 		ShaderPushConstants::EngineMeshPushConstants push{};
-		push.transform = EngineCore::cglm::makeMatrixQ(t.rotation, t.rotation_w, t.scale, meshPosRelative);
+		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 0, 1, position);
 		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 
 		planet.material->writePushConstants(cmdBuffer, push);
 		// record mesh draw command
-		patch.bindAndDraw(cmdBuffer);
+		patch.draw(cmdBuffer);
 	}
+
+	void PlanetDrawer::split(std::unique_ptr<TerrainPatch>& patch)
+	{
+		// call stealBuffers after TerrainPatch::split(), so they can be freed at the right time (on a later frame)
+		//if (patch->split())
+	}
+
+	// do not call this on the exact same frame as marking items to be freed
+	void PlanetDrawer::cleanJunkPile()
+	{
+		for (size_t i = 0; i < junkPile.size(); i++)
+		{
+			auto& item = junkPile[i];
+			// the frame index has looped back around to the same index with which the object was created, meaning it is safe to deallocate
+			if (item->freeOnFrameIndex == currentFrameIndex)
+			{
+				junkPile.erase(junkPile.begin() + i);
+				std::cout << "removed old patch\n";
+			}
+		}
+		// check if any split nodes have stale geometry buffers to free
+		for (const auto& planet : planets)
+		{
+			for (const auto& rootPtr : planet->roots)
+			{
+				recursiveFree(*rootPtr);
+			}
+		}
+	}
+
+	void PlanetDrawer::recursiveFree(TerrainPatch& patch)
+	{
+		if (patch.canFreeOnFrame(currentFrameIndex))
+			patch.freeBuffers();
+		for (auto& childPatch : patch.children)
+		{
+			recursiveFree(*childPatch);
+		}
+	}
+
+	//double PlanetDrawer::calculateAxisDisplacement(float startLocalOffset, SectorInt startSector, SectorInt targetSector)
+	//{
+	//	const SectorInt sectorDelta = targetSector - startSector;
+	//	const double distanceDelta = static_cast<double>(sectorDelta) * static_cast<double>(Sector::SECTOR_SIZE);
+	//	const double positionA = static_cast<double>(startLocalOffset) + distanceDelta;
+	//	return -positionA;
+	//};
+
+	//Vec PlanetDrawer::getDirectionToPlanet(const Transform& startTransform, const SectorCoord& planetSector) const
+	//{
+	//	// calculate high-precision displacement vector along each axis
+	//	const double dx = calculateAxisDisplacement(startTransform.translation.x, startTransform.sector.x, planetSector.x);
+	//	const double dy = calculateAxisDisplacement(startTransform.translation.y, startTransform.sector.y, planetSector.y);
+	//	const double dz = calculateAxisDisplacement(startTransform.translation.z, startTransform.sector.z, planetSector.z);
+	//
+	//	// compute 3D magnitude in double precision
+	//	const double lengthSq = dx * dx + dy * dy + dz * dz;
+	//
+	//	if (lengthSq == 0.0)
+	//	{
+	//		return Vec{ 0 }; // handle zero-distance edge case
+	//	}
+	//
+	//	// normalize in double precision, then cast down to float direction
+	//	const double invLength = 1.0 / std::sqrt(lengthSq);
+	//	return Vec
+	//	{
+	//		static_cast<float>(dx * invLength),
+	//		static_cast<float>(dy * invLength),
+	//		static_cast<float>(dz * invLength)
+	//	};
+	//}
+
+	//double PlanetDrawer::getDistanceToSectorCenter(const Transform& startTransform, const SectorCoord& targetSector)
+	//{
+	//	const double dx = calculateAxisDisplacement(startTransform.translation.x, startTransform.sector.x, targetSector.x);
+	//	const double dy = calculateAxisDisplacement(startTransform.translation.y, startTransform.sector.y, targetSector.y);
+	//	const double dz = calculateAxisDisplacement(startTransform.translation.z, startTransform.sector.z, targetSector.z);
+	//
+	//	// 2. Compute hypotenuse using std::hypot to prevent overflow/underflow during squaring
+	//	return std::hypot(dx, dy, dz);
+	//}
+
+
 
 }

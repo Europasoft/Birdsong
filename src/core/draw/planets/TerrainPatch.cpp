@@ -1,16 +1,23 @@
+// Copyright 2026 Simon Liimatainen. All rights reserved.
 #include "core/draw/planets/TerrainPatch.h"
+#include "core/draw/planets/PlanetDrawer.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Device.h"
+#include "core/gpu/SingleTimeCommands.h"
 
 #include <stdexcept>
 #include <array>
 #include <limits>
+#include <utility>
+#include <iostream>
 
 // glm
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 //#include <glm/glm.hpp>
 //#include <glm/gtc/constants.hpp>
+
+#include "core/engine/EngineClock.h"
 
 namespace EngineCore
 {
@@ -22,12 +29,17 @@ namespace EngineCore
 
 	TerrainPatch::~TerrainPatch()
 	{
-		destroyGPUBuffers();
 	}
 
-	void TerrainPatch::split()
+	bool TerrainPatch::split(uint32_t frameIndex)
 	{
-		if (not isLeafNode()) return; // already not a leaf node - can only split nodes with geometry
+		EngineClock clock{};
+		
+		if (state != EState::LEAF) 
+		{
+			std::cout << "cannot split terrain patch - not a valid leaf\n";
+			return false; // already not a leaf node - can only split nodes with geometry
+		}
 
 		float child_size = size * 0.5f;
 		Vector2D<float> o = center;
@@ -59,50 +71,66 @@ namespace EngineCore
 		// free parent mesh data so it stops rendering and acts as an inner node
 		vertices.clear();
 		indices.clear();
-		destroyGPUBuffers(); // ideally we shouldn't stall the device here, but it's the easiest way to synchronize
-	}
-
-	bool TerrainPatch::isLeafNode() const
-	{
-		return vertexBuffer || vertices.size(); // only leaf nodes have geometry
+		state = EState::PARENT_PENDING_FREE;
+		freeBuffersOnFrame = frameIndex;
+		std::cout << "split took " << clock.getElapsed() << " seconds\n";
+		return true;
 	}
 
 	// GEOMETRY FUNCTIONS - ONLY RELEVANT FOR PATCHES THAT ARE LEAF NODES
 
-	void TerrainPatch::bindAndDraw(VkCommandBuffer commandBuffer) const
+	void TerrainPatch::draw(VkCommandBuffer commandBuffer)
 	{
-		assert(isLeafNode() && "cannot draw patch that is not a leaf node - no geometry");
+		assert(state == EState::LEAF && "cannot draw patch that has no geometry");
+		assert((not singleTimeCommands) || singleTimeCommands->finished() && "GPU buffer upload not yet finished");
 		// bind to command buffer
-		VkBuffer buffers[] = { vertexBuffer->getBuffer() };
+		const auto& v = buffers->vertexBuffer;
+		const auto& i = buffers->indexBuffer;
+		VkBuffer buffers[] = { v->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
+		vkCmdBindIndexBuffer(commandBuffer, i->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		// send draw command
 		vkCmdDrawIndexed(commandBuffer, indices.size(), 1, 0, 0, 0);
+	}
+
+	bool TerrainPatch::canFreeOnFrame(uint32_t i) const
+	{
+		return (state != EState::PARENT_PENDING_FREE) && i == freeBuffersOnFrame;
+	}
+
+	void TerrainPatch::freeBuffers()
+	{
+		assert(state == EState::PARENT_PENDING_FREE);
+		buffers = nullptr;
+		state = EState::PARENT;
+	}
+
+	bool TerrainPatch::updateReadiness()
+	{
+		if (state == EState::LEAF) return true;
+		if (state == EState::LEAF_PENDING_LOAD && singleTimeCommands->finished())
+		{
+			state = EState::LEAF;
+			return true;
+		}
+		return false;
 	}
 
 	void TerrainPatch::createGPUBuffers()
 	{
 		assert(vertices.size() && indices.size());
-		vertexBuffer = std::make_unique<GBuffer>(device, sizeof(vertices[0]), vertices.size(),
+		buffers = std::make_unique<TerrainPatchBuffers>();
+		buffers->vertexBuffer = std::make_unique<GBuffer>(device, sizeof(vertices[0]), vertices.size(),
 					VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		indexBuffer = std::make_unique<GBuffer>(device, sizeof(indices[0]), indices.size(),
+		buffers->indexBuffer = std::make_unique<GBuffer>(device, sizeof(indices[0]), indices.size(),
 					VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	}
 
-	void TerrainPatch::destroyGPUBuffers()
-	{
-		// TODO: IMPORTANT FOR PERFORMANCE: this causes a stall, should use a fence instead
-		vkDeviceWaitIdle(device.device());
-		vertexBuffer = nullptr;
-		indexBuffer = nullptr;
-	}
-
 	std::vector<Vertex> TerrainPatch::toSinglePrecision() const
 	{
-
 		std::vector<Vertex> verts;
 		verts.reserve(vertices.size());
 
@@ -126,7 +154,11 @@ namespace EngineCore
 
 	void TerrainPatch::geometryToGPU()
 	{
-		if (not vertexBuffer) createGPUBuffers();
+		assert(state == EState::LEAF_PENDING_LOAD);
+		if (not buffers) createGPUBuffers();
+		// let the GPU do the buffer copying at its own pace, check later if the commands are done so we can draw the vertices
+		singleTimeCommands = std::make_unique<SingleTimeCommands>(device);
+		singleTimeCommands->begin();
 
 		// convert double-precision vertex coordinates to single precision for GPU
 		const std::vector<Vertex> standardVertices = TerrainPatch::toSinglePrecision();
@@ -134,28 +166,29 @@ namespace EngineCore
 		assert(standardVertices.size() >= 3 && "vertexCount cannot be below 3");
 		VkDeviceSize bufferSize = sizeof(standardVertices[0]) * standardVertices.size();
 		// temporary transfer buffer
-		GBuffer vertStagingBuffer
-		{
+		buffers->stagingBuffer1 = std::make_unique<GBuffer>
+		(
 			device, sizeof(standardVertices[0]), static_cast<uint32_t>(standardVertices.size()),
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
-		vertStagingBuffer.map();
-		vertStagingBuffer.writeToBuffer((void*)standardVertices.data()); // write vertices
-		// note: copyBuffer is inefficient, could use fence to avoid stalling until the copy is finished
-		device.copyBuffer(vertStagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize); // copy to final buffer
+		);
+		buffers->stagingBuffer1->map();
+		buffers->stagingBuffer1->writeToBuffer((void*)standardVertices.data()); // write vertices
+		singleTimeCommands->copyBuffer(*buffers->stagingBuffer1, *buffers->vertexBuffer, bufferSize);
 
 		// same as for vertex buffer
 		bufferSize = sizeof(indices[0]) * indices.size();
-		GBuffer idxStagingBuffer
-		{
+		buffers->stagingBuffer2 = std::make_unique<GBuffer>
+		(
 			device, sizeof(indices[0]), static_cast<uint32_t>(indices.size()),
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
-		idxStagingBuffer.map();
-		idxStagingBuffer.writeToBuffer((void*)indices.data());
-		device.copyBuffer(idxStagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+		);
+		buffers->stagingBuffer2->map();
+		buffers->stagingBuffer2->writeToBuffer((void*)indices.data());
+		singleTimeCommands->copyBuffer(*buffers->stagingBuffer2, *buffers->indexBuffer, bufferSize);
+
+		singleTimeCommands->submit();
 	}
 
 	std::array<float, 3> getPatchColor(uint32_t i)
@@ -166,6 +199,8 @@ namespace EngineCore
 
 	void TerrainPatch::generateGeometry()
 	{
+		assert(state == EState::PARENT);
+		state = EState::LEAF_PENDING_LOAD;
 		const uint32_t faceIndex = static_cast<uint32_t>(face);
 		static uint32_t debugColorIdx = 0;
 		debugColorIdx++;
@@ -233,8 +268,8 @@ namespace EngineCore
 				double nz = cz * inv_len;
 
 				LargeVertex v;
-				// scale unit vector by radius to place vertex at actual world-space sphere radius
-				v.position = n * radius;
+				
+				v.position = n * 200.0; // n* radius; // scale unit vector by radius to place vertex at actual world-space sphere radius
 				v.normal = { static_cast<float>(n.x), static_cast<float>(n.y), static_cast<float>(n.z) };
 
 				auto col = getPatchColor(debugColorIdx);
@@ -267,6 +302,11 @@ namespace EngineCore
 		}
 	}
 
-	
+	//std::unique_ptr<TerrainPatchBuffers>&& TerrainPatch::stealBuffers()
+	//{
+	//	assert(vertices.size() == 0);
+	//	hasGeometry = false;
+	//	return std::move(buffers);
+	//}
 
 }

@@ -122,7 +122,7 @@ void main()
     
     // 3. Simple sine wave terrain calculation
     float wave = sin(sphereNormal.x * 10.0) * cos(sphereNormal.y * 10.0);
-    float terrainAmplitude = 3.0; // Set to > 0.0 if you want terrain height
+    float terrainAmplitude = 0.0; // Set to > 0.0 if you want terrain height
 
     // 4. Displace using the ACTUAL CPU radius instead of a hardcoded 100.0
     vec3 displacedPos = sphereNormal * (planetRadius + (wave * terrainAmplitude));

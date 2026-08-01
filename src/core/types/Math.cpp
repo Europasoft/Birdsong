@@ -1,3 +1,4 @@
+// Copyright 2026 Simon Liimatainen. All rights reserved.
 #include "core/types/Math.h"
 #include "core/world/Sector.h"
 
