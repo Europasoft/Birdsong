@@ -199,6 +199,7 @@ namespace EngineCore
 
 	std::array<float, 3> getPatchColor_visualizeLODLevel(uint32_t lod)
 	{
+		lod += 1;
 		return std::array<float, 3>{ lod / 5.f, lod / 12.f, lod / 25.f };
 	}
 

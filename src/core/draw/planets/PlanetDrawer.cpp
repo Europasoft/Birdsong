@@ -45,7 +45,7 @@ namespace EngineCore
 		ShaderFilePaths shaders(makePath("shaders/compiled/planet.vert.spv"), makePath("shaders/compiled/planet.frag.spv"));
 		auto layouts = world.getScene().getDescriptorSetLayouts();
 		MaterialCreateInfo matInfo(shaders, layouts, samples, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO);
-		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_FILL;
+		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_LINE;
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		planet.material = std::make_shared<Material>(matInfo, device);
 		planet.material->finalize();
@@ -154,7 +154,12 @@ namespace EngineCore
 
 		// project 2D center to 3D unit sphere direction
 		const FaceBasis basis = getFaceBasis(patch.face);
-		const Vec cubePoint = basis.forward + (basis.right * localCenter2D.x) + (basis.up * localCenter2D.y);
+
+		// apply equiangular warping to match mesh geometry
+		constexpr double PI_OVER_4 = 0.78539816339;
+		float tan_x = static_cast<float>(std::tan(localCenter2D.x * PI_OVER_4));
+		float tan_y = static_cast<float>(std::tan(localCenter2D.y * PI_OVER_4));
+		const Vec cubePoint = basis.forward + (basis.right * tan_x) + (basis.up * tan_y);
 
 		const Vec unitDirection = cubePoint.getNormalized();
 

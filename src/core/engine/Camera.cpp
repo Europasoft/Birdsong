@@ -86,8 +86,8 @@ namespace EngineCore
 								const float& moveUp, const bool& extraSpeed, const float& deltaTime)
 	{
 		float lookSpeed = 0.002f;
-		float moveSpeed = 780.f;
-		if (extraSpeed) { moveSpeed = 4200.f; }
+		float moveSpeed = 600.f * 68000;
+		if (extraSpeed) { moveSpeed = 4200.f * 68000; }
 
 		transform.rotation.y += (float)lookInput.y * lookSpeed;      // pitch
 		transform.rotation.z += (float)(-lookInput.x) * lookSpeed;   // yaw
