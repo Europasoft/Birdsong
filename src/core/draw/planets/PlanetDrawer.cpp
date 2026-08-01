@@ -16,6 +16,7 @@
 #include <array>
 #include <limits>
 #include <utility>
+#include <numbers>
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -38,13 +39,13 @@ namespace EngineCore
 		planets.push_back(std::make_unique<Planet>());
 		Planet& planet = *planets.back();
 		planet.resolution = 8;
-		planet.radius = 200;
+		planet.radius = 6371 * 100000; // radius of earth
 
 		// create material
 		ShaderFilePaths shaders(makePath("shaders/compiled/planet.vert.spv"), makePath("shaders/compiled/planet.frag.spv"));
 		auto layouts = world.getScene().getDescriptorSetLayouts();
 		MaterialCreateInfo matInfo(shaders, layouts, samples, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO);
-		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_LINE;
+		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_FILL;
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		planet.material = std::make_shared<Material>(matInfo, device);
 		planet.material->finalize();
@@ -105,72 +106,133 @@ namespace EngineCore
 		std::cout << "====================== split all took " << clock.getElapsed() << " seconds\n";
 	}
 
-	/*void PlanetDrawer::updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, ResRad& r)
+	struct FaceBasis
 	{
-		// 1. Estimate 3D center point of this quad on the sphere surface
-		// (You can map quad.center + quad.size * 0.5f from local face space to 3D world space)
-		Vec264 localCenter2D = { quad.center.x + quad.size * 0.5f, quad.center.y + quad.size * 0.5f };
-		Vec64 sphereCenter3D = Planets::projectToSphere(static_cast<uint32_t>(quad.face), localCenter2D, r.radius);
+		Vec right;
+		Vec up;
+		Vec forward;
+	};
 
-		// Account for planet scale/transform offset if necessary
-		// float distance = distance(cameraPos, sphereCenter3D * transformScale + transformTranslation);
-		float distance = Vec64::distance(cameraPos, sphereCenter3D);
+	//FaceBasis getFaceBasis(ETerrainPatchFaceDirection face)
+	//{
+	//	switch (face)
+	//	{
+	//	case ETerrainPatchFaceDirection::A: return { {0,0,1}, {0,1,0}, {1,0,0} };
+	//	case ETerrainPatchFaceDirection::B: return { {0,0,-1}, {0,1,0}, {-1,0,0} };
+	//	case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,1}, {0,1,0} };
+	//	case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,-1}, {0,-1,0} };
+	//	case ETerrainPatchFaceDirection::E: return { {1,0,0}, {0,1,0}, {0,0,1} };
+	//	case ETerrainPatchFaceDirection::F: return { {1,0,0}, {0,1,0}, {0,0,-1} };
+	//	}
+	//	return { {1,0,0}, {0,1,0}, {0,0,1} };
+	//}
 
-		// 2. Define your split threshold rule (e.g., split if node size relative to distance is large)
-		// Adjust 'splitThreshold' multiplier to tune when nodes subdivide
-		float splitThreshold = quad.size * 2.5f;
-		bool shouldSplit = (distance < splitThreshold) && (quad.lodLevel < 6); // Max LOD cap e.g. 6
+	FaceBasis getFaceBasis(ETerrainPatchFaceDirection face)
+	{
+		switch (face)
+		{
+			// Face A (+X): Right = +Z, Up = +Y, Forward = +X
+		case ETerrainPatchFaceDirection::A: return { {0,0,1}, {0,1,0}, {1,0,0} };
+
+										  // Face B (-X): Right = -Z, Up = +Y, Forward = -X
+		case ETerrainPatchFaceDirection::B: return { {0,0,-1}, {0,1,0}, {-1,0,0} };
+
+										  // Face C (+Y / Top Pole): Right = +X, Up = -Z, Forward = +Y
+		case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,-1}, {0,1,0} };
+
+										  // Face D (-Y / Bottom Pole): Right = +X, Up = +Z, Forward = -Y
+		case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,1}, {0,-1,0} };
+
+										  // Face E (+Z / Front): Right = +X, Up = +Y, Forward = +Z
+		case ETerrainPatchFaceDirection::E: return { {1,0,0}, {0,1,0}, {0,0,1} };
+
+										  // Face F (-Z / Back): Right = -X, Up = +Y, Forward = -Z
+		case ETerrainPatchFaceDirection::F: return { {-1,0,0}, {0,1,0}, {0,0,-1} };
+		}
+		return { {1,0,0}, {0,1,0}, {0,0,1} };
+	}
+
+	constexpr uint32_t maxLOD = 32;     // Maximum depth of the quadtree
+	constexpr double lodFactor = 1.75;   // Distance split threshold multiplier
+
+	void PlanetDrawer::updateLOD()
+	{
+		for (const auto& planet : planets)
+		{
+			for (std::unique_ptr<TerrainPatch>& patch : planet->roots)
+			{
+				// update patch and its children
+				evaluatePatchLOD(*patch, *planet);
+			}
+		}
+	}
+
+	void PlanetDrawer::evaluatePatchLOD(TerrainPatch& patch, Planet& planet)
+	{
+		// get 2D center of this patch
+		const float halfSize = patch.size * 0.5f;
+		const Vec2 localCenter2D =
+		{
+			patch.center.x + halfSize,
+			patch.center.y + halfSize
+		};
+
+		// project 2D center to 3D unit sphere direction
+		const FaceBasis basis = getFaceBasis(patch.face);
+		const Vec cubePoint = basis.forward + (basis.right * localCenter2D.x) + (basis.up * localCenter2D.y);
+
+		const Vec unitDirection = cubePoint.getNormalized();
+
+		// true world-space position of patch center (planet is assumed to be at the center of its own sector)
+		const Vec patchCenter = unitDirection * static_cast<float>(planet.radius);
+
+		// true distance to camera
+		const Transform patchTransform(patchCenter, Vec(0), Vec(0), planet.transform.sector);
+		const double distanceToCamera = Math::calculateDistance(patchTransform, camTransform);
+
+		// estimate physical size of patch on the sphere surface (a root patch of size 2 spans roughly 90 deg / PI half-circumference)
+		const double patchArcLength = (static_cast<double>(patch.size) / 2.0) * (std::numbers::pi * 0.5) * planet.radius;
+
+		// check split criteria
+		const bool shouldSplit = (distanceToCamera < patchArcLength * lodFactor) && (patch.lodLevel < maxLOD);
 
 		if (shouldSplit)
 		{
-			if (quad.node) // It's currently a leaf node, split it!
+			// if the patch is a leaf, split it
+			if (patch.getState() == TerrainPatch::EState::LEAF)
 			{
-				splitQuad(quad, material, r);
+				patch.split(currentFrameIndex);
 			}
-
-			// Recursively evaluate children
-			for (auto& child : quad.children)
+			else
 			{
-				updateLOD(*child, cameraPos, material, r);
+				// recursively update children (probably ok to skip if patch was just split, children can be updated next iteration)
+				for (auto& child : patch.children)
+				{
+					evaluatePatchLOD(*child, planet);
+				}
 			}
 		}
 		else
 		{
-			if (!quad.node) // It has children, but we are far enough to merge back
+			// distance is too far, reduce geometry
+			if (patch.children.size() > 0)
 			{
-				// Check if all children are leaves before merging (prevents popping artifacts)
-				bool allChildrenAreLeaves = true;
-				for (const auto& child : quad.children)
+				// remove geometry for child patches
+				for (auto& patchToRemove : patch.children)
 				{
-					if (!child->node)
-					{
-						allChildrenAreLeaves = false; break;
-					}
+					junkPile.push_back(std::make_unique<JunkPileItem>(std::move(patchToRemove), currentFrameIndex));
 				}
-
-				if (allChildrenAreLeaves)
+				patch.children.clear();
+				// skipped if old geometry is still pending free - this may create holes briefly!
+				if (patch.getState() != TerrainPatch::EState::PARENT_PENDING_FREE) 
 				{
-					// Re-create parent node mesh/leaf state and clear children
-					quad.node = std::make_unique<EngineNodeData>(nullptr, device);
-					quad.node->mesh = std::make_unique<Mesh>(device);
-					quad.node->mesh->build(Planets::generateSubFace(static_cast<int>(quad.face), r.resolution, r.radius, { quad.center.x, quad.center.y }, quad.size, quad.lodLevel, true).toSinglePrecision());
-
-					// Copy transform from children/planet context
-					quad.node->engineTransform = quad.children[0]->node->engineTransform;
-					quad.node->mesh->setMaterial(material);
-
-					quad.children.clear();
+					// regenerate this patch as a leaf node
+					patch.generateGeometry();
+					patch.geometryToGPU();
 				}
 			}
 		}
-	}*/
-
-	/*void PlanetDrawer::mergeQuad(Quad& quad)
-	{
-		quad.children.clear();
-		// re-instantiate quad.node here if you want it to be a leaf again, 
-		// or handle it inside your LOD evaluation loop.
-	}*/
+	}
 
 	PlanetDrawer::~PlanetDrawer() = default;
 
@@ -184,6 +246,8 @@ namespace EngineCore
 		const auto sets = scene.getDescriptorSets(frameIndex);
 
 		cleanJunkPile(); // called at the start, ensures that we don't delete any of the geometry created this exact frame
+		
+		updateLOD(); // recursively split/merge patches based on distance
 
 		for (const auto& planet : planets)
 		{
@@ -218,6 +282,7 @@ namespace EngineCore
 
 	void PlanetDrawer::drawLeafPatch(TerrainPatch& patch, Planet& planet)
 	{
+		//std::cout << "distance from center: " << (Math::calculateDistanceToSectorCenter(camTransform, SectorCoord()) * 0.00001) << " km\n";
 		if (not patch.updateReadiness()) return;
 
 		// translation and scaling factor
@@ -242,7 +307,7 @@ namespace EngineCore
 		}
 		else [[unlikely]]
 		{
-			// this usually won't happen, unless the radius is tiny, or we go underground
+			// this usually won't happen unless the radius is tiny, or we go underground
 			position = Math::calculateRelativePositionForRendering(planet.transform, camTransform.sector);
 		}
 
@@ -286,61 +351,22 @@ namespace EngineCore
 				recursiveFree(*rootPtr);
 			}
 		}
+		assert(junkPile.size() < (maxLOD * maxLOD) && "excessive number of terrain patches pending cleanup");
 	}
 
 	void PlanetDrawer::recursiveFree(TerrainPatch& patch)
 	{
 		if (patch.canFreeOnFrame(currentFrameIndex))
+		{
 			patch.freeBuffers();
+		}
 		for (auto& childPatch : patch.children)
 		{
 			recursiveFree(*childPatch);
 		}
 	}
 
-	//double PlanetDrawer::calculateAxisDisplacement(float startLocalOffset, SectorInt startSector, SectorInt targetSector)
-	//{
-	//	const SectorInt sectorDelta = targetSector - startSector;
-	//	const double distanceDelta = static_cast<double>(sectorDelta) * static_cast<double>(Sector::SECTOR_SIZE);
-	//	const double positionA = static_cast<double>(startLocalOffset) + distanceDelta;
-	//	return -positionA;
-	//};
-
-	//Vec PlanetDrawer::getDirectionToPlanet(const Transform& startTransform, const SectorCoord& planetSector) const
-	//{
-	//	// calculate high-precision displacement vector along each axis
-	//	const double dx = calculateAxisDisplacement(startTransform.translation.x, startTransform.sector.x, planetSector.x);
-	//	const double dy = calculateAxisDisplacement(startTransform.translation.y, startTransform.sector.y, planetSector.y);
-	//	const double dz = calculateAxisDisplacement(startTransform.translation.z, startTransform.sector.z, planetSector.z);
-	//
-	//	// compute 3D magnitude in double precision
-	//	const double lengthSq = dx * dx + dy * dy + dz * dz;
-	//
-	//	if (lengthSq == 0.0)
-	//	{
-	//		return Vec{ 0 }; // handle zero-distance edge case
-	//	}
-	//
-	//	// normalize in double precision, then cast down to float direction
-	//	const double invLength = 1.0 / std::sqrt(lengthSq);
-	//	return Vec
-	//	{
-	//		static_cast<float>(dx * invLength),
-	//		static_cast<float>(dy * invLength),
-	//		static_cast<float>(dz * invLength)
-	//	};
-	//}
-
-	//double PlanetDrawer::getDistanceToSectorCenter(const Transform& startTransform, const SectorCoord& targetSector)
-	//{
-	//	const double dx = calculateAxisDisplacement(startTransform.translation.x, startTransform.sector.x, targetSector.x);
-	//	const double dy = calculateAxisDisplacement(startTransform.translation.y, startTransform.sector.y, targetSector.y);
-	//	const double dz = calculateAxisDisplacement(startTransform.translation.z, startTransform.sector.z, targetSector.z);
-	//
-	//	// 2. Compute hypotenuse using std::hypot to prevent overflow/underflow during squaring
-	//	return std::hypot(dx, dy, dz);
-	//}
-
+	
 
 
 }

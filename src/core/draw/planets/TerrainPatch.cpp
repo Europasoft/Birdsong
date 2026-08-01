@@ -37,7 +37,7 @@ namespace EngineCore
 		
 		if (state != EState::LEAF) 
 		{
-			std::cout << "cannot split terrain patch - not a valid leaf\n";
+			assert(0 && "cannot split terrain patch - not a valid leaf\n");
 			return false; // already not a leaf node - can only split nodes with geometry
 		}
 
@@ -68,13 +68,25 @@ namespace EngineCore
 			child.geometryToGPU();
 		}
 
-		// free parent mesh data so it stops rendering and acts as an inner node
+		// free parent mesh data so it stops rendering and acts as a container node
 		vertices.clear();
 		indices.clear();
 		state = EState::PARENT_PENDING_FREE;
 		freeBuffersOnFrame = frameIndex;
 		std::cout << "split took " << clock.getElapsed() << " seconds\n";
 		return true;
+	}
+
+	bool TerrainPatch::canFreeOnFrame(uint32_t i) const
+	{
+		return (state == EState::PARENT_PENDING_FREE) && i == freeBuffersOnFrame;
+	}
+
+	void TerrainPatch::freeBuffers()
+	{
+		assert(state == EState::PARENT_PENDING_FREE);
+		buffers = nullptr;
+		state = EState::PARENT;
 	}
 
 	// GEOMETRY FUNCTIONS - ONLY RELEVANT FOR PATCHES THAT ARE LEAF NODES
@@ -92,18 +104,6 @@ namespace EngineCore
 		vkCmdBindIndexBuffer(commandBuffer, i->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		// send draw command
 		vkCmdDrawIndexed(commandBuffer, indices.size(), 1, 0, 0, 0);
-	}
-
-	bool TerrainPatch::canFreeOnFrame(uint32_t i) const
-	{
-		return (state != EState::PARENT_PENDING_FREE) && i == freeBuffersOnFrame;
-	}
-
-	void TerrainPatch::freeBuffers()
-	{
-		assert(state == EState::PARENT_PENDING_FREE);
-		buffers = nullptr;
-		state = EState::PARENT;
 	}
 
 	bool TerrainPatch::updateReadiness()

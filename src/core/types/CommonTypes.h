@@ -20,9 +20,9 @@ template<typename T>
 class Vector3D
 {
 public:
-	Vector3D<T>(const T& x_, const T& y_, const T& z_) : x{ x_ }, y{ y_ }, z{ z_ } {};
-	Vector3D<T>(const T& v) : x{ v }, y{ v }, z{ v } {};
-	Vector3D() : x{ 0 }, y{ 0 }, z{ 0 } {};
+	constexpr Vector3D<T>(const T& x_, const T& y_, const T& z_) : x{ x_ }, y{ y_ }, z{ z_ } {};
+	constexpr Vector3D<T>(const T& v) : x{ v }, y{ v }, z{ v } {};
+	constexpr Vector3D() : x{ 0 }, y{ 0 }, z{ 0 } {};
 	T x; T y; T z;
 	// operator mess, can be ignored
 	Vector3D<T> operator+(const Vector3D<T>& v) const { return Vector3D{ x + v.x, y + v.y, z + v.z }; } // +
@@ -55,10 +55,10 @@ public:
 	Vector3D<T> getNormalized() const 
 	{ 
 		const auto sum = dot(*this, *this); // magnitude squared
-		if (sum < std::numeric_limits<float>::epsilon()) { return Vector3D(); }
+		if (sum < std::numeric_limits<T>::epsilon()) { return Vector3D(); }
 		return *this * CommonTypesMath::invSqrt(sum);
 	}
-	bool normalize(const T& tolerance = std::numeric_limits<float>::epsilon())
+	bool normalize(const T& tolerance = std::numeric_limits<T>::epsilon())
 	{
 		const auto sum = dot(*this, *this); // magnitude squared
 		if (sum > tolerance)

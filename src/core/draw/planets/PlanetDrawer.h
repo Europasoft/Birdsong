@@ -50,6 +50,8 @@ namespace EngineCore
 
 		void regenerate(Planet& planet);
 
+		void updateLOD();
+
 		void render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt);
 
 	private:
@@ -68,6 +70,7 @@ namespace EngineCore
 
 		//void updateLOD(Quad& quad, const Vec64& cameraPos, std::shared_ptr<Material> material, ResRad& r);
 		//void mergeQuad(Quad& quad);
+		void evaluatePatchLOD(TerrainPatch& patch, Planet& planet);
 
 		void drawRecursive(TerrainPatch& patch, Planet& planet);
 		void drawLeafPatch(TerrainPatch& patch, Planet& planet);
@@ -77,7 +80,8 @@ namespace EngineCore
 		void cleanJunkPile();
 		void recursiveFree(TerrainPatch& patch);
 
-		
 	};
+
+	
 
 }
