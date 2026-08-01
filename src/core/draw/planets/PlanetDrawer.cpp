@@ -113,40 +113,15 @@ namespace EngineCore
 		Vec forward;
 	};
 
-	//FaceBasis getFaceBasis(ETerrainPatchFaceDirection face)
-	//{
-	//	switch (face)
-	//	{
-	//	case ETerrainPatchFaceDirection::A: return { {0,0,1}, {0,1,0}, {1,0,0} };
-	//	case ETerrainPatchFaceDirection::B: return { {0,0,-1}, {0,1,0}, {-1,0,0} };
-	//	case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,1}, {0,1,0} };
-	//	case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,-1}, {0,-1,0} };
-	//	case ETerrainPatchFaceDirection::E: return { {1,0,0}, {0,1,0}, {0,0,1} };
-	//	case ETerrainPatchFaceDirection::F: return { {1,0,0}, {0,1,0}, {0,0,-1} };
-	//	}
-	//	return { {1,0,0}, {0,1,0}, {0,0,1} };
-	//}
-
 	FaceBasis getFaceBasis(ETerrainPatchFaceDirection face)
 	{
 		switch (face)
 		{
-			// Face A (+X): Right = +Z, Up = +Y, Forward = +X
 		case ETerrainPatchFaceDirection::A: return { {0,0,1}, {0,1,0}, {1,0,0} };
-
-										  // Face B (-X): Right = -Z, Up = +Y, Forward = -X
 		case ETerrainPatchFaceDirection::B: return { {0,0,-1}, {0,1,0}, {-1,0,0} };
-
-										  // Face C (+Y / Top Pole): Right = +X, Up = -Z, Forward = +Y
-		case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,-1}, {0,1,0} };
-
-										  // Face D (-Y / Bottom Pole): Right = +X, Up = +Z, Forward = -Y
-		case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,1}, {0,-1,0} };
-
-										  // Face E (+Z / Front): Right = +X, Up = +Y, Forward = +Z
+		case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,1}, {0,1,0} };
+		case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,-1}, {0,-1,0} };
 		case ETerrainPatchFaceDirection::E: return { {1,0,0}, {0,1,0}, {0,0,1} };
-
-										  // Face F (-Z / Back): Right = -X, Up = +Y, Forward = -Z
 		case ETerrainPatchFaceDirection::F: return { {-1,0,0}, {0,1,0}, {0,0,-1} };
 		}
 		return { {1,0,0}, {0,1,0}, {0,0,1} };
@@ -188,6 +163,7 @@ namespace EngineCore
 
 		// true distance to camera
 		const Transform patchTransform(patchCenter, Vec(0), Vec(0), planet.transform.sector);
+
 		const double distanceToCamera = Math::calculateDistance(patchTransform, camTransform);
 
 		// estimate physical size of patch on the sphere surface (a root patch of size 2 spans roughly 90 deg / PI half-circumference)

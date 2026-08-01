@@ -197,6 +197,11 @@ namespace EngineCore
 		return colors[i % colors.size()];
 	}
 
+	std::array<float, 3> getPatchColor_visualizeLODLevel(uint32_t lod)
+	{
+		return std::array<float, 3>{ lod / 5.f, lod / 12.f, lod / 25.f };
+	}
+
 	void TerrainPatch::generateGeometry()
 	{
 		assert(state == EState::PARENT);
@@ -231,7 +236,7 @@ namespace EngineCore
 			double local_y = static_cast<double>(y) / resolution;
 
 			// apply scale and quadtree offset to compute coordinate in range [-1.0, 1.0]
-			double my = center.x + local_y * size;
+			double my = center.y + local_y * size;
 
 			// apply equiangular (tangent) distortion mapping to y axis
 			// this converts uniform linear spacing into uniform angular spacing on the sphere,
@@ -247,7 +252,7 @@ namespace EngineCore
 
 				// (map into local face space [-1, 1])
 				// map to cube face range [-1.0, 1.0] using offset and scale
-				double mx = center.y + local_x * size;
+				double mx = center.x + local_x * size;
 
 				// apply equiangular distortion mapping to x-axis
 				double tan_x = std::tan(mx * PI_OVER_4);
@@ -271,7 +276,7 @@ namespace EngineCore
 				v.position = n; // instead of scaling by radius here, just make it a unit sphere and let the GPU scale it up
 				v.normal = { static_cast<float>(n.x), static_cast<float>(n.y), static_cast<float>(n.z) };
 
-				auto col = getPatchColor(debugColorIdx);
+				auto col = getPatchColor_visualizeLODLevel(lodLevel);
 				v.color = { col[0], col[1], col[2] };
 
 				vertices.push_back(v);
