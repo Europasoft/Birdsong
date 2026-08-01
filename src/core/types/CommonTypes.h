@@ -7,45 +7,13 @@
 #include <string>
 #include <filesystem>
 
-namespace Math
+namespace CommonTypesMath
 {
-#define EPSILON_F std::numeric_limits<float>::epsilon()
-
-	// returns multiple of x that is closest to v
-	template<typename T>
-	T closestMultiple(T v, const T& x)
-	{
-		if (x > v)
-		{
-			return x;
-		}
-		v = v + (x / 2);
-		v = v - fmod(v, x);
-		return v;
-	}
-
-	// returns multiple of m that is closest to but >= v
-	template<typename T>
-	T roundUpToClosestMultiple(const T& v, const T& m)
-	{
-		if (m == 0)
-		{
-			return v;
-		}
-		const T remainder = v % m;
-		if (remainder == 0)
-		{
-			return v;
-		}
-		return v + m - remainder;
-	}
-
 	template<typename T>
 	T invSqrt(const T& v)
 	{
 		return 1.0 / sqrt(v);
 	}
-
 }
 
 template<typename T>
@@ -87,15 +55,15 @@ public:
 	Vector3D<T> getNormalized() const 
 	{ 
 		const auto sum = dot(*this, *this); // magnitude squared
-		if (sum < EPSILON_F) { return Vector3D(); }
-		return *this * Math::invSqrt(sum);
+		if (sum < std::numeric_limits<float>::epsilon()) { return Vector3D(); }
+		return *this * CommonTypesMath::invSqrt(sum);
 	}
-	bool normalize(const T& tolerance = EPSILON_F)
+	bool normalize(const T& tolerance = std::numeric_limits<float>::epsilon())
 	{
 		const auto sum = dot(*this, *this); // magnitude squared
 		if (sum > tolerance)
 		{
-			*this = *this * Math::invSqrt(sum);
+			*this = *this * CommonTypesMath::invSqrt(sum);
 			return true;
 		}
 		return false;
