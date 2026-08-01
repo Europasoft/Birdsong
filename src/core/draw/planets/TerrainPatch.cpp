@@ -268,8 +268,7 @@ namespace EngineCore
 				double nz = cz * inv_len;
 
 				LargeVertex v;
-				
-				v.position = n * 200.0; // n* radius; // scale unit vector by radius to place vertex at actual world-space sphere radius
+				v.position = n; // instead of scaling by radius here, just make it a unit sphere and let the GPU scale it up
 				v.normal = { static_cast<float>(n.x), static_cast<float>(n.y), static_cast<float>(n.z) };
 
 				auto col = getPatchColor(debugColorIdx);
@@ -301,12 +300,5 @@ namespace EngineCore
 			}
 		}
 	}
-
-	//std::unique_ptr<TerrainPatchBuffers>&& TerrainPatch::stealBuffers()
-	//{
-	//	assert(vertices.size() == 0);
-	//	hasGeometry = false;
-	//	return std::move(buffers);
-	//}
 
 }

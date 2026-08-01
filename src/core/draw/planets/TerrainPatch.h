@@ -89,8 +89,6 @@ namespace EngineCore
 		bool canFreeOnFrame(uint32_t i) const;
 		void freeBuffers();
 
-		//std::unique_ptr<TerrainPatchBuffers>&& stealBuffers();
-
 	private:
 		// private data
 

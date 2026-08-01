@@ -38,7 +38,7 @@ namespace EngineCore
 		planets.push_back(std::make_unique<Planet>());
 		Planet& planet = *planets.back();
 		planet.resolution = 8;
-		planet.radius = 100;
+		planet.radius = 200;
 
 		// create material
 		ShaderFilePaths shaders(makePath("shaders/compiled/planet.vert.spv"), makePath("shaders/compiled/planet.frag.spv"));
@@ -220,15 +220,14 @@ namespace EngineCore
 	{
 		if (not patch.updateReadiness()) return;
 
+		// translation and scaling factor
+		Vec position;
+		double k = 1;
+
 		const Vec64 rel = Math::calculateRelativeCoordsXYZ(camTransform, planet.transform);
 		const double distance = rel.getLength();
-		Vec position;
-		if (distance < finalDrawDistance) [[unlikely]]
-		{
-			// this usually won't happen, unless the "planet" is tiny, or we go underground
-			position = Math::calculateRelativePositionForRendering(planet.transform, camTransform.sector);
-		}
-		else [[likely]]
+
+		if (distance > finalDrawDistance) [[likely]]
 		{
 			// generate new position relative to player's sector, pinned to a certain distance so it stays closer than the far clip plane
 			Vec direction =
@@ -238,10 +237,21 @@ namespace EngineCore
 				static_cast<float>(rel.z / distance)
 			};
 			position = camTransform.translation + direction * finalDrawDistance;
+
+			k = finalDrawDistance / distance;
+		}
+		else [[unlikely]]
+		{
+			// this usually won't happen, unless the radius is tiny, or we go underground
+			position = Math::calculateRelativePositionForRendering(planet.transform, camTransform.sector);
 		}
 
+		// the unit sphere is scaled up to its final radius in the shader
+		const double visualRadius = planet.radius * k;
+		const Vec scale = Vec(static_cast<float>(visualRadius));
+
 		ShaderPushConstants::EngineMeshPushConstants push{};
-		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 0, 1, position);
+		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 0, scale, position);
 		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 
 		planet.material->writePushConstants(cmdBuffer, push);
