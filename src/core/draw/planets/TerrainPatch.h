@@ -39,6 +39,11 @@ namespace EngineCore
 		std::unique_ptr<EngineCore::GBuffer> stagingBuffer2 = nullptr;
 	};
 
+	struct JunkPileItem
+	{
+		std::unique_ptr<TerrainPatchBuffers> buffers;
+		uint32_t freeOnFrameIndex;
+	};
 
 	class TerrainPatch
 	{
@@ -47,7 +52,7 @@ namespace EngineCore
 		~TerrainPatch();
 
 		// only leaf nodes have valid geometry, but data may be pending or waiting to be freed
-		enum class EState : uint32_t { PARENT, PARENT_PENDING_FREE, LEAF, LEAF_PENDING_LOAD };
+		enum class EState : uint32_t { PARENT, LOADING, LEAF };
 
 	public:
 		// public data
@@ -65,13 +70,10 @@ namespace EngineCore
 		// public functions
 
 		// split into 4 child patches (turning this leaf node into a parent node)
-		bool split(uint32_t frameIndex);
+		bool split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
 
-		// create the patch vertices on CPU
-		void generateGeometry();
-
-		// copy the geometry into GPU memory
-		void geometryToGPU();
+		// generate and push geometry to GPU
+		void generate();
 
 		bool updateReadiness();
 
@@ -82,20 +84,24 @@ namespace EngineCore
 		{ 
 			return state; 
 		}
+		bool stateIs(EState s) const
+		{
+			return state == s;
+		}
 		bool isParent() const
 		{
-			return (state == EState::PARENT || state == EState::PARENT_PENDING_FREE);
+			return (state == EState::PARENT);
 		}
-		bool canFreeOnFrame(uint32_t i) const;
-		void freeBuffers();
+
+		void scheduleFreeBuffers(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
+		void scheduleFreeBuffersRecursive(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
 
 	private:
 		// private data
 
 		EngineDevice& device;
 
-		EState state = EState::PARENT;
-		uint32_t freeBuffersOnFrame = -1;
+		EState state;
 
 		// CPU geometry buffers
 		std::vector<LargeVertex> vertices{};
@@ -109,8 +115,16 @@ namespace EngineCore
 
 	private:
 		// private functions
+
+		// create the patch vertices on CPU
+		void generateGeometry();
+		// copy the geometry into GPU memory
+		void geometryToGPU();
+
 		void createGPUBuffers();
 		std::vector<Vertex> toSinglePrecision() const;
+
+		void setState(EState s);
 
 	};
 }

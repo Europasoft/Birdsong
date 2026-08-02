@@ -22,7 +22,7 @@
 namespace EngineCore
 {
 	TerrainPatch::TerrainPatch(EngineDevice& device, uint32_t resolution, double radius)
-		: device(device), resolution(resolution), radius(radius)
+		: device(device), resolution(resolution), radius(radius), state(EState::PARENT)
 	{
 		assert(resolution != 0 && radius != 0);
 	}
@@ -31,15 +31,16 @@ namespace EngineCore
 	{
 	}
 
-	bool TerrainPatch::split(uint32_t frameIndex)
+	bool TerrainPatch::split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
 	{
 		EngineClock clock{};
-		
-		if (state != EState::LEAF) 
-		{
-			assert(0 && "cannot split terrain patch - not a valid leaf\n");
-			return false; // already not a leaf node - can only split nodes with geometry
-		}
+		assert(stateIs(EState::LEAF) && "cannot split terrain patch - not a leaf\n");
+		assert(children.size() == 0);
+		// free parent mesh data so it stops rendering and acts as a container node
+		vertices.clear();
+		indices.clear();
+		scheduleFreeBuffers(junkPile, frameIndex);
+		setState(EState::PARENT);
 
 		float child_size = size * 0.5f;
 		Vector2D<float> o = center;
@@ -64,36 +65,39 @@ namespace EngineCore
 			child.face = face;
 
 			// build child geometry (this is hard on performance)
-			child.generateGeometry();
-			child.geometryToGPU();
+			child.generate();
 		}
-
-		// free parent mesh data so it stops rendering and acts as a container node
-		vertices.clear();
-		indices.clear();
-		state = EState::PARENT_PENDING_FREE;
-		freeBuffersOnFrame = frameIndex;
-		std::cout << "split took " << clock.getElapsed() << " seconds\n";
+		//std::cout << "split took " << clock.getElapsed() << " seconds\n";
 		return true;
 	}
 
-	bool TerrainPatch::canFreeOnFrame(uint32_t i) const
+	void TerrainPatch::generate()
 	{
-		return (state == EState::PARENT_PENDING_FREE) && i == freeBuffersOnFrame;
+		assert(not buffers);
+		generateGeometry();
+		geometryToGPU();
 	}
 
-	void TerrainPatch::freeBuffers()
+	void TerrainPatch::scheduleFreeBuffers(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
 	{
-		assert(state == EState::PARENT_PENDING_FREE);
-		buffers = nullptr;
-		state = EState::PARENT;
+		junkPile.push_back(std::make_unique<JunkPileItem>(std::move(buffers), frameIndex));
+		assert(children.size() == 0);
+	}
+
+	void TerrainPatch::scheduleFreeBuffersRecursive(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
+	{
+		junkPile.push_back(std::make_unique<JunkPileItem>(std::move(buffers), frameIndex));
+		for (auto& child : children)
+		{
+			child->scheduleFreeBuffersRecursive(junkPile, frameIndex);
+		}
 	}
 
 	// GEOMETRY FUNCTIONS - ONLY RELEVANT FOR PATCHES THAT ARE LEAF NODES
 
 	void TerrainPatch::draw(VkCommandBuffer commandBuffer)
 	{
-		assert(state == EState::LEAF && "cannot draw patch that has no geometry");
+		assert(stateIs(EState::LEAF) && "cannot draw patch that has no geometry");
 		assert((not singleTimeCommands) || singleTimeCommands->finished() && "GPU buffer upload not yet finished");
 		// bind to command buffer
 		const auto& v = buffers->vertexBuffer;
@@ -108,10 +112,10 @@ namespace EngineCore
 
 	bool TerrainPatch::updateReadiness()
 	{
-		if (state == EState::LEAF) return true;
-		if (state == EState::LEAF_PENDING_LOAD && singleTimeCommands->finished())
+		if (stateIs(EState::LEAF)) return true;
+		if (stateIs(EState::LOADING) && singleTimeCommands && singleTimeCommands->finished())
 		{
-			state = EState::LEAF;
+			setState(EState::LEAF);
 			return true;
 		}
 		return false;
@@ -152,9 +156,16 @@ namespace EngineCore
 		return verts;
 	}
 
+	void TerrainPatch::setState(EState s)
+	{
+		assert((s != EState::LEAF || children.size() == 0) && "patch with children cannot become leaf");
+		state = s;
+	}
+
 	void TerrainPatch::geometryToGPU()
 	{
-		assert(state == EState::LEAF_PENDING_LOAD);
+		EngineClock clock{};
+		assert(stateIs(EState::LOADING));
 		if (not buffers) createGPUBuffers();
 		// let the GPU do the buffer copying at its own pace, check later if the commands are done so we can draw the vertices
 		singleTimeCommands = std::make_unique<SingleTimeCommands>(device);
@@ -189,6 +200,8 @@ namespace EngineCore
 		singleTimeCommands->copyBuffer(*buffers->stagingBuffer2, *buffers->indexBuffer, bufferSize);
 
 		singleTimeCommands->submit();
+		const float ms = clock.getElapsed() * 1000;
+		//if (ms > 0.15) std::cout << "============= geometryToGPU() done in " << ms << " ms =============\n";
 	}
 
 	std::array<float, 3> getPatchColor(uint32_t i)
@@ -205,8 +218,9 @@ namespace EngineCore
 
 	void TerrainPatch::generateGeometry()
 	{
-		assert(state == EState::PARENT);
-		state = EState::LEAF_PENDING_LOAD;
+		EngineClock clock{};
+		assert(stateIs(EState::PARENT));
+		setState(EState::LOADING);
 		const uint32_t faceIndex = static_cast<uint32_t>(face);
 		static uint32_t debugColorIdx = 0;
 		debugColorIdx++;
@@ -305,6 +319,9 @@ namespace EngineCore
 				indices.push_back(i3);
 			}
 		}
+		const float ms = clock.getElapsed() * 1000;
+		//if (ms > 0.15) std::cout << "============= generateGeometry() done in " << ms << " ms =============\n";
 	}
+	
 
 }

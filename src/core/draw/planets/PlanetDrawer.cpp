@@ -25,6 +25,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include <cmath>
+#include <thread>
 #include <iostream>
 #include "core/engine/EngineClock.h"
 
@@ -53,12 +54,14 @@ namespace EngineCore
 		regenerate(planet);
 	}
 
+	PlanetDrawer::~PlanetDrawer() = default;
+
 	void PlanetDrawer::regenerate(Planet& planet)
 	{
-		for (auto& terrainPatch : planet.roots)
+		for (auto& rootPatch : planet.roots)
 		{
 			// move previous geometry buffers (if present) to be deleted on a later frame
-			junkPile.push_back(std::make_unique<JunkPileItem>(std::move(terrainPatch), currentFrameIndex));
+			rootPatch->scheduleFreeBuffers(junkPile, currentFrameIndex);
 		}
 		planet.roots.clear();
 
@@ -74,8 +77,7 @@ namespace EngineCore
 			root.lodLevel = 0;
 			root.face = static_cast<ETerrainPatchFaceDirection>(i);
 
-			root.generateGeometry();
-			root.geometryToGPU();
+			root.generate();
 
 			//planet.centerTransform.translation.x = currentXoffset;
 			planet.transform.sector = { 0, 0, 0 };
@@ -88,7 +90,7 @@ namespace EngineCore
 		//	continue;
 		//}
 
-		EngineClock clock{};
+		
 		// test - just split one of the root faces and its children, for now
 		//root1.split();
 		//for (auto& c : root1.children)
@@ -103,7 +105,35 @@ namespace EngineCore
 		//		}
 		//	}
 		//}
-		std::cout << "====================== split all took " << clock.getElapsed() << " seconds\n";
+	}
+
+	void PlanetDrawer::render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt)
+	{
+		currentFrameIndex = frameIndex;
+		delta = dt;
+		cmdBuffer = commandBuffer;
+		camTransform = cameraTransform;
+		Scene& scene = world.getScene();
+		const auto sets = scene.getDescriptorSets(frameIndex);
+
+		cleanJunkPile(); // called at the start, ensures that we don't delete any of the geometry created this exact frame
+
+		updateLOD(); // recursively split/merge patches based on distance
+
+		for (const auto& planet : planets)
+		{
+			// bind planet's material
+			planet->material->bindToCommandBuffer(commandBuffer);
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, planet->material->getPipelineLayout(),
+				0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+
+			// draw all patches in the quadtree
+			for (const auto& rootPtr : planet->roots)
+			{
+				TerrainPatch& rootPatch = *rootPtr;
+				drawRecursive(rootPatch, *planet);
+			}
+		}
 	}
 
 	struct FaceBasis
@@ -144,6 +174,7 @@ namespace EngineCore
 
 	void PlanetDrawer::evaluatePatchLOD(TerrainPatch& patch, Planet& planet)
 	{
+		EngineClock clock{};
 		// get 2D center of this patch
 		const float halfSize = patch.size * 0.5f;
 		const Vec2 localCenter2D =
@@ -177,12 +208,15 @@ namespace EngineCore
 		// check split criteria
 		const bool shouldSplit = (distanceToCamera < patchArcLength * lodFactor) && (patch.lodLevel < maxLOD);
 
+		const float ms = clock.getElapsed() * 1000;
+		//if (ms > 0.01) std::cout << "============= LOD eval done in " << ms << " ms =============\n";
+
 		if (shouldSplit)
 		{
 			// if the patch is a leaf, split it
 			if (patch.getState() == TerrainPatch::EState::LEAF)
 			{
-				patch.split(currentFrameIndex);
+				patch.split(junkPile, currentFrameIndex);
 			}
 			else
 			{
@@ -199,49 +233,13 @@ namespace EngineCore
 			if (patch.children.size() > 0)
 			{
 				// remove geometry for child patches
-				for (auto& patchToRemove : patch.children)
+				for (auto& child : patch.children)
 				{
-					junkPile.push_back(std::make_unique<JunkPileItem>(std::move(patchToRemove), currentFrameIndex));
+					child->scheduleFreeBuffersRecursive(junkPile, currentFrameIndex);
 				}
 				patch.children.clear();
-				// skipped if old geometry is still pending free - this may create holes briefly!
-				if (patch.getState() != TerrainPatch::EState::PARENT_PENDING_FREE) 
-				{
-					// regenerate this patch as a leaf node
-					patch.generateGeometry();
-					patch.geometryToGPU();
-				}
-			}
-		}
-	}
-
-	PlanetDrawer::~PlanetDrawer() = default;
-
-	void PlanetDrawer::render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt)
-	{
-		currentFrameIndex = frameIndex;
-		delta = dt;
-		cmdBuffer = commandBuffer;
-		camTransform = cameraTransform;
-		Scene& scene = world.getScene();
-		const auto sets = scene.getDescriptorSets(frameIndex);
-
-		cleanJunkPile(); // called at the start, ensures that we don't delete any of the geometry created this exact frame
-		
-		updateLOD(); // recursively split/merge patches based on distance
-
-		for (const auto& planet : planets)
-		{
-			// bind planet's material
-			planet->material->bindToCommandBuffer(commandBuffer);
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, planet->material->getPipelineLayout(),
-								0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-
-			// draw all patches in the quadtree
-			for (const auto& rootPtr : planet->roots)
-			{
-				TerrainPatch& rootPatch = *rootPtr;
-				drawRecursive(rootPatch, *planet);
+				// regenerate this patch as a leaf node
+				patch.generate();
 			}
 		}
 	}
@@ -305,49 +303,19 @@ namespace EngineCore
 		patch.draw(cmdBuffer);
 	}
 
-	void PlanetDrawer::split(std::unique_ptr<TerrainPatch>& patch)
-	{
-		// call stealBuffers after TerrainPatch::split(), so they can be freed at the right time (on a later frame)
-		//if (patch->split())
-	}
-
 	// do not call this on the exact same frame as marking items to be freed
 	void PlanetDrawer::cleanJunkPile()
 	{
+		//if (junkPile.size()) std::cout << "junk pile has " << junkPile.size() << " items\n";
 		for (size_t i = 0; i < junkPile.size(); i++)
 		{
-			auto& item = junkPile[i];
+			JunkPileItem& item = *junkPile[i];
 			// the frame index has looped back around to the same index with which the object was created, meaning it is safe to deallocate
-			if (item->freeOnFrameIndex == currentFrameIndex)
+			if (item.freeOnFrameIndex == currentFrameIndex)
 			{
 				junkPile.erase(junkPile.begin() + i);
-				std::cout << "removed old patch\n";
 			}
 		}
-		// check if any split nodes have stale geometry buffers to free
-		for (const auto& planet : planets)
-		{
-			for (const auto& rootPtr : planet->roots)
-			{
-				recursiveFree(*rootPtr);
-			}
-		}
-		assert(junkPile.size() < (maxLOD * maxLOD) && "excessive number of terrain patches pending cleanup");
 	}
-
-	void PlanetDrawer::recursiveFree(TerrainPatch& patch)
-	{
-		if (patch.canFreeOnFrame(currentFrameIndex))
-		{
-			patch.freeBuffers();
-		}
-		for (auto& childPatch : patch.children)
-		{
-			recursiveFree(*childPatch);
-		}
-	}
-
-	
-
 
 }
