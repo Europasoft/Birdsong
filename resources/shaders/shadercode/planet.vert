@@ -114,23 +114,21 @@ float snoise(vec3 v)
 
 void main()
 {
-     // 1. Calculate the sphere normal directly from the CPU position (unit vector pointing out)
-    vec3 sphereNormal = normalize(position.xyz);
+    // the input position the sphere normal on a unit sphere
+    vec3 sphereNormal = position.xyz;
     
-    // 2. Derive the actual radius computed by the CPU (length of incoming position)
-    float planetRadius = length(position.xyz);
-    
-    // 3. Simple sine wave terrain calculation
+    // add terrain displacement relative to unit radius 1.0
     float wave = sin(sphereNormal.x * 10.0) * cos(sphereNormal.y * 10.0);
-    float terrainAmplitude = 0.08; // Set to > 0.0 if you want terrain height
+    float terrainAmplitude = 0.08; 
 
-    // 4. Displace using the ACTUAL CPU radius instead of a hardcoded 100.0
-    vec3 displacedPos = sphereNormal * (planetRadius + (wave * terrainAmplitude));
+    // displace out from base unit radius (1.0)
+    vec3 displacedPos = sphereNormal * (1.0 + (wave * terrainAmplitude));
 
-    // 5. Final transformations
+    // final transformations (push.transform scales the unit sphere to final size)
     gl_Position = ubo1.projectionViewMatrix * push.transform * vec4(displacedPos, 1.0);
     
-    fragNormalWS = normalize(mat3(push.normalMatrix) * sphereNormal);
+    // note: if push.transform has non-uniform scaling, use mat3(push.normalMatrix) on the displaced/terrain normal instead of just the unit sphere normal
+    fragNormalWS = normalize(mat3(push.transform) * sphereNormal);
     fragPositionWS = (push.transform * vec4(displacedPos, 1.0)).xyz;
     fragUV = uv;
     fragColor = color;

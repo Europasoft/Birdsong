@@ -8,8 +8,10 @@
 
 #include <memory>
 #include <vector>
-#include <atomic>
+#include <array>
 #include <thread>
+#include <future>
+#include <mutex>
 
 namespace WorldSystem
 { 
@@ -50,8 +52,6 @@ namespace EngineCore
 		EngineDevice& device;
 		WorldSystem::World& world;
 		std::vector<std::unique_ptr<Planet>> planets;
-		std::atomic<bool> asyncInProgress = false;
-		std::thread asyncThread;
 
 		VkCommandBuffer cmdBuffer = VK_NULL_HANDLE;
 		Transform camTransform;
@@ -60,20 +60,27 @@ namespace EngineCore
 		double currentXoffset = 800.f;
 		double tempTimer = 0.6;
 
-		std::vector<std::unique_ptr<JunkPileItem>> junkPile; // old patches to be deleted when the GPU is done with them
+		std::future<void> updater;
+		std::mutex updaterMutex;
+		std::array<std::vector<std::unique_ptr<JunkPileItem>>, 2> junkPiles; // old patches to be deleted when the GPU is done with them
+		std::array<std::mutex, 2> junkPileMutexes; // used to guarantee that we don't write and free on the same junk pile
+		std::vector<std::unique_ptr<JunkPileItem>>& getJunkPile(uint32_t threadIndex);
+		void ensureJunkPileLock(uint32_t threadIndex, std::unique_lock<std::mutex>& lock);
 
 		void regenerate(Planet& planet);
 
-		void updateLOD();
+		void asyncUpdate();
+
 		void evaluatePatchLOD(TerrainPatch& patch, Planet& planet);
+		bool shouldSplit(TerrainPatch& patch, Planet& planet);
 
-		void drawRecursive(TerrainPatch& patch, Planet& planet);
-		void drawLeafPatch(TerrainPatch& patch, Planet& planet);
+		void attemptReplace(std::unique_ptr<TerrainPatch>& patch);
+		void drawRecursive(std::unique_ptr<TerrainPatch>& patch, Planet& planet);
+		void drawLeafPatch(std::unique_ptr<TerrainPatch>& patch, Planet& planet);
 
-		void cleanJunkPile();
+		int32_t acquireJunkPile(std::unique_lock<std::mutex>& lock, bool allowFail = false);
+		void cleanJunkPile(uint32_t cleaningFrameIndex);
 
 	};
-
-	
 
 }

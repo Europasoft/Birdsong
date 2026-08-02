@@ -10,6 +10,9 @@
 #include <limits>
 #include <utility>
 #include <iostream>
+#include <thread>
+#include <chrono>
+#include <mutex>
 
 // glm
 //#define GLM_FORCE_RADIANS
@@ -31,7 +34,61 @@ namespace EngineCore
 	{
 	}
 
-	bool TerrainPatch::split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
+	void TerrainPatch::splitReplace()
+	{
+		assert(stateIs(EState::LEAF) && children.size() == 0 && "cannot split terrain patch - not a leaf\n");
+
+		// make a new patch to replace this one with
+		assert(not next);
+		next = std::make_unique<TerrainPatch>(device, resolution, radius);
+		next->setState(EState::PARENT);
+		next->center = center;
+		next->size = size;
+		next->lodLevel = lodLevel;
+		next->face = face;
+
+
+		const float child_size = size * 0.5f;
+		const Vector2D<float> o = center;
+
+		// 4 local sub-quadrants
+		const Vector2D<float> offsets[4] =
+		{
+			{ o.x,               o.y               }, // bottom-left
+			{ o.x + child_size,  o.y               }, // bottom-right
+			{ o.x,               o.y + child_size  }, // top-left
+			{ o.x + child_size,  o.y + child_size  }  // top-right
+		};
+
+		next->children.resize(4);
+		for (uint32_t i = 0; i < 4; ++i)
+		{
+			next->children[i] = std::make_unique<TerrainPatch>(device, resolution, radius);
+			TerrainPatch& child = *next->children[i];
+
+			child.center = offsets[i];
+			child.size = child_size;
+			child.lodLevel = lodLevel + 1;
+			child.face = face;
+
+			// build child geometry (this is hard on performance)
+			child.generate();
+		}
+	}
+
+	void TerrainPatch::mergeReplace()
+	{
+		// make a new patch to replace this one with
+		next = std::make_unique<TerrainPatch>(device, resolution, radius);
+		next->center = center;
+		next->size = size;
+		next->lodLevel = lodLevel;
+		next->face = face;
+		
+		next->generate();
+	}
+
+	void TerrainPatch::split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
 	{
 		EngineClock clock{};
 		assert(stateIs(EState::LEAF) && "cannot split terrain patch - not a leaf\n");
@@ -68,7 +125,6 @@ namespace EngineCore
 			child.generate();
 		}
 		//std::cout << "split took " << clock.getElapsed() << " seconds\n";
-		return true;
 	}
 
 	void TerrainPatch::generate()
@@ -86,7 +142,7 @@ namespace EngineCore
 
 	void TerrainPatch::scheduleFreeBuffersRecursive(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
 	{
-		junkPile.push_back(std::make_unique<JunkPileItem>(std::move(buffers), frameIndex));
+		if (buffers) junkPile.push_back(std::make_unique<JunkPileItem>(std::move(buffers), frameIndex));
 		for (auto& child : children)
 		{
 			child->scheduleFreeBuffersRecursive(junkPile, frameIndex);
@@ -110,27 +166,12 @@ namespace EngineCore
 		vkCmdDrawIndexed(commandBuffer, indices.size(), 1, 0, 0, 0);
 	}
 
-	bool TerrainPatch::updateReadiness()
+	void TerrainPatch::updateLoadState()
 	{
-		if (stateIs(EState::LEAF)) return true;
 		if (stateIs(EState::LOADING) && singleTimeCommands && singleTimeCommands->finished())
 		{
-			setState(EState::LEAF);
-			return true;
+			setState(EState::LEAF); // GPU buffer upload finished
 		}
-		return false;
-	}
-
-	void TerrainPatch::createGPUBuffers()
-	{
-		assert(vertices.size() && indices.size());
-		buffers = std::make_unique<TerrainPatchBuffers>();
-		buffers->vertexBuffer = std::make_unique<GBuffer>(device, sizeof(vertices[0]), vertices.size(),
-					VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-		buffers->indexBuffer = std::make_unique<GBuffer>(device, sizeof(indices[0]), indices.size(),
-					VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 	}
 
 	std::vector<Vertex> TerrainPatch::toSinglePrecision() const
@@ -166,10 +207,24 @@ namespace EngineCore
 	{
 		EngineClock clock{};
 		assert(stateIs(EState::LOADING));
-		if (not buffers) createGPUBuffers();
+
+		if (not buffers)
+		{
+			// create GPU buffers
+			assert(vertices.size() && indices.size());
+			buffers = std::make_unique<TerrainPatchBuffers>();
+			buffers->vertexBuffer = std::make_unique<GBuffer>(device, sizeof(vertices[0]), vertices.size(),
+				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+			buffers->indexBuffer = std::make_unique<GBuffer>(device, sizeof(indices[0]), indices.size(),
+				VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		}
+
 		// let the GPU do the buffer copying at its own pace, check later if the commands are done so we can draw the vertices
 		singleTimeCommands = std::make_unique<SingleTimeCommands>(device);
-		singleTimeCommands->begin();
+		std::unique_lock<std::mutex> lock;
+		singleTimeCommands->begin(lock);
 
 		// convert double-precision vertex coordinates to single precision for GPU
 		const std::vector<Vertex> standardVertices = TerrainPatch::toSinglePrecision();
@@ -177,6 +232,7 @@ namespace EngineCore
 		assert(standardVertices.size() >= 3 && "vertexCount cannot be below 3");
 		VkDeviceSize bufferSize = sizeof(standardVertices[0]) * standardVertices.size();
 		// temporary transfer buffer
+		buffers->stagingBuffer1.reset();
 		buffers->stagingBuffer1 = std::make_unique<GBuffer>
 		(
 			device, sizeof(standardVertices[0]), static_cast<uint32_t>(standardVertices.size()),
@@ -219,7 +275,7 @@ namespace EngineCore
 	void TerrainPatch::generateGeometry()
 	{
 		EngineClock clock{};
-		assert(stateIs(EState::PARENT));
+		assert(stateIs(EState::PARENT) && children.size() == 0);
 		setState(EState::LOADING);
 		const uint32_t faceIndex = static_cast<uint32_t>(face);
 		static uint32_t debugColorIdx = 0;
@@ -323,5 +379,4 @@ namespace EngineCore
 		//if (ms > 0.15) std::cout << "============= generateGeometry() done in " << ms << " ms =============\n";
 	}
 	
-
 }

@@ -25,7 +25,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include <cmath>
-#include <thread>
+#include <chrono>
 #include <iostream>
 #include "core/engine/EngineClock.h"
 
@@ -33,14 +33,40 @@ namespace EngineCore
 {
 	using namespace WorldSystem;
 
+	struct FaceBasis
+	{
+		Vec right;
+		Vec up;
+		Vec forward;
+	};
+
+	FaceBasis getFaceBasis(ETerrainPatchFaceDirection face)
+	{
+		switch (face)
+		{
+		case ETerrainPatchFaceDirection::A: return { {0,0,1}, {0,1,0}, {1,0,0} };
+		case ETerrainPatchFaceDirection::B: return { {0,0,-1}, {0,1,0}, {-1,0,0} };
+		case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,1}, {0,1,0} };
+		case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,-1}, {0,-1,0} };
+		case ETerrainPatchFaceDirection::E: return { {1,0,0}, {0,1,0}, {0,0,1} };
+		case ETerrainPatchFaceDirection::F: return { {-1,0,0}, {0,1,0}, {0,0,-1} };
+		}
+		return { {1,0,0}, {0,1,0}, {0,0,1} };
+	}
+
+	constexpr uint32_t maxLOD = 12;     // Maximum depth of the quadtree
+	constexpr double lodFactor = 1.75;   // Distance split threshold multiplier
+
+
 	PlanetDrawer::PlanetDrawer(EngineDevice& device, World& world, const RenderingFormats& formats, VkSampleCountFlagBits samples)
-		: device(device), world(world)
+		: device(device), world(world), junkPileMutexes({{},{}})
 	{
 		// create a planet made up of one node per root face
 		planets.push_back(std::make_unique<Planet>());
 		Planet& planet = *planets.back();
-		planet.resolution = 8;
+		planet.resolution = 32;
 		planet.radius = 6371 * 100000; // radius of earth
+		planet.transform.sector = { 0, 0, 0 };
 
 		// create material
 		ShaderFilePaths shaders(makePath("shaders/compiled/planet.vert.spv"), makePath("shaders/compiled/planet.frag.spv"));
@@ -51,17 +77,30 @@ namespace EngineCore
 		planet.material = std::make_shared<Material>(matInfo, device);
 		planet.material->finalize();
 
+		for (auto& pile : junkPiles) pile.reserve(1000);
 		regenerate(planet);
 	}
 
 	PlanetDrawer::~PlanetDrawer() = default;
+
+	std::vector<std::unique_ptr<JunkPileItem>>& PlanetDrawer::getJunkPile(uint32_t threadIndex)
+	{
+		return junkPiles[(currentFrameIndex + threadIndex) % junkPiles.size()];
+	}
+
+	void PlanetDrawer::ensureJunkPileLock(uint32_t threadIndex, std::unique_lock<std::mutex>& lock)
+	{
+		auto& m = junkPileMutexes[(currentFrameIndex + threadIndex) % junkPiles.size()];
+		lock = std::move(std::unique_lock<std::mutex>(m, std::try_to_lock));
+		assert(lock.owns_lock() && "unsafe to free from and write to the same junk pile concurrently");
+	}
 
 	void PlanetDrawer::regenerate(Planet& planet)
 	{
 		for (auto& rootPatch : planet.roots)
 		{
 			// move previous geometry buffers (if present) to be deleted on a later frame
-			rootPatch->scheduleFreeBuffers(junkPile, currentFrameIndex);
+			rootPatch->scheduleFreeBuffers(getJunkPile(0), currentFrameIndex);
 		}
 		planet.roots.clear();
 
@@ -76,11 +115,7 @@ namespace EngineCore
 			root.size = 2.0f; // full extent of the face
 			root.lodLevel = 0;
 			root.face = static_cast<ETerrainPatchFaceDirection>(i);
-
 			root.generate();
-
-			//planet.centerTransform.translation.x = currentXoffset;
-			planet.transform.sector = { 0, 0, 0 };
 		}
 
 		TerrainPatch& root1 = *planet.roots[1];
@@ -116,52 +151,37 @@ namespace EngineCore
 		Scene& scene = world.getScene();
 		const auto sets = scene.getDescriptorSets(frameIndex);
 
-		cleanJunkPile(); // called at the start, ensures that we don't delete any of the geometry created this exact frame
+		if ((not updater.valid()) || updater.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+		{
+			// start LOD updates in another thread
+			updater = std::async(std::launch::async, &PlanetDrawer::asyncUpdate, this);
+		}
 
-		updateLOD(); // recursively split/merge patches based on distance
-
+		Material* currentMaterial = nullptr;
 		for (const auto& planet : planets)
 		{
-			// bind planet's material
-			planet->material->bindToCommandBuffer(commandBuffer);
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, planet->material->getPipelineLayout(),
-				0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-
-			// draw all patches in the quadtree
-			for (const auto& rootPtr : planet->roots)
+			if (planet->material.get() != currentMaterial)
 			{
-				TerrainPatch& rootPatch = *rootPtr;
+				// bind planet's material
+				currentMaterial = planet->material.get();
+				currentMaterial->bindToCommandBuffer(commandBuffer);
+				vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, currentMaterial->getPipelineLayout(),
+						0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+			}
+
+			// draw patches
+			for (std::unique_ptr<TerrainPatch>& rootPatch : planet->roots)
+			{
+				attemptReplace(rootPatch);
 				drawRecursive(rootPatch, *planet);
 			}
 		}
 	}
 
-	struct FaceBasis
+	void PlanetDrawer::asyncUpdate()
 	{
-		Vec right;
-		Vec up;
-		Vec forward;
-	};
+		cleanJunkPile(currentFrameIndex);
 
-	FaceBasis getFaceBasis(ETerrainPatchFaceDirection face)
-	{
-		switch (face)
-		{
-		case ETerrainPatchFaceDirection::A: return { {0,0,1}, {0,1,0}, {1,0,0} };
-		case ETerrainPatchFaceDirection::B: return { {0,0,-1}, {0,1,0}, {-1,0,0} };
-		case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,1}, {0,1,0} };
-		case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,-1}, {0,-1,0} };
-		case ETerrainPatchFaceDirection::E: return { {1,0,0}, {0,1,0}, {0,0,1} };
-		case ETerrainPatchFaceDirection::F: return { {-1,0,0}, {0,1,0}, {0,0,-1} };
-		}
-		return { {1,0,0}, {0,1,0}, {0,0,1} };
-	}
-
-	constexpr uint32_t maxLOD = 32;     // Maximum depth of the quadtree
-	constexpr double lodFactor = 1.75;   // Distance split threshold multiplier
-
-	void PlanetDrawer::updateLOD()
-	{
 		for (const auto& planet : planets)
 		{
 			for (std::unique_ptr<TerrainPatch>& patch : planet->roots)
@@ -174,7 +194,35 @@ namespace EngineCore
 
 	void PlanetDrawer::evaluatePatchLOD(TerrainPatch& patch, Planet& planet)
 	{
-		EngineClock clock{};
+		patch.updateLoadState();
+
+		if (shouldSplit(patch, planet))
+		{
+			// if the patch is a leaf, split it
+			if (patch.stateIs(TerrainPatch::EState::LEAF))
+			{
+				std::unique_lock<std::mutex> lock(updaterMutex); // will block if render thread is performing replacement
+				if (not patch.next) patch.splitReplace();
+			}
+			else
+			{
+				// recursively update children (skip if patch was just split)
+				for (auto& child : patch.children)
+				{
+					evaluatePatchLOD(*child, planet);
+				}
+			}
+		}
+		else if (patch.children.size() > 0)
+		{
+			// distance is too far, remove geometry from child patches 
+			std::unique_lock<std::mutex> lock(updaterMutex);
+			if (not patch.next) patch.mergeReplace();
+		}
+	}
+
+	bool PlanetDrawer::shouldSplit(TerrainPatch& patch, Planet& planet)
+	{
 		// get 2D center of this patch
 		const float halfSize = patch.size * 0.5f;
 		const Vec2 localCenter2D =
@@ -206,51 +254,20 @@ namespace EngineCore
 		const double patchArcLength = (static_cast<double>(patch.size) / 2.0) * (std::numbers::pi * 0.5) * planet.radius;
 
 		// check split criteria
-		const bool shouldSplit = (distanceToCamera < patchArcLength * lodFactor) && (patch.lodLevel < maxLOD);
-
-		const float ms = clock.getElapsed() * 1000;
-		//if (ms > 0.01) std::cout << "============= LOD eval done in " << ms << " ms =============\n";
-
-		if (shouldSplit)
-		{
-			// if the patch is a leaf, split it
-			if (patch.getState() == TerrainPatch::EState::LEAF)
-			{
-				patch.split(junkPile, currentFrameIndex);
-			}
-			else
-			{
-				// recursively update children (probably ok to skip if patch was just split, children can be updated next iteration)
-				for (auto& child : patch.children)
-				{
-					evaluatePatchLOD(*child, planet);
-				}
-			}
-		}
-		else
-		{
-			// distance is too far, reduce geometry
-			if (patch.children.size() > 0)
-			{
-				// remove geometry for child patches
-				for (auto& child : patch.children)
-				{
-					child->scheduleFreeBuffersRecursive(junkPile, currentFrameIndex);
-				}
-				patch.children.clear();
-				// regenerate this patch as a leaf node
-				patch.generate();
-			}
-		}
+		bool should = (distanceToCamera < patchArcLength * lodFactor) && (patch.lodLevel < maxLOD);
+		//std::cout << (should ? "/ SPLIT\n" : "\\split not\n");
+		return should;
 	}
 
-	void PlanetDrawer::drawRecursive(TerrainPatch& patch, Planet& planet)
+
+	void PlanetDrawer::drawRecursive(std::unique_ptr<TerrainPatch>& patch, Planet& planet)
 	{
-		if (patch.isParent())
+		if (patch->isParent())
 		{
-			for (auto& childPatch : patch.children)
+			for (auto& childPatch : patch->children)
 			{
-				drawRecursive(*childPatch, planet);
+				attemptReplace(childPatch);
+				drawRecursive(childPatch, planet);
 			}
 		}
 		else
@@ -259,10 +276,29 @@ namespace EngineCore
 		}
 	}
 
-	void PlanetDrawer::drawLeafPatch(TerrainPatch& patch, Planet& planet)
+	void PlanetDrawer::attemptReplace(std::unique_ptr<TerrainPatch>& patch)
+	{
+		{
+			std::unique_lock<std::mutex> lock(updaterMutex, std::try_to_lock);
+			if (lock.owns_lock() && patch->next)
+			{
+				// this patch has an updated version ready, replace it
+				std::unique_ptr<TerrainPatch> next = std::move(patch->next);
+
+				std::unique_lock<std::mutex> trashLock;
+				ensureJunkPileLock(0, trashLock);
+				patch->scheduleFreeBuffersRecursive(getJunkPile(0), currentFrameIndex);
+				patch->children.clear();
+
+				patch = std::move(next);
+			}
+		}
+	}
+
+	void PlanetDrawer::drawLeafPatch(std::unique_ptr<TerrainPatch>& patch, Planet& planet)
 	{
 		//std::cout << "distance from center: " << (Math::calculateDistanceToSectorCenter(camTransform, SectorCoord()) * 0.00001) << " km\n";
-		if (not patch.updateReadiness()) return;
+		if (not patch->stateIs(TerrainPatch::EState::LEAF)) return; // patch geometry is still loading
 
 		// translation and scaling factor
 		Vec position;
@@ -295,27 +331,46 @@ namespace EngineCore
 		const Vec scale = Vec(static_cast<float>(visualRadius));
 
 		ShaderPushConstants::EngineMeshPushConstants push{};
+		// TODO: optimize this
 		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 0, scale, position);
 		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 
 		planet.material->writePushConstants(cmdBuffer, push);
 		// record mesh draw command
-		patch.draw(cmdBuffer);
+		patch->draw(cmdBuffer);
+	}
+
+	int32_t PlanetDrawer::acquireJunkPile(std::unique_lock<std::mutex>& lock, bool allowFail)
+	{
+		// try to acquire any available mutex without waiting
+		//for (uint32_t i = 0; i < junkPileMutexes.size(); i++)
+		//{
+		//	std::unique_lock<std::mutex> tryLock(junkPileMutexes[i], std::try_to_lock);
+		//	if (tryLock.owns_lock())
+		//	{
+		//		lock = std::move(tryLock);
+		//		return i;
+		//	}
+		//}
+		//if (allowFail) return -1;
+		//
+		//// if none were free, do a blocking wait
+		//lock = std::unique_lock<std::mutex>(junkPileMutexes[0]);
+		return 0;
 	}
 
 	// do not call this on the exact same frame as marking items to be freed
-	void PlanetDrawer::cleanJunkPile()
+	void PlanetDrawer::cleanJunkPile(uint32_t cleaningFrameIndex)
 	{
-		//if (junkPile.size()) std::cout << "junk pile has " << junkPile.size() << " items\n";
-		for (size_t i = 0; i < junkPile.size(); i++)
-		{
-			JunkPileItem& item = *junkPile[i];
-			// the frame index has looped back around to the same index with which the object was created, meaning it is safe to deallocate
-			if (item.freeOnFrameIndex == currentFrameIndex)
+		std::unique_lock<std::mutex> trashLock;
+		ensureJunkPileLock(1, trashLock);
+
+		auto& junkPile = getJunkPile(1);
+		std::erase_if(junkPile, [cleaningFrameIndex](const auto& item)
 			{
-				junkPile.erase(junkPile.begin() + i);
-			}
-		}
+				return item->freeOnFrameIndex == cleaningFrameIndex;
+			});
+		//if (junkPile.size()>0) std::cout << (currentFrameIndex + 1) % junkPiles.size() << " junk pile size: " << junkPile.size() << "\n";
 	}
 
 }

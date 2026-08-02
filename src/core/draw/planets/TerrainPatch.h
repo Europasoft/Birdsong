@@ -7,6 +7,8 @@
 
 #include <memory>
 #include <vector>
+#include <atomic>
+#include <future>
 
 namespace WorldSystem
 { 
@@ -56,6 +58,8 @@ namespace EngineCore
 
 	public:
 		// public data
+		const uint32_t resolution;
+		const double radius;
 		Vector2D<float> center; // local 2D face coordinates
 		float size = 0;  // extent in 2D space
 		uint32_t lodLevel = 0; // how deep inside the quadtree this patch is
@@ -63,19 +67,22 @@ namespace EngineCore
 
 		std::vector<std::unique_ptr<TerrainPatch>> children;
 
-		const uint32_t resolution;
-		const double radius;
+		// if present, the updated patch to replace this one with
+		// guarded by updaterMutex
+		std::unique_ptr<TerrainPatch> next; 
 
 	public:
 		// public functions
 
+		void splitReplace();
+		void mergeReplace();
 		// split into 4 child patches (turning this leaf node into a parent node)
-		bool split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
+		void split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
 
 		// generate and push geometry to GPU
 		void generate();
 
-		bool updateReadiness();
+		void updateLoadState();
 
 		// bind and draw the final geometry if it is ready
 		void draw(VkCommandBuffer commandBuffer);
@@ -101,7 +108,7 @@ namespace EngineCore
 
 		EngineDevice& device;
 
-		EState state;
+		std::atomic<EState> state;
 
 		// CPU geometry buffers
 		std::vector<LargeVertex> vertices{};
@@ -109,8 +116,6 @@ namespace EngineCore
 
 		// GPU geometry buffers
 		std::unique_ptr<TerrainPatchBuffers> buffers;
-
-
 		std::unique_ptr<SingleTimeCommands> singleTimeCommands;
 
 	private:
@@ -121,7 +126,6 @@ namespace EngineCore
 		// copy the geometry into GPU memory
 		void geometryToGPU();
 
-		void createGPUBuffers();
 		std::vector<Vertex> toSinglePrecision() const;
 
 		void setState(EState s);
