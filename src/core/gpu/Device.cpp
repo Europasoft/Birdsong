@@ -1,10 +1,14 @@
 #include "core/gpu/Device.h"
+#include "core/gpu/Buffer.h" // for Fence class
 
 #include <cstring>
 #include <iostream>
 #include <set>
 #include <unordered_set>
+#include <array>
+#include <cassert>
 
+#include <utility>
 #include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 
 namespace EngineCore 
@@ -59,6 +63,7 @@ namespace EngineCore
 	EngineDevice::~EngineDevice() 
 	{
 		vkDestroyCommandPool(device_, commandPool, nullptr);
+		getAsyncCommandDispatcher().destroy();
 		vkDestroyDevice(device_, nullptr);
 
 		if (enableValidationLayers) 
@@ -154,16 +159,19 @@ namespace EngineCore
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily, indices.presentFamily };
 
-		float queuePriority = 1.0f;
+		std::array<float, 2> prios = { 1.f, 0.9f };
 		for (uint32_t queueFamily : uniqueQueueFamilies) 
 		{
 			VkDeviceQueueCreateInfo queueCreateInfo = {};
 			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			queueCreateInfo.queueFamilyIndex = queueFamily;
-			queueCreateInfo.queueCount = 1;
-			queueCreateInfo.pQueuePriorities = &queuePriority;
+			queueCreateInfo.queueCount = 2; // one extra queue for the async dispatcher
+			queueCreateInfo.pQueuePriorities = prios.data();
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
+		// create an async command dispatcher, for handling random command submissions from different threads
+		asyncCommandDispatcher = std::make_unique<AsyncCommandDispatcher>(*this);
+
 
 		// vulkan v1 features
 		VkPhysicalDeviceFeatures deviceFeatures1 = {};
@@ -217,6 +225,7 @@ namespace EngineCore
 
 		vkGetDeviceQueue(device_, indices.graphicsFamily, 0, &graphicsQueue_);
 		vkGetDeviceQueue(device_, indices.presentFamily, 0, &presentQueue_);
+		asyncCommandDispatcher->init(indices.graphicsFamily, 1);
 	}
 
 	void EngineDevice::createCommandPool() 
@@ -440,7 +449,7 @@ namespace EngineCore
 		throw std::runtime_error("failed to find supported format!");
 	}
 
-	uint32_t EngineDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) 
+    uint32_t EngineDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
@@ -691,5 +700,111 @@ namespace EngineCore
 
 		endSingleTimeCommands(commandBuffer);
 	}
+
+	void EngineDevice::submitAsyncCommandDispatcherBuffers() const
+	{
+		getAsyncCommandDispatcher().submitAll();
+	}
+
+
+	AsyncCommandDispatcher& EngineDevice::getAsyncCommandDispatcher() const
+	{
+		return *asyncCommandDispatcher;
+	}
+
+	AsyncCommandBuffer::AsyncCommandBuffer(EngineDevice& device, VkCommandPool pool)
+		: device(device), pool(pool)
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = pool;
+		allocInfo.commandBufferCount = 1;
+		vkAllocateCommandBuffers(device.device(), &allocInfo, &buf);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		vkBeginCommandBuffer(buf, &beginInfo);
+
+		fence = std::make_unique<Fence>(device);
+	}
+
+	AsyncCommandBuffer::~AsyncCommandBuffer()
+	{
+		assert(finished());
+	}
+
+	bool AsyncCommandBuffer::finished() const
+	{
+		return fence->wasSignaled();
+	}
+
+	AsyncCommandDispatcher::AsyncCommandDispatcher(EngineDevice& device)
+		: device(device)
+	{
+	}
+	
+	AsyncCommandDispatcher::~AsyncCommandDispatcher()
+	{
+	}
+
+	void AsyncCommandDispatcher::init(uint32_t familyIndex, uint32_t queueIndex)
+	{
+		// get async queue (created by device)
+		vkGetDeviceQueue(device.device(), familyIndex, queueIndex, &asyncQueue);
+
+		// create async command pool
+		QueueFamilyIndices queueFamilyIndices = device.findPhysicalQueueFamilies();
+		VkCommandPoolCreateInfo poolInfo = {};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		if (vkCreateCommandPool(device.device(), &poolInfo, nullptr, &asyncCommandPool) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create command pool!");
+		}
+	}
+
+	std::shared_ptr<AsyncCommandBuffer> AsyncCommandDispatcher::startNewCommandBuffer(std::unique_lock<std::mutex>& lock)
+	{
+		lock = std::move(std::unique_lock<std::mutex>(m));
+		cmdBuffers.push_back(std::make_shared<AsyncCommandBuffer>(device, asyncCommandPool));
+		return cmdBuffers.back();
+	}
+
+	void AsyncCommandDispatcher::submitAll()
+	{
+		std::unique_lock<std::mutex> l(m);
+
+		for (size_t i = cmdBuffers.size(); i-- > 0;)
+		{
+			auto& b = *cmdBuffers[i];
+			// free previously completed
+			if (b.finished())
+			{
+				//vkFreeCommandBuffers(device.device(), asyncCommandPool, 1, &b.buf);
+				cmdBuffers.erase(cmdBuffers.begin() + i);
+			}
+			// submit to GPU
+			else if (b.readyToSubmit)
+			{
+				b.readyToSubmit = false;
+				vkEndCommandBuffer(b.buf);
+				VkSubmitInfo submitInfo{};
+				submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+				submitInfo.commandBufferCount = 1;
+				submitInfo.pCommandBuffers = &b.buf;
+				vkQueueSubmit(asyncQueue, 1, &submitInfo, b.fence->getFence());
+			}
+		}
+	}
+
+    void AsyncCommandDispatcher::destroy()
+    {
+		std::unique_lock<std::mutex> l(m);
+		vkDestroyCommandPool(device.device(), asyncCommandPool, nullptr);
+	}
+
 
 }

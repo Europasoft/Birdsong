@@ -5,11 +5,16 @@
 // std lib headers
 #include <string>
 #include <vector>
+#include <memory>
+#include <mutex>
 
-class EngineApplication; // forward-declaration
+class EngineApplication; 
 
 namespace EngineCore 
 {
+	class Fence; // for AsyncCommandDispatcher
+	class AsyncCommandDispatcher;
+
 	struct SwapChainSupportDetails 
 	{
 		VkSurfaceCapabilitiesKHR capabilities;
@@ -58,6 +63,8 @@ namespace EngineCore
 		VkPhysicalDevice& getPhysicalDevice() { return physicalDevice; }
 		// checks device properties to get the max samples supported for both color and depth
 		VkSampleCountFlagBits getMaxSampleCount();
+		AsyncCommandDispatcher& getAsyncCommandDispatcher() const;
+		void submitAsyncCommandDispatcherBuffers() const;
 
 		// Buffer Helper Functions
 		void createBuffer(
@@ -117,6 +124,52 @@ namespace EngineCore
 
 		const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
 		const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+		std::unique_ptr<AsyncCommandDispatcher> asyncCommandDispatcher;
+	};
+
+	class AsyncCommandBuffer
+	{
+	public:
+		AsyncCommandBuffer(EngineDevice& device, VkCommandPool pool);
+		~AsyncCommandBuffer();
+
+		VkCommandBuffer get() const { return buf; }
+		void markForSubmit() { readyToSubmit = true; }
+		bool finished() const;
+
+	private:
+		EngineDevice& device;
+		VkCommandPool pool;
+		VkCommandBuffer buf = VK_NULL_HANDLE;
+		std::unique_ptr<Fence> fence;
+
+		friend class AsyncCommandDispatcher;
+		bool readyToSubmit = false;
+	};
+
+	class AsyncCommandDispatcher
+	{
+	public:
+		AsyncCommandDispatcher(EngineDevice& device);
+		~AsyncCommandDispatcher();
+
+	public:
+		std::shared_ptr<AsyncCommandBuffer> startNewCommandBuffer(std::unique_lock<std::mutex>& lock);
+		
+
+	private:
+		EngineDevice& device;
+		VkQueue asyncQueue = VK_NULL_HANDLE;
+		VkCommandPool asyncCommandPool = VK_NULL_HANDLE;
+		std::mutex m;
+
+		std::vector<std::shared_ptr<AsyncCommandBuffer>> cmdBuffers;
+
+		friend EngineDevice;
+		void init(uint32_t familyIndex, uint32_t queueIndex);
+		void submitAll();
+		void destroy();
 	};
 
 }

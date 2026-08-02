@@ -321,6 +321,8 @@ namespace EngineCore
 	{
 		assert(isFrameStarted && "endFrame failed, no frame in progress");
 
+		device.submitAsyncCommandDispatcherBuffers(); // submit all command buffers from the async dispatcher
+
 		auto commandBuffer = getCurrentCommandBuffer();
 
 		// transition swapchain image to present layout

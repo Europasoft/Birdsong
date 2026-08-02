@@ -3,10 +3,12 @@
 #include "core/types/vk.h"
 
 #include <memory>
+#include <mutex>
 
 namespace EngineCore
 {
 	class EngineDevice;
+	class AsyncCommandBuffer;
 	class Fence;
 	class GBuffer;
 
@@ -18,18 +20,16 @@ namespace EngineCore
 		SingleTimeCommands(EngineDevice& device);
 		~SingleTimeCommands();
 
-		VkCommandBuffer begin();
+		VkCommandBuffer begin(std::unique_lock<std::mutex>& lock);
 		void submit();
 		void copyBuffer(GBuffer& src, GBuffer& dst, VkDeviceSize size);
-		// if this returns true, it is safe to call begin() again, or destroy the object
+		// if this returns true, it is safe to destroy the object
 		bool finished() const;
-		void reset();
 
 
 	private:
 		EngineDevice& device;
-		std::unique_ptr<Fence> fence;
-		VkCommandBuffer cmdBuffer;
+		std::shared_ptr<AsyncCommandBuffer> cmdBuffer;
 		ESingleTimeCommandsState state = ESingleTimeCommandsState::NOT_BEGUN;
 	};
 }
