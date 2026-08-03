@@ -17,6 +17,7 @@
 #include <limits>
 #include <utility>
 #include <numbers>
+#include <chrono>
 
 // glm
 #define GLM_FORCE_RADIANS
@@ -78,10 +79,15 @@ namespace EngineCore
 		planet.material->finalize();
 
 		for (auto& pile : junkPiles) pile.reserve(1000);
-		regenerate(planet);
+		
+		updater = std::thread(&PlanetDrawer::asyncUpdate, this);
 	}
 
-	PlanetDrawer::~PlanetDrawer() = default;
+	PlanetDrawer::~PlanetDrawer()
+	{
+		updaterExit = true;
+		updater.join();
+	}
 
 	std::vector<std::unique_ptr<JunkPileItem>>& PlanetDrawer::getJunkPile(uint32_t threadIndex)
 	{
@@ -95,53 +101,6 @@ namespace EngineCore
 		assert(lock.owns_lock() && "unsafe to free from and write to the same junk pile concurrently");
 	}
 
-	void PlanetDrawer::regenerate(Planet& planet)
-	{
-		for (auto& rootPatch : planet.roots)
-		{
-			// move previous geometry buffers (if present) to be deleted on a later frame
-			rootPatch->scheduleFreeBuffers(getJunkPile(0), currentFrameIndex);
-		}
-		planet.roots.clear();
-
-		// create each root face
-		for (uint32_t i = 0; i < 6; i++)
-		{
-			planet.roots.push_back(std::make_unique<TerrainPatch>(device, planet.resolution, planet.radius));
-			TerrainPatch& root = *planet.roots.back();
-
-			// set up quad metadata for root
-			root.center = { -1.0f, -1.0f }; // using bottom-left as offset
-			root.size = 2.0f; // full extent of the face
-			root.lodLevel = 0;
-			root.face = static_cast<ETerrainPatchFaceDirection>(i);
-			root.generate();
-		}
-
-		TerrainPatch& root1 = *planet.roots[1];
-		//while (not root1.updateReadiness())
-		//{
-		//	std::cout << "patch still loading...\n";
-		//	continue;
-		//}
-
-		
-		// test - just split one of the root faces and its children, for now
-		//root1.split();
-		//for (auto& c : root1.children)
-		//{
-		//	c->split();
-		//	for (auto& j : c->children)
-		//	{
-		//		j->split();
-		//		for (auto& k : j->children)
-		//		{
-		//			k->split();
-		//		}
-		//	}
-		//}
-	}
-
 	void PlanetDrawer::render(VkCommandBuffer commandBuffer, uint32_t frameIndex, const Transform& cameraTransform, double dt)
 	{
 		currentFrameIndex = frameIndex;
@@ -151,10 +110,10 @@ namespace EngineCore
 		Scene& scene = world.getScene();
 		const auto sets = scene.getDescriptorSets(frameIndex);
 
-		if ((not updater.valid()) || updater.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+		if (updaterIdle)
 		{
-			// start LOD updates in another thread
-			updater = std::async(std::launch::async, &PlanetDrawer::asyncUpdate, this);
+			// instruct the updater thread to do a LOD pass
+			updaterIdle = false;
 		}
 
 		Material* currentMaterial = nullptr;
@@ -178,50 +137,88 @@ namespace EngineCore
 		}
 	}
 
-	void PlanetDrawer::asyncUpdate()
+	void PlanetDrawer::createRootFaces()
 	{
-		cleanJunkPile(currentFrameIndex);
-
-		for (const auto& planet : planets)
+		// create each root face (the 6 sides of a cube-sphere)
+		assert(planets[0]->roots.size() == 0);
+		for (auto& planet : planets)
 		{
-			for (std::unique_ptr<TerrainPatch>& patch : planet->roots)
+			for (uint32_t i = 0; i < 6; i++)
 			{
-				// update patch and its children
-				evaluatePatchLOD(*patch, *planet);
+				planet->roots.push_back(std::make_unique<TerrainPatch>(device, planet->resolution, planet->radius));
+				TerrainPatch& root = *planet->roots.back();
+
+				// set up quad metadata for root
+				root.center = { -1.0f, -1.0f }; // using bottom-left as offset
+				root.size = 2.0f; // full extent of the face
+				root.lodLevel = 0;
+				root.face = static_cast<ETerrainPatchFaceDirection>(i);
+				root.generate(*asyncCmdBuffer);
 			}
 		}
+	}
+
+	void PlanetDrawer::asyncUpdate()
+	{
+		while (not updaterExit)
+		{
+			if (not firstGeometryReady)
+			{
+				asyncCmdBuffer = device.getAsyncCommandDispatcher().makeNewCommandBuffer();
+				asyncCmdBuffer->start();
+				createRootFaces(); // initialize cube-sphere when started for the first time
+			}
+
+			while (updaterIdle && not updaterExit); std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			if (updaterExit) break;
+
+			cleanJunkPile(currentFrameIndex);
+
+			if (firstGeometryReady) asyncCmdBuffer->start();
+			std::unique_lock<std::mutex> lock(updaterDoneMutex);
+			for (const auto& planet : planets)
+			{
+				for (std::unique_ptr<TerrainPatch>& patch : planet->roots)
+				{
+					// update patch and its children
+					evaluatePatchLOD(*patch, *planet);
+				}
+			}
+
+			asyncCmdBuffer->submit();
+			asyncCmdBuffer->wait(30000);
+			firstGeometryReady = true;
+			updaterIdle = true;
+		}
+		asyncCmdBuffer.reset();
 	}
 
 	void PlanetDrawer::evaluatePatchLOD(TerrainPatch& patch, Planet& planet)
 	{
-		patch.updateLoadState();
-
-		if (shouldSplit(patch, planet))
+		if (patch.next) return;
+		uint32_t action = checkSplitCriteria(patch, planet);
+		if (action == 1)
 		{
-			// if the patch is a leaf, split it
-			if (patch.stateIs(TerrainPatch::EState::LEAF))
-			{
-				std::unique_lock<std::mutex> lock(updaterMutex); // will block if render thread is performing replacement
-				if (not patch.next) patch.splitReplace();
-			}
-			else
-			{
-				// recursively update children (skip if patch was just split)
-				for (auto& child : patch.children)
-				{
-					evaluatePatchLOD(*child, planet);
-				}
-			}
+			// the patch is a leaf, split it
+			patch.splitReplace(*asyncCmdBuffer);
 		}
-		else if (patch.children.size() > 0)
+		else if (action == 2)
 		{
 			// distance is too far, remove geometry from child patches 
-			std::unique_lock<std::mutex> lock(updaterMutex);
-			if (not patch.next) patch.mergeReplace();
+			patch.mergeReplace(*asyncCmdBuffer);
 		}
+		else
+		{
+			// recursively update children (skip if patch was just split)
+			for (auto& child : patch.children)
+			{
+				evaluatePatchLOD(*child, planet);
+			}
+		}
+
 	}
 
-	bool PlanetDrawer::shouldSplit(TerrainPatch& patch, Planet& planet)
+	uint32_t PlanetDrawer::checkSplitCriteria(TerrainPatch& patch, Planet& planet)
 	{
 		// get 2D center of this patch
 		const float halfSize = patch.size * 0.5f;
@@ -253,15 +250,18 @@ namespace EngineCore
 		// estimate physical size of patch on the sphere surface (a root patch of size 2 spans roughly 90 deg / PI half-circumference)
 		const double patchArcLength = (static_cast<double>(patch.size) / 2.0) * (std::numbers::pi * 0.5) * planet.radius;
 
-		// check split criteria
-		bool should = (distanceToCamera < patchArcLength * lodFactor) && (patch.lodLevel < maxLOD);
-		//std::cout << (should ? "/ SPLIT\n" : "\\split not\n");
-		return should;
+		const double targetDistance = patchArcLength * lodFactor;
+
+		// check split criteria - use a higher distance multiplier to merge than to split
+		const bool split = (distanceToCamera < targetDistance) && (patch.lodLevel < maxLOD) && patch.stateIs(TerrainPatch::EState::LEAF);
+		const bool merge = (distanceToCamera > targetDistance * 1.15) && patch.children.size();
+		return (split || merge) ? (split ? 1 : 2) : 0;
 	}
 
 
 	void PlanetDrawer::drawRecursive(std::unique_ptr<TerrainPatch>& patch, Planet& planet)
 	{
+		if (not firstGeometryReady) return;
 		if (patch->isParent())
 		{
 			for (auto& childPatch : patch->children)
@@ -278,27 +278,30 @@ namespace EngineCore
 
 	void PlanetDrawer::attemptReplace(std::unique_ptr<TerrainPatch>& patch)
 	{
+		// only replace patches when the updater thread is idle, but do not wait for it, as that would lower FPS when terrain is being generated
+		std::unique_lock<std::mutex> lock(updaterDoneMutex, std::try_to_lock);
+		if (lock.owns_lock() && patch->next)
 		{
-			std::unique_lock<std::mutex> lock(updaterMutex, std::try_to_lock);
-			if (lock.owns_lock() && patch->next)
-			{
-				// this patch has an updated version ready, replace it
-				std::unique_ptr<TerrainPatch> next = std::move(patch->next);
+			// this patch has an updated version ready, replace it
+			std::unique_ptr<TerrainPatch> next = std::move(patch->next);
 
-				std::unique_lock<std::mutex> trashLock;
-				ensureJunkPileLock(0, trashLock);
-				patch->scheduleFreeBuffersRecursive(getJunkPile(0), currentFrameIndex);
-				patch->children.clear();
+			std::unique_lock<std::mutex> trashLock;
+			ensureJunkPileLock(0, trashLock);
+			patch->scheduleFreeBuffersRecursive(getJunkPile(0), currentFrameIndex);
+			patch->children.clear();
 
-				patch = std::move(next);
-			}
+			patch = std::move(next);
 		}
 	}
 
 	void PlanetDrawer::drawLeafPatch(std::unique_ptr<TerrainPatch>& patch, Planet& planet)
 	{
 		//std::cout << "distance from center: " << (Math::calculateDistanceToSectorCenter(camTransform, SectorCoord()) * 0.00001) << " km\n";
-		if (not patch->stateIs(TerrainPatch::EState::LEAF)) return; // patch geometry is still loading
+
+		//std::unique_lock<std::mutex> lock(updaterDoneMutex);//, std::try_to_lock);
+		//if (not lock.owns_lock()) return;
+
+		if (not patch->stateIs(TerrainPatch::EState::LEAF)) return;
 
 		// translation and scaling factor
 		Vec position;

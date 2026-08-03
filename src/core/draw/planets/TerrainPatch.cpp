@@ -3,7 +3,7 @@
 #include "core/draw/planets/PlanetDrawer.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/Device.h"
-#include "core/gpu/SingleTimeCommands.h"
+#include "core/gpu/Device.h"
 
 #include <stdexcept>
 #include <array>
@@ -34,7 +34,7 @@ namespace EngineCore
 	{
 	}
 
-	void TerrainPatch::splitReplace()
+	void TerrainPatch::splitReplace(AsyncCommandBuffer& commandBuffer)
 	{
 		assert(stateIs(EState::LEAF) && children.size() == 0 && "cannot split terrain patch - not a leaf\n");
 
@@ -72,11 +72,11 @@ namespace EngineCore
 			child.face = face;
 
 			// build child geometry (this is hard on performance)
-			child.generate();
+			child.generate(commandBuffer);
 		}
 	}
 
-	void TerrainPatch::mergeReplace()
+	void TerrainPatch::mergeReplace(AsyncCommandBuffer& commandBuffer)
 	{
 		// make a new patch to replace this one with
 		next = std::make_unique<TerrainPatch>(device, resolution, radius);
@@ -85,7 +85,7 @@ namespace EngineCore
 		next->lodLevel = lodLevel;
 		next->face = face;
 		
-		next->generate();
+		next->generate(commandBuffer);
 	}
 
 	void TerrainPatch::split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
@@ -122,16 +122,16 @@ namespace EngineCore
 			child.face = face;
 
 			// build child geometry (this is hard on performance)
-			child.generate();
+			//child.generate(VK_NULL_HANDLE);
 		}
 		//std::cout << "split took " << clock.getElapsed() << " seconds\n";
 	}
 
-	void TerrainPatch::generate()
+	void TerrainPatch::generate(AsyncCommandBuffer& commandBuffer)
 	{
 		assert(not buffers);
 		generateGeometry();
-		geometryToGPU();
+		geometryToGPU(commandBuffer);
 	}
 
 	void TerrainPatch::scheduleFreeBuffers(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
@@ -154,7 +154,6 @@ namespace EngineCore
 	void TerrainPatch::draw(VkCommandBuffer commandBuffer)
 	{
 		assert(stateIs(EState::LEAF) && "cannot draw patch that has no geometry");
-		assert((not singleTimeCommands) || singleTimeCommands->finished() && "GPU buffer upload not yet finished");
 		// bind to command buffer
 		const auto& v = buffers->vertexBuffer;
 		const auto& i = buffers->indexBuffer;
@@ -164,14 +163,6 @@ namespace EngineCore
 		vkCmdBindIndexBuffer(commandBuffer, i->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
 		// send draw command
 		vkCmdDrawIndexed(commandBuffer, indices.size(), 1, 0, 0, 0);
-	}
-
-	void TerrainPatch::updateLoadState()
-	{
-		if (stateIs(EState::LOADING) && singleTimeCommands && singleTimeCommands->finished())
-		{
-			setState(EState::LEAF); // GPU buffer upload finished
-		}
 	}
 
 	std::vector<Vertex> TerrainPatch::toSinglePrecision() const
@@ -203,10 +194,10 @@ namespace EngineCore
 		state = s;
 	}
 
-	void TerrainPatch::geometryToGPU()
+	void TerrainPatch::geometryToGPU(AsyncCommandBuffer& commandBuffer)
 	{
 		EngineClock clock{};
-		assert(stateIs(EState::LOADING));
+		assert(stateIs(EState::LEAF));
 
 		if (not buffers)
 		{
@@ -222,9 +213,6 @@ namespace EngineCore
 		}
 
 		// let the GPU do the buffer copying at its own pace, check later if the commands are done so we can draw the vertices
-		singleTimeCommands = std::make_unique<SingleTimeCommands>(device);
-		std::unique_lock<std::mutex> lock;
-		singleTimeCommands->begin(lock);
 
 		// convert double-precision vertex coordinates to single precision for GPU
 		const std::vector<Vertex> standardVertices = TerrainPatch::toSinglePrecision();
@@ -241,7 +229,7 @@ namespace EngineCore
 		);
 		buffers->stagingBuffer1->map();
 		buffers->stagingBuffer1->writeToBuffer((void*)standardVertices.data()); // write vertices
-		singleTimeCommands->copyBuffer(*buffers->stagingBuffer1, *buffers->vertexBuffer, bufferSize);
+		commandBuffer.copyBuffer(*buffers->stagingBuffer1, *buffers->vertexBuffer, bufferSize);
 
 		// same as for vertex buffer
 		bufferSize = sizeof(indices[0]) * indices.size();
@@ -253,9 +241,8 @@ namespace EngineCore
 		);
 		buffers->stagingBuffer2->map();
 		buffers->stagingBuffer2->writeToBuffer((void*)indices.data());
-		singleTimeCommands->copyBuffer(*buffers->stagingBuffer2, *buffers->indexBuffer, bufferSize);
+		commandBuffer.copyBuffer(*buffers->stagingBuffer2, *buffers->indexBuffer, bufferSize);
 
-		singleTimeCommands->submit();
 		const float ms = clock.getElapsed() * 1000;
 		//if (ms > 0.15) std::cout << "============= geometryToGPU() done in " << ms << " ms =============\n";
 	}
@@ -276,7 +263,7 @@ namespace EngineCore
 	{
 		EngineClock clock{};
 		assert(stateIs(EState::PARENT) && children.size() == 0);
-		setState(EState::LOADING);
+		setState(EState::LEAF);
 		const uint32_t faceIndex = static_cast<uint32_t>(face);
 		static uint32_t debugColorIdx = 0;
 		debugColorIdx++;
