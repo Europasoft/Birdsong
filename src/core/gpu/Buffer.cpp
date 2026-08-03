@@ -108,7 +108,7 @@ namespace EngineCore
 
 
 	Fence::Fence(EngineDevice& device)
-		: device(device)
+		: device(device), threadId(std::this_thread::get_id())
 	{
 		VkFenceCreateInfo i = {};
 		i.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -120,17 +120,26 @@ namespace EngineCore
 	Fence::~Fence()
 	{
 		assert(wasSignaled() && "cannot destroy fence before associated commands finish");
+		assert(threadId == std::this_thread::get_id() && "fence is not threadsafe");
 		vkDestroyFence(device.device(), fence, nullptr);
 	}
 
 	bool Fence::wasSignaled() const
 	{
+		assert(threadId == std::this_thread::get_id() && "fence is not threadsafe");
 		return vkWaitForFences(device.device(), 1, &fence, VK_TRUE, 0) != VK_TIMEOUT;
 	}
 
     bool Fence::wait(uint32_t milliseconds) const
     {
+		assert(threadId == std::this_thread::get_id() && "fence is not threadsafe");
 		return vkWaitForFences(device.device(), 1, &fence, VK_TRUE, static_cast<uint64_t>(milliseconds) * 1000000) != VK_TIMEOUT;
     }
+
+    void Fence::reset()
+    {
+		assert(threadId == std::this_thread::get_id() && "fence is not threadsafe");
+		vkResetFences(device.device(), 1, &fence);
+	}
 
 }

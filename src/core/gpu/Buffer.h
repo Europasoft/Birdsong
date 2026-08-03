@@ -2,6 +2,8 @@
 
 #include "core/gpu/Device.h"
 
+#include <thread>
+
 namespace EngineCore 
 {
 	class Fence
@@ -17,9 +19,11 @@ namespace EngineCore
 		explicit operator bool() const noexcept { return wasSignaled(); }
 		bool wait(uint32_t milliseconds) const;
 		VkFence getFence() const { return fence; }
+		void reset();
 	private:
 		EngineDevice& device;
 		VkFence fence = VK_NULL_HANDLE;
+		std::thread::id threadId; // the thread this object was created on
 	};
 
 	class GBuffer 

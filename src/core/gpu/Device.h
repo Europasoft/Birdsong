@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <mutex>
+#include <thread>
 
 class EngineApplication; 
 
@@ -14,6 +15,7 @@ namespace EngineCore
 {
 	class Fence; // for AsyncCommandDispatcher
 	class AsyncCommandDispatcher;
+	class GBuffer;
 
 	struct SwapChainSupportDetails 
 	{
@@ -64,7 +66,6 @@ namespace EngineCore
 		// checks device properties to get the max samples supported for both color and depth
 		VkSampleCountFlagBits getMaxSampleCount();
 		AsyncCommandDispatcher& getAsyncCommandDispatcher() const;
-		void submitAsyncCommandDispatcherBuffers() const;
 
 		// Buffer Helper Functions
 		void createBuffer(
@@ -131,21 +132,26 @@ namespace EngineCore
 	class AsyncCommandBuffer
 	{
 	public:
-		AsyncCommandBuffer(EngineDevice& device, VkCommandPool pool);
-		~AsyncCommandBuffer();
+		friend AsyncCommandDispatcher;
+		AsyncCommandBuffer(AsyncCommandDispatcher& dispatcher, EngineDevice& device);
 
+	public:
+		~AsyncCommandBuffer();
 		VkCommandBuffer get() const { return buf; }
-		void markForSubmit() { readyToSubmit = true; }
-		bool finished() const;
+		void submit();
+		bool finished();
+		void wait(uint32_t milliseconds);
+		void start();
+
+		void copyBuffer(GBuffer& src, GBuffer& dst, VkDeviceSize size);
 
 	private:
+		AsyncCommandDispatcher& dispatcher;
 		EngineDevice& device;
-		VkCommandPool pool;
 		VkCommandBuffer buf = VK_NULL_HANDLE;
 		std::unique_ptr<Fence> fence;
-
-		friend class AsyncCommandDispatcher;
-		bool readyToSubmit = false;
+		std::thread::id threadId; // the thread this object was created on
+		bool canBeStarted = true;
 	};
 
 	class AsyncCommandDispatcher
@@ -155,20 +161,17 @@ namespace EngineCore
 		~AsyncCommandDispatcher();
 
 	public:
-		std::shared_ptr<AsyncCommandBuffer> startNewCommandBuffer(std::unique_lock<std::mutex>& lock);
-		
+		std::unique_ptr<AsyncCommandBuffer> makeNewCommandBuffer();
+		VkCommandPool getPool();
+		VkQueue getQueue();
 
 	private:
 		EngineDevice& device;
 		VkQueue asyncQueue = VK_NULL_HANDLE;
 		VkCommandPool asyncCommandPool = VK_NULL_HANDLE;
-		std::mutex m;
-
-		std::vector<std::shared_ptr<AsyncCommandBuffer>> cmdBuffers;
 
 		friend EngineDevice;
 		void init(uint32_t familyIndex, uint32_t queueIndex);
-		void submitAll();
 		void destroy();
 	};
 

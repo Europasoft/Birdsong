@@ -701,43 +701,11 @@ namespace EngineCore
 		endSingleTimeCommands(commandBuffer);
 	}
 
-	void EngineDevice::submitAsyncCommandDispatcherBuffers() const
-	{
-		getAsyncCommandDispatcher().submitAll();
-	}
 
 
 	AsyncCommandDispatcher& EngineDevice::getAsyncCommandDispatcher() const
 	{
 		return *asyncCommandDispatcher;
-	}
-
-	AsyncCommandBuffer::AsyncCommandBuffer(EngineDevice& device, VkCommandPool pool)
-		: device(device), pool(pool)
-	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = pool;
-		allocInfo.commandBufferCount = 1;
-		vkAllocateCommandBuffers(device.device(), &allocInfo, &buf);
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		vkBeginCommandBuffer(buf, &beginInfo);
-
-		fence = std::make_unique<Fence>(device);
-	}
-
-	AsyncCommandBuffer::~AsyncCommandBuffer()
-	{
-		assert(finished());
-	}
-
-	bool AsyncCommandBuffer::finished() const
-	{
-		return fence->wasSignaled();
 	}
 
 	AsyncCommandDispatcher::AsyncCommandDispatcher(EngineDevice& device)
@@ -766,45 +734,86 @@ namespace EngineCore
 		}
 	}
 
-	std::shared_ptr<AsyncCommandBuffer> AsyncCommandDispatcher::startNewCommandBuffer(std::unique_lock<std::mutex>& lock)
+
+	std::unique_ptr<AsyncCommandBuffer> AsyncCommandDispatcher::makeNewCommandBuffer()
 	{
-		lock = std::move(std::unique_lock<std::mutex>(m));
-		cmdBuffers.push_back(std::make_shared<AsyncCommandBuffer>(device, asyncCommandPool));
-		return cmdBuffers.back();
+		return std::make_unique<AsyncCommandBuffer>(*this, device);
 	}
 
-	void AsyncCommandDispatcher::submitAll()
+	VkCommandPool AsyncCommandDispatcher::getPool()
 	{
-		std::unique_lock<std::mutex> l(m);
+		return asyncCommandPool;
+	}
 
-		for (size_t i = cmdBuffers.size(); i-- > 0;)
-		{
-			auto& b = *cmdBuffers[i];
-			// free previously completed
-			if (b.finished())
-			{
-				//vkFreeCommandBuffers(device.device(), asyncCommandPool, 1, &b.buf);
-				cmdBuffers.erase(cmdBuffers.begin() + i);
-			}
-			// submit to GPU
-			else if (b.readyToSubmit)
-			{
-				b.readyToSubmit = false;
-				vkEndCommandBuffer(b.buf);
-				VkSubmitInfo submitInfo{};
-				submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-				submitInfo.commandBufferCount = 1;
-				submitInfo.pCommandBuffers = &b.buf;
-				vkQueueSubmit(asyncQueue, 1, &submitInfo, b.fence->getFence());
-			}
-		}
+	VkQueue AsyncCommandDispatcher::getQueue()
+	{
+		return asyncQueue;
 	}
 
     void AsyncCommandDispatcher::destroy()
     {
-		std::unique_lock<std::mutex> l(m);
 		vkDestroyCommandPool(device.device(), asyncCommandPool, nullptr);
 	}
 
+	AsyncCommandBuffer::AsyncCommandBuffer(AsyncCommandDispatcher& dispatcher, EngineDevice& device)
+		: dispatcher(dispatcher), device(device), threadId(std::this_thread::get_id()), fence(std::make_unique<Fence>(device))
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = dispatcher.getPool();
+		allocInfo.commandBufferCount = 1;
+		vkAllocateCommandBuffers(device.device(), &allocInfo, &buf);
+	}
+
+	AsyncCommandBuffer::~AsyncCommandBuffer()
+	{
+		vkFreeCommandBuffers(device.device(), dispatcher.getPool(), 1, &buf);
+		fence.reset();
+	}
+
+	void AsyncCommandBuffer::submit()
+	{
+		assert(threadId == std::this_thread::get_id());
+		vkEndCommandBuffer(buf);
+		canBeStarted = true;
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &buf;
+		vkQueueSubmit(dispatcher.getQueue(), 1, &submitInfo, fence->getFence());
+	}
+
+	bool AsyncCommandBuffer::finished()
+	{
+		assert(threadId == std::this_thread::get_id());
+		return fence->wasSignaled();
+	}
+
+	void AsyncCommandBuffer::wait(uint32_t milliseconds)
+	{
+		if (not fence->wait(milliseconds))
+		{
+			assert(0 && "timed out waiting for AsyncCommandBuffer commands to finish");
+		}
+	}
+
+	void AsyncCommandBuffer::start()
+	{
+		fence->reset();
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		assert(canBeStarted);
+		vkBeginCommandBuffer(buf, &beginInfo);
+		canBeStarted = false;
+	}
+
+	void AsyncCommandBuffer::copyBuffer(GBuffer& src, GBuffer& dst, VkDeviceSize size)
+	{
+		VkBufferCopy copyRegion{};
+		copyRegion.size = size;
+		vkCmdCopyBuffer(buf, src.getBuffer(), dst.getBuffer(), 1, &copyRegion);
+	}
 
 }
