@@ -12,7 +12,7 @@ layout(location = 3) in vec2 fragUV;
 layout (location = 0) out vec4 outColor;
 
 // SCENE GLOBAL DESCRIPTOR SET
-layout(std430, set = 0, binding = 0) uniform UBO1 
+layout(std140, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
 } ubo1;
@@ -26,6 +26,7 @@ layout(push_constant) uniform Push
 	mat4 transform;
 	mat4 normalMatrix;
 } push;
+
 
 #define PI 3.1415926535897932384626433832795
 
@@ -77,8 +78,8 @@ void main()
 
     float effectiveRoughness = 0.5; // temporary
     float indirect = 0.3;
+    vec4 baseColor = vec4(0.5, 0.5, 0.5, 1.0);
     // nonuniformEXT tells driver that different threads inside the warp/wavefront might sample different texture indices simultaneously
-    vec4 baseColor = texture(globalTextures[nonuniformEXT(1000)], fragUV);
 	vec3 litColor = BRDF(baseColor.xyz, normalize(fragNormalWS), viewDir, lightDir, halfwayVec, effectiveRoughness);
     //outColor = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
     outColor = vec4(fragColor, 1.0);

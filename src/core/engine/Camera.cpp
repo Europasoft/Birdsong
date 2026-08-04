@@ -54,8 +54,12 @@ namespace EngineCore
 		// m[1][1] = 1 / tan(fov / 2);
 		// https://www.gamedev.net/forums/topic/695655-trouble-with-my-perspective-projection-matrix/5373548/
 
-		m[0][0] = 1.f / (fov / 2.f);
-		m[1][1] = 1.f / ((fov / 2.f) / aspectRatio);
+		//m[0][0] = 1.f / (fov / 2.f);
+		//m[1][1] = 1.f / ((fov / 2.f) / aspectRatio);
+		// alternate (more exact):
+		float f = 1.0f / std::tan(fov * 0.5f);
+		m[0][0] = f / aspectRatio;
+		m[1][1] = f;
 
 		m[2][2] = far / (far - near);
 		m[3][2] = -((near * far) / (far - near));
@@ -66,7 +70,7 @@ namespace EngineCore
 
 	glm::mat4 Camera::getViewMatrix() const
 	{
-		return glm::inverse(cglm::makeMatrixZYX(transform.rotation, transform.scale, transform.translation));
+		return glm::inverse(cglm::makeMatrixZYX(transform.rotation, Vec(1,1,1), transform.translation));
 	}
 
 	glm::mat4 Camera::getProjectionViewMatrix(bool inverse)
@@ -83,11 +87,16 @@ namespace EngineCore
 	}
 
 	void Camera::moveInPlaneXY(const Vector2D<double>& lookInput, const float& moveFwd, const float& moveRight, 
-								const float& moveUp, const bool& extraSpeed, const float& deltaTime)
+								const float& moveUp, const float& extraSpeed, const float& deltaTime)
 	{
 		float lookSpeed = 0.002f;
-		float moveSpeed = 600.f * 68000;
-		if (extraSpeed) { moveSpeed = 4200.f * 68000; }
+
+		// km/h
+		float moveSpeed = 6000;
+		if (extraSpeed > 0) { moveSpeed = 10281600; }
+		if (extraSpeed < 0) { moveSpeed = 32000; }
+
+		const float moveSpeedCms = moveSpeed * 27.778f; // km/h to cm/s
 
 		transform.rotation.y += (float)lookInput.y * lookSpeed;      // pitch
 		transform.rotation.z += (float)(-lookInput.x) * lookSpeed;   // yaw
@@ -113,7 +122,7 @@ namespace EngineCore
 		if (moveUp > 0.f) { moveDir += upDir; }
 		else if (moveUp < 0.f) { moveDir -= upDir; }
 
-		transform.translation += moveDir * moveSpeed * deltaTime;
+		transform.translation += moveDir * moveSpeedCms * deltaTime;
 		//std::cout << "CAM: " << (Vec::distance(Vec(), transform.translation) / 100) / 1000 << "km\n";
 		//std::cout << "\n" << "x:" << transform.translation.x << "y:" << transform.translation.y << "z:" << transform.translation.z;
 	}

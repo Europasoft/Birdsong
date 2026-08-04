@@ -55,9 +55,9 @@ namespace EngineCore
 		return { {1,0,0}, {0,1,0}, {0,0,1} };
 	}
 
-	constexpr uint32_t maxLOD = 12;     // Maximum depth of the quadtree
-	constexpr double lodFactor = 1.75;   // Distance split threshold multiplier
-
+	constexpr uint32_t maxLOD = 16;			// Maximum depth of the quadtree
+	constexpr double lodFactor = 1.75;		// Distance split threshold multiplier
+	constexpr bool shaderDesignMode = true; // Periodically reload shaders, slow but useful for quick changes
 
 	PlanetDrawer::PlanetDrawer(EngineDevice& device, World& world, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 		: device(device), world(world), junkPileMutexes({{},{}})
@@ -73,7 +73,7 @@ namespace EngineCore
 		ShaderFilePaths shaders(makePath("shaders/compiled/planet.vert.spv"), makePath("shaders/compiled/planet.frag.spv"));
 		auto layouts = world.getScene().getDescriptorSetLayouts();
 		MaterialCreateInfo matInfo(shaders, layouts, samples, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO);
-		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_LINE;
+		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_FILL;
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		planet.material = std::make_shared<Material>(matInfo, device);
 		planet.material->finalize();
@@ -109,6 +109,9 @@ namespace EngineCore
 		camTransform = cameraTransform;
 		Scene& scene = world.getScene();
 		const auto sets = scene.getDescriptorSets(frameIndex);
+
+		// periodically reload shaders (design mode only)
+		if (shaderDesignMode) tickShaderDesignMode();
 
 		if (updaterIdle)
 		{
@@ -296,11 +299,6 @@ namespace EngineCore
 
 	void PlanetDrawer::drawLeafPatch(std::unique_ptr<TerrainPatch>& patch, Planet& planet)
 	{
-		//std::cout << "distance from center: " << (Math::calculateDistanceToSectorCenter(camTransform, SectorCoord()) * 0.00001) << " km\n";
-
-		//std::unique_lock<std::mutex> lock(updaterDoneMutex);//, std::try_to_lock);
-		//if (not lock.owns_lock()) return;
-
 		if (not patch->stateIs(TerrainPatch::EState::LEAF)) return;
 
 		// translation and scaling factor
@@ -309,7 +307,6 @@ namespace EngineCore
 
 		const Vec64 rel = Math::calculateRelativeCoordsXYZ(camTransform, planet.transform);
 		const double distance = rel.getLength();
-
 		if (distance > finalDrawDistance) [[likely]]
 		{
 			// generate new position relative to player's sector, pinned to a certain distance so it stays closer than the far clip plane
@@ -335,7 +332,7 @@ namespace EngineCore
 
 		ShaderPushConstants::EngineMeshPushConstants push{};
 		// TODO: optimize this
-		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 0, scale, position);
+		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 1.f, scale, position);
 		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 
 		planet.material->writePushConstants(cmdBuffer, push);
@@ -376,4 +373,27 @@ namespace EngineCore
 		//if (junkPile.size()>0) std::cout << (currentFrameIndex + 1) % junkPiles.size() << " junk pile size: " << junkPile.size() << "\n";
 	}
 
+	void PlanetDrawer::tickShaderDesignMode()
+	{
+		if (reloadShadersNextFrame)
+		{
+			reloadShadersNextFrame = false;
+			vkDeviceWaitIdle(device.device());
+			for (const auto& planet : planets)
+			{
+				MaterialCreateInfo matInfo = planet->material->getMaterialCreateInfo();
+				planet->material = std::make_shared<Material>(matInfo, device);
+				planet->material->finalize();
+			}
+		}
+		else
+		{
+			shaderReloadTimer -= delta;
+			if (shaderReloadTimer <= 0)
+			{
+				shaderReloadTimer = 1.2;
+				reloadShadersNextFrame = true;
+			}
+		}
+	}
 }

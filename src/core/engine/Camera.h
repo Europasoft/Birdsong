@@ -43,7 +43,7 @@ namespace EngineCore
 		glm::mat4 getProjectionViewMatrix(bool inverse = false);
 
 		void moveInPlaneXY(const Vector2D<double>& lookInput, const float& moveFwd, const float& moveRight,
-							const float& moveUp, const bool& extraSpeed, const float& deltaTime);
+							const float& moveUp, const float& extraSpeed, const float& deltaTime);
 
 		void moveInPlaneXYN(const Vector2D<double>& lookInput, const float& moveFwd, const float& moveRight,
 							const float& moveUp, const bool& extraSpeed, const float& deltaTime);

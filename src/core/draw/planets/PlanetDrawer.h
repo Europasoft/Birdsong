@@ -27,7 +27,7 @@ namespace EngineCore
 	struct JunkPileItem;
 	class AsyncCommandBuffer;
 
-	static constexpr float finalDrawDistance = 800;
+	static constexpr float finalDrawDistance = 80000;
 
 	struct Planet
 	{
@@ -58,8 +58,6 @@ namespace EngineCore
 		Transform camTransform;
 		uint32_t currentFrameIndex = 0;
 		double delta = 0.0;
-		double currentXoffset = 800.f;
-		double tempTimer = 0.6;
 
 		std::thread updater;
 		std::atomic<bool> updaterIdle = true;
@@ -85,6 +83,9 @@ namespace EngineCore
 		int32_t acquireJunkPile(std::unique_lock<std::mutex>& lock, bool allowFail = false);
 		void cleanJunkPile(uint32_t cleaningFrameIndex);
 
+		double shaderReloadTimer = 2.5;
+		bool reloadShadersNextFrame = false;
+		void tickShaderDesignMode();
 	};
 
 }

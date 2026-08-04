@@ -274,9 +274,6 @@
     <ClCompile Include="..\src\core\draw\planets\TerrainPatch.cpp">
       <Filter>core\draw\planets</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\gpu\SingleTimeCommands.cpp">
-      <Filter>core\gpu</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\input\InputInclude.cpp">
       <Filter>core\input</Filter>
     </ClCompile>
@@ -581,9 +578,6 @@
     </ClInclude>
     <ClInclude Include="..\src\core\draw\planets\TerrainPatch.h">
       <Filter>core\draw\planets</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\gpu\SingleTimeCommands.h">
-      <Filter>core\gpu</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\input\InputInclude.h">
       <Filter>core\input</Filter>

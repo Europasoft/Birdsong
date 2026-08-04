@@ -119,7 +119,7 @@ namespace EngineCore
 		moveForwardInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_W, 1), KeyBinding(GLFW_KEY_S, -1) });
 		moveSidewaysInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_D, 1), KeyBinding(GLFW_KEY_A, -1) });
 		moveUpDownInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_R, 1), KeyBinding(GLFW_KEY_F, -1) });
-		moveFasterInput = inputSys.addInputAxis().addKeyBinding(KeyBinding(GLFW_KEY_LEFT_SHIFT));
+		moveFasterInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_LEFT_SHIFT, 1), KeyBinding(GLFW_KEY_LEFT_CONTROL, -1) });
 		exitApplicationEvent = inputSys.addInputEvent().addKeyBinding(KeyBinding(GLFW_KEY_ESCAPE));
 		toggleFullscreenEvent = inputSys.addInputEvent(EInputEvent::COMBO).addKeyBinding({ KeyBinding(GLFW_KEY_LEFT_ALT), KeyBinding(GLFW_KEY_ENTER) });
 	}

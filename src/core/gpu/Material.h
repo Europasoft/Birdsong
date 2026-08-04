@@ -104,6 +104,7 @@ namespace EngineCore
 
 		bool hasDescriptorSet() const { return descriptorSet.get(); }
 		DescriptorSet& getDescriptorSet() { return *descriptorSet.get(); }
+		const MaterialCreateInfo& getMaterialCreateInfo() const { return materialCreateInfo; };
 
 	private:
 		MaterialCreateInfo materialCreateInfo;
