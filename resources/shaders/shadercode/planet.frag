@@ -25,6 +25,7 @@ layout(push_constant) uniform Push
 {
 	mat4 transform;
 	mat4 normalMatrix;
+    vec4 cameraPositionAndLOD;
 } push;
 
 
@@ -70,17 +71,16 @@ vec3 BRDF(vec3 baseColor, vec3 N, vec3 V, vec3 L, vec3 H, float roughness)
 
 void main()
 {
-    vec3 lightPos = vec3(10.0, 10.0, 10.0); // temporary
-    vec3 camPos = vec3(0.0, 0.0, 0.0); // temporary
-    vec3 lightDir = normalize(lightPos - fragPositionWS);
-    vec3 viewDir = normalize(camPos - fragPositionWS);
+    vec3 lightDir = normalize(vec3(5.0, 10.0, 10.0));
+    vec3 viewDir = normalize(push.cameraPositionAndLOD.xyz - fragPositionWS);
     vec3 halfwayVec = normalize(lightDir + viewDir);
 
-    float effectiveRoughness = 0.5; // temporary
-    float indirect = 0.3;
+    float effectiveRoughness = 0.95; // temporary
+    float indirect = 0.01;
     vec4 baseColor = vec4(0.5, 0.5, 0.5, 1.0);
-    // nonuniformEXT tells driver that different threads inside the warp/wavefront might sample different texture indices simultaneously
 	vec3 litColor = BRDF(baseColor.xyz, normalize(fragNormalWS), viewDir, lightDir, halfwayVec, effectiveRoughness);
+
+    //outColor = vec4(fragNormalWS * 0.5 + 0.5, 1.0);
     outColor = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
 
 }

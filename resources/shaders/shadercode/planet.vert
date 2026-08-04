@@ -26,6 +26,7 @@ layout(push_constant) uniform Push
 {
 	mat4 transform;
 	mat4 normalMatrix;
+	vec4 cameraPositionAndLOD;
 } push;
 
 
@@ -166,11 +167,12 @@ float fbm(vec3 p, float frequency, float amplitude)
 // returns displacement height
 float getTerrainHeight(vec3 p) 
 {
-	float midScaleMountains = fbm(p, 180.0, 0.0002);
-	float largeHills = fbm(p, 2800.0, 0.00003);
-	float midHills = fbm(p, 3500.0, 0.00003) * 1;
-	float smallHills = fbm(p, 75000.0, 0.00001) * 1;
-	return midScaleMountains + largeHills + midHills + smallHills;
+	float h = 0;
+	h += fbm(p, 40.0, 0.0035);
+	if (push.cameraPositionAndLOD.w >= 4) h += fbm(p, 100.0, 0.0001);
+	if (push.cameraPositionAndLOD.w >= 6) h += fbm(p, 250.0, 0.0002);
+	if (push.cameraPositionAndLOD.w >= 7) h += fbm(p, 380.0, 0.0001);
+	return h;
 }
 
 vec3 calculateTerrainNormal(vec3 p)
@@ -192,7 +194,28 @@ vec3 calculateTerrainNormal(vec3 p)
 	vec3 tangentGrad = grad - p * dot(p, grad);
 
 	// Subtract the projected gradient from the unperturbed normal
-	return normalize(p - tangentGrad);
+	return normalize((1.0 + h0) * p - tangentGrad);
+}
+
+vec3 terrainNormal(vec3 N)
+{
+	float eps = 0.008 * exp2(-push.cameraPositionAndLOD.w);
+
+	vec3 up = abs(N.z) < 0.99
+	? vec3(0.0, 0.0, 1.0)
+	: vec3(0.0, 1.0, 0.0);
+
+	vec3 T = normalize(cross(up, N));
+	vec3 B = cross(N, T);
+
+	vec3 N1 = normalize(N + eps * T);
+	vec3 N2 = normalize(N + eps * B);
+
+	vec3 P0 = N  * (1.0 + getTerrainHeight(N));
+	vec3 P1 = N1 * (1.0 + getTerrainHeight(N1));
+	vec3 P2 = N2 * (1.0 + getTerrainHeight(N2));
+
+	return normalize(cross(P1 - P0, P2 - P0));
 }
 
 void main()
@@ -203,13 +226,12 @@ void main()
 	vec3 displacedPos = sphereNormal * (1.0 + h);
 
 	// output
-	vec4 ws = push.transform * vec4(displacedPos, 1.0);
+	vec4 positionOut = push.transform * vec4(displacedPos, 1.0);
 
-	gl_Position = ubo1.projectionViewMatrix * ws;
-	fragPositionWS = ws.xyz;
+	gl_Position = ubo1.projectionViewMatrix * positionOut;
+	fragPositionWS = positionOut.xyz;
 
-	vec3 localNormal = calculateTerrainNormal(sphereNormal);
-	fragNormalWS = normalize(mat3(push.normalMatrix) * localNormal); // normal to world space
+	fragNormalWS = terrainNormal(sphereNormal);
 
 	fragColor = mix(fragNormalWS, fragNormalWS, clamp(h, 0.0, 1.0));
 

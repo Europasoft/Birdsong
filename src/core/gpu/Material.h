@@ -144,6 +144,14 @@ namespace EngineCore
 			glm::mat4 normalMatrix{1.f};
 		};
 
+		// TODO: make this smaller so it fits within guaranteed minimum (128)
+		struct PlanetMeshPushConstants
+		{
+			glm::mat4 transform{ 1.f };
+			glm::mat4 normalMatrix{ 1.f };
+			glm::vec4 cameraPositionAndLOD{ 0.f };
+		};
+
 		struct InterfaceElementPushConstants
 		{
 			glm::vec2 position;

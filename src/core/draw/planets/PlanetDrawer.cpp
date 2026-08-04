@@ -72,7 +72,7 @@ namespace EngineCore
 		// create material
 		ShaderFilePaths shaders(makePath("shaders/compiled/planet.vert.spv"), makePath("shaders/compiled/planet.frag.spv"));
 		auto layouts = world.getScene().getDescriptorSetLayouts();
-		MaterialCreateInfo matInfo(shaders, layouts, samples, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO);
+		MaterialCreateInfo matInfo(shaders, layouts, samples, formats, sizeof(ShaderPushConstants::PlanetMeshPushConstants), EMatSet::NO);
 		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_FILL;
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		planet.material = std::make_shared<Material>(matInfo, device);
@@ -330,10 +330,14 @@ namespace EngineCore
 		const double visualRadius = planet.radius * k;
 		const Vec scale = Vec(static_cast<float>(visualRadius));
 
-		ShaderPushConstants::EngineMeshPushConstants push{};
+		ShaderPushConstants::PlanetMeshPushConstants push{};
 		// TODO: optimize this
 		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 1.f, scale, position);
 		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
+		push.cameraPositionAndLOD.x = camTransform.translation.x;
+		push.cameraPositionAndLOD.y = camTransform.translation.y;
+		push.cameraPositionAndLOD.z = camTransform.translation.z;
+		push.cameraPositionAndLOD.w = static_cast<float>(patch->lodLevel);
 
 		planet.material->writePushConstants(cmdBuffer, push);
 		// record mesh draw command
