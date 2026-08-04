@@ -81,6 +81,6 @@ void main()
     vec4 baseColor = vec4(0.5, 0.5, 0.5, 1.0);
     // nonuniformEXT tells driver that different threads inside the warp/wavefront might sample different texture indices simultaneously
 	vec3 litColor = BRDF(baseColor.xyz, normalize(fragNormalWS), viewDir, lightDir, halfwayVec, effectiveRoughness);
-    //outColor = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
-    outColor = vec4(fragColor, 1.0);
+    outColor = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
+
 }

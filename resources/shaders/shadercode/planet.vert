@@ -177,7 +177,7 @@ vec3 calculateTerrainNormal(vec3 p)
 {
 	// Epsilon must scale relative to your noise frequency.
 	// Small enough for fine details, large enough to avoid float precision issues.
-	const float eps = 0.001; 
+	const float eps = 0.02; 
 
 	// Sample terrain height at central point and 3 offset points along cartesian axes
 	float h0 = getTerrainHeight(p);
