@@ -65,7 +65,7 @@ namespace EngineCore
 		// create a planet made up of one node per root face
 		planets.push_back(std::make_unique<Planet>());
 		Planet& planet = *planets.back();
-		planet.resolution = 32;
+		planet.resolution = 64;
 		planet.radius = 6371 * 100000; // radius of earth
 		planet.transform.sector = { 0, 0, 0 };
 

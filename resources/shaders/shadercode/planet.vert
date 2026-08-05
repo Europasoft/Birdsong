@@ -51,7 +51,13 @@ vec4 taylorInvSqrt(vec4 r)
 	return 1.79284291400159 - 0.85373472095314 * r;
 }
 
-float snoise(vec3 v)
+struct NoiseResult
+{
+	float value;
+	vec3 gradient;
+};
+
+NoiseResult snoise(vec3 v)
 {
 	const vec2 C = vec2(1.0 / 6.0, 1.0 / 3.0);
 	const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
@@ -122,108 +128,73 @@ float snoise(vec3 v)
 		dot(x2, x2),
 		dot(x3, x3)), 0.0);
 
-	m *= m;
+	vec4 pdotx = vec4(
+	dot(p0, x0),
+	dot(p1, x1),
+	dot(p2, x2),
+	dot(p3, x3));
 
-	return 42.0 * dot(
-		m * m,
-		vec4(
-			dot(p0, x0),
-			dot(p1, x1),
-			dot(p2, x2),
-			dot(p3, x3)));
+	// compute gradient
+	vec4 m2 = m * m;
+	vec4 m3 = m2 * m;
+	vec4 m4 = m2 * m2;
+	vec3 grad =
+		m4.x * p0 - 8.0 * m3.x * pdotx.x * x0 +
+		m4.y * p1 - 8.0 * m3.y * pdotx.y * x1 +
+		m4.z * p2 - 8.0 * m3.z * pdotx.z * x2 +
+		m4.w * p3 - 8.0 * m3.w * pdotx.w * x3;
+	grad *= 42.0;
+
+	NoiseResult result;
+	result.gradient = grad;
+	result.value = 42.0 * dot(m4, pdotx);
+	
+	return result;
 }
 
-// returns displacement height
-float sineDisplacement(vec3 N, float freq, float amplitude)
+struct HeightResult
 {
-	return sin(N.x * freq) * cos(N.y * freq) * amplitude;
-}
+	float height;
+	vec3 gradient;
+};
 
-// returns the gradient vector [dh/dx, dh/dy, dh/dz]
-vec3 sineDisplacementGrad(vec3 N, float freq, float amplitude)
-{
-	float dx =  cos(N.x * freq) * freq * cos(N.y * freq) * amplitude;
-	float dy = -sin(N.x * freq) * sin(N.y * freq) * freq * amplitude;
-	float dz = 0.0;
-	return vec3(dx, dy, dz);
-}
+const float lacunarity = 2.2; // how much frequency increases per octave (higher = sharper)
+const float persistence = 0.33; // how much amplitude scales per octave (higher = sharper)
+const int octaves = 8; // number of octaves to sum
 
-float fbm(vec3 p, float frequency, float amplitude)
+HeightResult fbm(vec3 p, float frequency, float amplitude)
 {
+	HeightResult r;
+	r.height = 0.0;
+	r.gradient = vec3(0.0);
+
 	float freq = frequency;
 	float amp = amplitude;
 
 	float value = 0.0;
-	for (int i = 0; i < 5; ++i)
+	float totalAmp = 0.0;
+	for (int i = 0; i < octaves; ++i)
 	{
-		value += amp * snoise(p * freq);
-		freq *= 2.0;
-		amp *= 0.01;
+		NoiseResult s = snoise(p * freq);
+		r.height += amp * s.value;
+		r.gradient += amp * freq * s.gradient;
+
+		freq *= lacunarity;
+		amp *= persistence;
 	}
 
-	return value;
-}
-
-// returns displacement height
-float getTerrainHeight(vec3 p) 
-{
-	float h = 0;
-	h += fbm(p, 40.0, 0.0035);
-	if (push.cameraPositionAndLOD.w >= 4) h += fbm(p, 100.0, 0.0001);
-	if (push.cameraPositionAndLOD.w >= 6) h += fbm(p, 250.0, 0.0002);
-	if (push.cameraPositionAndLOD.w >= 7) h += fbm(p, 380.0, 0.0001);
-	return h;
-}
-
-vec3 calculateTerrainNormal(vec3 p)
-{
-	// Epsilon must scale relative to your noise frequency.
-	// Small enough for fine details, large enough to avoid float precision issues.
-	const float eps = 0.02; 
-
-	// Sample terrain height at central point and 3 offset points along cartesian axes
-	float h0 = getTerrainHeight(p);
-	float hX = getTerrainHeight(normalize(p + vec3(eps, 0.0, 0.0)));
-	float hY = getTerrainHeight(normalize(p + vec3(0.0, eps, 0.0)));
-	float hZ = getTerrainHeight(normalize(p + vec3(0.0, 0.0, eps)));
-
-	// Approximate partial derivatives (Gradient vector)
-	vec3 grad = vec3(hX - h0, hY - h0, hZ - h0) / eps;
-
-	// Project gradient onto the sphere's tangent plane to get slope relative to the surface
-	vec3 tangentGrad = grad - p * dot(p, grad);
-
-	// Subtract the projected gradient from the unperturbed normal
-	return normalize((1.0 + h0) * p - tangentGrad);
-}
-
-vec3 terrainNormal(vec3 N)
-{
-	float eps = 0.008 * exp2(-push.cameraPositionAndLOD.w);
-
-	vec3 up = abs(N.z) < 0.99
-	? vec3(0.0, 0.0, 1.0)
-	: vec3(0.0, 1.0, 0.0);
-
-	vec3 T = normalize(cross(up, N));
-	vec3 B = cross(N, T);
-
-	vec3 N1 = normalize(N + eps * T);
-	vec3 N2 = normalize(N + eps * B);
-
-	vec3 P0 = N  * (1.0 + getTerrainHeight(N));
-	vec3 P1 = N1 * (1.0 + getTerrainHeight(N1));
-	vec3 P2 = N2 * (1.0 + getTerrainHeight(N2));
-
-	return normalize(cross(P1 - P0, P2 - P0));
+	return r;
 }
 
 void main()
 {
 	vec3 sphereNormal = normalize(position);
 
-	float h = getTerrainHeight(sphereNormal);
-	vec3 displacedPos = sphereNormal * (1.0 + h);
+	HeightResult h = fbm(sphereNormal, 80.0, 0.0002);
+	vec3 tangentGrad = h.gradient - sphereNormal * dot(h.gradient, sphereNormal);
+	vec3 terrainNormal = normalize((1.0 + h.height) * sphereNormal - tangentGrad);
+
+	vec3 displacedPos = sphereNormal * (1.0 + h.height);
 
 	// output
 	vec4 positionOut = push.transform * vec4(displacedPos, 1.0);
@@ -231,9 +202,9 @@ void main()
 	gl_Position = ubo1.projectionViewMatrix * positionOut;
 	fragPositionWS = positionOut.xyz;
 
-	fragNormalWS = terrainNormal(sphereNormal);
+	fragNormalWS = terrainNormal;
 
-	fragColor = mix(fragNormalWS, fragNormalWS, clamp(h, 0.0, 1.0));
+	fragColor = mix(fragNormalWS, fragNormalWS, clamp(h.height, 0.0, 1.0));
 
 	fragUV = uv;
 }
