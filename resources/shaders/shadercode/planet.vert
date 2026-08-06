@@ -27,6 +27,7 @@ layout(push_constant) uniform Push
 	mat4 transform;
 	mat4 normalMatrix;
 	vec4 cameraPositionAndLOD;
+	vec4 patchCenterDirectionAndPlanetRadius;
 } push;
 
 
@@ -191,7 +192,13 @@ HeightResult fbm(vec3 p, int octaves, float frequency, float lacunarity,float pe
 
 void main()
 {
-	vec3 sphereNormal = normalize(position);
+	// these will be zero if rendering far away patches, only applies if the patch is close and drawn at full scale
+	vec3 patchCenterDir = push.patchCenterDirectionAndPlanetRadius.xyz;
+	float planetRadius = push.patchCenterDirectionAndPlanetRadius.w;
+	bool isClosePatch = (patchCenterDir.x != 0.0);
+
+	vec3 spherePos = patchCenterDir + position / (planetRadius > 0.0 ? planetRadius : 1.0);
+	vec3 sphereNormal = normalize(normal);
 
 	HeightResult h = fbm(sphereNormal, 8, 80.0, 2.2, 0.33);
 	const float baseAmplitude = 0.0004;
@@ -201,7 +208,9 @@ void main()
 	vec3 tangentGrad = h.gradient - sphereNormal * dot(h.gradient, sphereNormal);
 	vec3 terrainNormal = normalize((1.0 + h.height) * sphereNormal - tangentGrad);
 
-	vec3 displacedPos = sphereNormal * (1.0 + h.height);
+	vec3 displacedPos = (!isClosePatch) ?
+			sphereNormal * (1.0 + h.height) // patch is in the unit sphere coordinate space 
+			: position + sphereNormal * (h.height * planetRadius); // patch is actual scale
 
 	// output
 	vec4 positionOut = push.transform * vec4(displacedPos, 1.0);
@@ -211,7 +220,8 @@ void main()
 
 	fragNormalWS = terrainNormal;
 
-	fragColor = mix(fragNormalWS, fragNormalWS, clamp(h.height, 0.0, 1.0));
-
 	fragUV = uv;
+	fragColor = mix(fragNormalWS, fragNormalWS, clamp(h.height, 0.0, 1.0));
+	//fragColor = terrainNormal * 0.5 + 0.5;
+	//fragColor = isClosePatch ? vec3(0,1,0) : vec3(0,0,1);
 }

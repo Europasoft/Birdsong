@@ -55,7 +55,7 @@ namespace EngineCore
 
 		// only leaf nodes have valid geometry, but data may be pending or waiting to be freed
 		enum class EState : uint32_t { PARENT, LOADING, LEAF };
-
+		enum class EGenGeometryMode { UNIT_SPHERE_RELATIVE, PATCH_CENTER_RELATIVE };
 	public:
 		// public data
 		const uint32_t resolution;
@@ -74,13 +74,13 @@ namespace EngineCore
 	public:
 		// public functions
 
-		void splitReplace(AsyncCommandBuffer& commandBuffer);
-		void mergeReplace(AsyncCommandBuffer& commandBuffer);
+		void splitReplace(AsyncCommandBuffer& commandBuffer, EGenGeometryMode genMode);
+		void mergeReplace(AsyncCommandBuffer& commandBuffer, EGenGeometryMode genMode);
 		// split into 4 child patches (turning this leaf node into a parent node)
 		void split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
 
 		// generate and push geometry to GPU
-		void generate(AsyncCommandBuffer& commandBuffer);
+		void generate(AsyncCommandBuffer& commandBuffer, EGenGeometryMode genMode);
 
 		// bind and draw the final geometry if it is ready
 		void draw(VkCommandBuffer commandBuffer);
@@ -97,9 +97,16 @@ namespace EngineCore
 		{
 			return (state == EState::PARENT);
 		}
+		EGenGeometryMode getCoordinateMode() const
+		{
+			return coordinateMode;
+		}
 
 		void scheduleFreeBuffers(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
 		void scheduleFreeBuffersRecursive(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex);
+
+		Vec64 cubeFaceToSphere(double faceX, double faceY) const;
+		Vec64 getCenterDirection() const;
 
 	private:
 		// private data
@@ -115,11 +122,13 @@ namespace EngineCore
 		// GPU geometry buffers
 		std::unique_ptr<TerrainPatchBuffers> buffers;
 
+		EGenGeometryMode coordinateMode;
+
 	private:
 		// private functions
 
 		// create the patch vertices on CPU
-		void generateGeometry();
+		void generateGeometry(EGenGeometryMode mode = EGenGeometryMode::UNIT_SPHERE_RELATIVE);
 		// copy the geometry into GPU memory
 		void geometryToGPU(AsyncCommandBuffer& commandBuffer);
 

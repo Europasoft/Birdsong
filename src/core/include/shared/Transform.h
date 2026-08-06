@@ -35,6 +35,8 @@ struct Transform
 	Transform() = default;
 	Transform(const Vec& t, const Vec& r = Vec::zero(), const Vec& s = Vec::one(), const WorldSystem::SectorCoord& sec = WorldSystem::SectorCoord())
 		: translation{ t }, rotation{ r }, scale{ s }, sector{ sec } {};
+	Transform(const WorldSystem::SectorCoord& sec)
+		: sector{ sec } {};
 
 	static constexpr uint64_t getPackedSize()
 	{

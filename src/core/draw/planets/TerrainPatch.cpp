@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <array>
 #include <limits>
+#include <numbers>
 #include <utility>
 #include <iostream>
 #include <thread>
@@ -25,7 +26,7 @@
 namespace EngineCore
 {
 	TerrainPatch::TerrainPatch(EngineDevice& device, uint32_t resolution, double radius)
-		: device(device), resolution(resolution), radius(radius), state(EState::PARENT)
+		: device(device), resolution(resolution), radius(radius), state(EState::PARENT), coordinateMode(EGenGeometryMode::UNIT_SPHERE_RELATIVE)
 	{
 		assert(resolution != 0 && radius != 0);
 	}
@@ -34,7 +35,7 @@ namespace EngineCore
 	{
 	}
 
-	void TerrainPatch::splitReplace(AsyncCommandBuffer& commandBuffer)
+	void TerrainPatch::splitReplace(AsyncCommandBuffer& commandBuffer, EGenGeometryMode genMode)
 	{
 		assert(stateIs(EState::LEAF) && children.size() == 0 && "cannot split terrain patch - not a leaf\n");
 
@@ -72,11 +73,11 @@ namespace EngineCore
 			child.face = face;
 
 			// build child geometry (this is hard on performance)
-			child.generate(commandBuffer);
+			child.generate(commandBuffer, genMode);
 		}
 	}
 
-	void TerrainPatch::mergeReplace(AsyncCommandBuffer& commandBuffer)
+	void TerrainPatch::mergeReplace(AsyncCommandBuffer& commandBuffer, EGenGeometryMode genMode)
 	{
 		// make a new patch to replace this one with
 		next = std::make_unique<TerrainPatch>(device, resolution, radius);
@@ -85,7 +86,7 @@ namespace EngineCore
 		next->lodLevel = lodLevel;
 		next->face = face;
 		
-		next->generate(commandBuffer);
+		next->generate(commandBuffer, genMode);
 	}
 
 	void TerrainPatch::split(std::vector<std::unique_ptr<JunkPileItem>>& junkPile, uint32_t frameIndex)
@@ -127,10 +128,11 @@ namespace EngineCore
 		//std::cout << "split took " << clock.getElapsed() << " seconds\n";
 	}
 
-	void TerrainPatch::generate(AsyncCommandBuffer& commandBuffer)
+	void TerrainPatch::generate(AsyncCommandBuffer& commandBuffer, EGenGeometryMode genMode)
 	{
 		assert(not buffers);
-		generateGeometry();
+		coordinateMode = genMode;
+		generateGeometry(genMode);
 		geometryToGPU(commandBuffer);
 	}
 
@@ -259,7 +261,9 @@ namespace EngineCore
 		return std::array<float, 3>{ lod / 5.f, lod / 12.f, lod / 25.f };
 	}
 
-	void TerrainPatch::generateGeometry()
+	constexpr double PI_OVER_4 = std::numbers::pi_v<double> * 0.25; // constant PI / 4 used for equiangular warping: tan(PI/4) = 1, tan(-PI/4) = -1
+
+	void TerrainPatch::generateGeometry(EGenGeometryMode mode)
 	{
 		EngineClock clock{};
 		assert(stateIs(EState::PARENT) && children.size() == 0);
@@ -284,54 +288,33 @@ namespace EngineCore
 		const auto& r = rights[faceIndex]; // local 2D x-axis on cube face
 		const auto& u = ups[faceIndex]; // local 2D y-axis on cube face
 		const auto& f = forwards[faceIndex]; // cube face normal vector (distance = 1 from origin)
-
-		constexpr double PI_OVER_4 = 0.78539816339f; // constant PI / 4 used for equiangular warping: tan(PI/4) = 1, tan(-PI/4) = -1
-
+		
 		// VERTEX GENERATION LOOP
 		for (uint32_t y = 0; y <= resolution; ++y)
 		{
-			// convert y loop index to local normalized coordinate [0.0, 1.0]
-			double local_y = static_cast<double>(y) / resolution;
-
-			// apply scale and quadtree offset to compute coordinate in range [-1.0, 1.0]
-			double my = center.y + local_y * size;
-
-			// apply equiangular (tangent) distortion mapping to y axis
-			// this converts uniform linear spacing into uniform angular spacing on the sphere,
-			// preventing area compression/distortion at cube corners
-			double tan_y = std::tan(my * PI_OVER_4);
-
 			for (uint32_t x = 0; x <= resolution; ++x)
 			{
-				// convert x loop index to local normalized coordinate [0.0, 1.0]
+				// convert each loop index to local normalized coordinate [0.0, 1.0]
 				double local_x = static_cast<double>(x) / resolution;
+				double local_y = static_cast<double>(y) / resolution;
 
-				// !! TODO: ASAP: looks like x and y  are flipped here:
-
-				// (map into local face space [-1, 1])
-				// map to cube face range [-1.0, 1.0] using offset and scale
+				// map into local face space [-1, 1]
 				double mx = center.x + local_x * size;
+				double my = center.y + local_y * size;
 
-				// apply equiangular distortion mapping to x-axis
-				double tan_x = std::tan(mx * PI_OVER_4);
-
-				// construct 3D point (cx, cy, cz) on the surface of the unit cube:
-				// center_point + (right_vector * tan_x) + (up_vector * tan_y)
-				double cx = f.x + r.x * tan_x + u.x * tan_y;
-				double cy = f.y + r.y * tan_x + u.y * tan_y;
-				double cz = f.z + r.z * tan_x + u.z * tan_y;
-
-
-				// projects point onto unit sphere by using inverse magnitude to normalize the vector
-				double inv_len = 1.0f / std::sqrt(cx * cx + cy * cy + cz * cz);
-				// unit vector pointing outwards from sphere center (also doubles as surface normal)
-				Vec64 n = { cx * inv_len, cy * inv_len, cz * inv_len };
-				double nx = cx * inv_len;
-				double ny = cy * inv_len;
-				double nz = cz * inv_len;
+				Vec64 n = cubeFaceToSphere(mx, my);
 
 				LargeVertex v;
-				v.position = n; // instead of scaling by radius here, just make it a unit sphere and let the GPU scale it up
+
+				if (mode == EGenGeometryMode::UNIT_SPHERE_RELATIVE)
+				{
+					v.position = n; // instead of scaling by radius here, just make it a unit sphere and let the GPU scale it up
+				}
+				else
+				{
+					const Vec64 centerDir = getCenterDirection();
+					v.position = (n - centerDir) * radius; // actual patch geometry scaled to true size
+				}
 				v.normal = { static_cast<float>(n.x), static_cast<float>(n.y), static_cast<float>(n.z) };
 
 				auto col = getPatchColor_visualizeLODLevel(lodLevel);
@@ -352,18 +335,43 @@ namespace EngineCore
 				uint32_t i1 = (x + 1) + y * stride;
 				uint32_t i2 = x + (y + 1) * stride;
 				uint32_t i3 = (x + 1) + (y + 1) * stride;
-
+				
+				// NOTE: due to the engine's coordinate-system conversion to Vulkan,
+				// this index order produces the correct front-facing triangles.
+				// do not change without also changing frontFace / coordinate conversion
 				indices.push_back(i0);
-				indices.push_back(i2);
 				indices.push_back(i1);
+				indices.push_back(i2);
 
 				indices.push_back(i1);
-				indices.push_back(i2);
 				indices.push_back(i3);
+				indices.push_back(i2);
 			}
 		}
 		const float ms = clock.getElapsed() * 1000;
-		//if (ms > 0.15) std::cout << "============= generateGeometry() done in " << ms << " ms =============\n";
+	}
+
+	Vec64 TerrainPatch::cubeFaceToSphere(double faceX, double faceY) const
+	{
+		const double tx = std::tan(faceX * PI_OVER_4);
+		const double ty = std::tan(faceY * PI_OVER_4);
+		Vec64 p;
+		switch (face)
+		{
+			case ETerrainPatchFaceDirection::A: p = { 1,  ty, -tx }; break;
+			case ETerrainPatchFaceDirection::B: p = { -1,  ty,  tx }; break;
+			case ETerrainPatchFaceDirection::C: p = { tx,  1, -ty }; break;
+			case ETerrainPatchFaceDirection::D: p = { tx, -1,  ty }; break;
+			case ETerrainPatchFaceDirection::E: p = { tx,  ty,  1 }; break;
+			case ETerrainPatchFaceDirection::F: p = { -tx,  ty, -1 }; break;
+		}
+
+		return p.getNormalized();
+	}
+
+	Vec64 TerrainPatch::getCenterDirection() const
+	{
+		return cubeFaceToSphere(center.x + size * 0.5, center.y + size * 0.5);
 	}
 	
 }

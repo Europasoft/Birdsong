@@ -45,18 +45,25 @@ namespace EngineCore
 	{
 		switch (face)
 		{
-		case ETerrainPatchFaceDirection::A: return { {0,0,1}, {0,1,0}, {1,0,0} };
-		case ETerrainPatchFaceDirection::B: return { {0,0,-1}, {0,1,0}, {-1,0,0} };
-		case ETerrainPatchFaceDirection::C: return { {1,0,0}, {0,0,1}, {0,1,0} };
-		case ETerrainPatchFaceDirection::D: return { {1,0,0}, {0,0,-1}, {0,-1,0} };
-		case ETerrainPatchFaceDirection::E: return { {1,0,0}, {0,1,0}, {0,0,1} };
-		case ETerrainPatchFaceDirection::F: return { {-1,0,0}, {0,1,0}, {0,0,-1} };
+			case ETerrainPatchFaceDirection::A:
+				return { {0,0,-1}, {0,1,0}, {1,0,0} };
+			case ETerrainPatchFaceDirection::B:
+				return { {0,0,1}, {0,1,0}, {-1,0,0} };
+			case ETerrainPatchFaceDirection::C:
+				return { {1,0,0}, {0,0,-1}, {0,1,0} };
+			case ETerrainPatchFaceDirection::D:
+				return { {1,0,0}, {0,0,1}, {0,-1,0} };
+			case ETerrainPatchFaceDirection::E:
+				return { {1,0,0}, {0,1,0}, {0,0,1} };
+			case ETerrainPatchFaceDirection::F:
+				return { {-1,0,0}, {0,1,0}, {0,0,-1} };
 		}
-		return { {1,0,0}, {0,1,0}, {0,0,1} };
+		return { {0,1,0}, {0,0,1}, {1,0,0} };
 	}
 
 	constexpr uint32_t maxLOD = 16;			// maximum depth of the quadtree
 	constexpr double lodFactor = 2.4;		// distance split threshold multiplier
+	constexpr bool separateClosePatches = true; // render close patches at their true positions
 	constexpr bool shaderDesignMode = true; // periodically reload shaders, slow but useful for quick changes
 
 	PlanetDrawer::PlanetDrawer(EngineDevice& device, World& world, const RenderingFormats& formats, VkSampleCountFlagBits samples)
@@ -74,7 +81,7 @@ namespace EngineCore
 		auto layouts = world.getScene().getDescriptorSetLayouts();
 		MaterialCreateInfo matInfo(shaders, layouts, samples, formats, sizeof(ShaderPushConstants::PlanetMeshPushConstants), EMatSet::NO);
 		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_FILL;
-		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
+		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_BACK_BIT;
 		planet.material = std::make_shared<Material>(matInfo, device);
 		planet.material->finalize();
 
@@ -168,7 +175,7 @@ namespace EngineCore
 				root.size = 2.0f; // full extent of the face
 				root.lodLevel = 0;
 				root.face = static_cast<ETerrainPatchFaceDirection>(i);
-				root.generate(*asyncCmdBuffer);
+				root.generate(*asyncCmdBuffer, TerrainPatch::EGenGeometryMode::UNIT_SPHERE_RELATIVE);
 			}
 		}
 	}
@@ -216,15 +223,16 @@ namespace EngineCore
 	{
 		if (patch.next) return;
 		uint32_t action = checkSplitCriteria(patch, planet);
-		if (action == 1)
+		const auto genMode = (action < 10 or not separateClosePatches) ? TerrainPatch::EGenGeometryMode::UNIT_SPHERE_RELATIVE : TerrainPatch::EGenGeometryMode::PATCH_CENTER_RELATIVE;
+		if (action == 1 || action == 1 + 10)
 		{
 			// the patch is a leaf, split it
-			patch.splitReplace(*asyncCmdBuffer);
+			patch.splitReplace(*asyncCmdBuffer, genMode);
 		}
-		else if (action == 2)
+		else if (action == 2 || action == 2 + 10)
 		{
 			// distance is too far, remove geometry from child patches 
-			patch.mergeReplace(*asyncCmdBuffer);
+			patch.mergeReplace(*asyncCmdBuffer, genMode);
 		}
 		else
 		{
@@ -234,7 +242,6 @@ namespace EngineCore
 				evaluatePatchLOD(*child, planet);
 			}
 		}
-
 	}
 
 	uint32_t PlanetDrawer::checkSplitCriteria(TerrainPatch& patch, Planet& planet)
@@ -274,7 +281,8 @@ namespace EngineCore
 		// check split criteria - use a higher distance multiplier to merge than to split
 		const bool split = (distanceToCamera < targetDistance) && (patch.lodLevel < maxLOD) && patch.stateIs(TerrainPatch::EState::LEAF);
 		const bool merge = (distanceToCamera > targetDistance * 1.15) && patch.children.size();
-		return (split || merge) ? (split ? 1 : 2) : 0;
+		uint32_t result = (split || merge) ? (split ? 1 : 2) : 0;
+		return result + ((distanceToCamera < 350000) ? 10 : 0);
 	}
 
 
@@ -343,12 +351,32 @@ namespace EngineCore
 		}
 
 		// the unit sphere is scaled up to its final radius in the shader
-		const double visualRadius = planet.radius * k;
-		const Vec scale = Vec(static_cast<float>(visualRadius));
+		double visualRadius = planet.radius * k;
 
 		ShaderPushConstants::PlanetMeshPushConstants push{};
+
+		// close patch, render with true position and scale
+		if (patch->getCoordinateMode() == TerrainPatch::EGenGeometryMode::PATCH_CENTER_RELATIVE)
+		{
+			const Vec64 centerDirection = patch->getCenterDirection();
+			const Vec64 patchPositionInPlanetSector = centerDirection * planet.radius;
+			const Vec64 patchPositionInCamSector =
+			{
+				Math::calculateRelativeCoord(0.0, camTransform.sector.x, patchPositionInPlanetSector.x, planet.transform.sector.x),
+				Math::calculateRelativeCoord(0.0, camTransform.sector.y, patchPositionInPlanetSector.y, planet.transform.sector.y),
+				Math::calculateRelativeCoord(0.0, camTransform.sector.z, patchPositionInPlanetSector.z, planet.transform.sector.z),
+			};
+			position = Vec(static_cast<float>(patchPositionInCamSector.x), static_cast<float>(patchPositionInCamSector.y), static_cast<float>(patchPositionInCamSector.z));
+			visualRadius = 1.0;
+
+			push.patchCenterDirectionAndPlanetRadius.x = static_cast<float>(centerDirection.x);
+			push.patchCenterDirectionAndPlanetRadius.y = static_cast<float>(centerDirection.y);
+			push.patchCenterDirectionAndPlanetRadius.z = static_cast<float>(centerDirection.z);
+			push.patchCenterDirectionAndPlanetRadius.w = static_cast<float>(planet.radius);
+		}
+
 		// TODO: optimize this
-		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 1.f, scale, position);
+		push.transform = EngineCore::cglm::makeMatrixQ(Vec(0), 1.f, Vec(static_cast<float>(visualRadius)), position);
 		push.normalMatrix = glm::transpose(glm::inverse(push.transform));
 		push.cameraPositionAndLOD.x = camTransform.translation.x;
 		push.cameraPositionAndLOD.y = camTransform.translation.y;
@@ -358,6 +386,7 @@ namespace EngineCore
 		planet.material->writePushConstants(cmdBuffer, push);
 		// record mesh draw command
 		patch->draw(cmdBuffer);
+
 	}
 
 	int32_t PlanetDrawer::acquireJunkPile(std::unique_lock<std::mutex>& lock, bool allowFail)

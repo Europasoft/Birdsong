@@ -25,7 +25,8 @@ layout(push_constant) uniform Push
 {
 	mat4 transform;
 	mat4 normalMatrix;
-    vec4 cameraPositionAndLOD;
+	vec4 cameraPositionAndLOD;
+	vec4 patchCenterDirectionAndPlanetRadius;
 } push;
 
 
@@ -81,6 +82,8 @@ void main()
 	vec3 litColor = BRDF(baseColor.xyz, normalize(fragNormalWS), viewDir, lightDir, halfwayVec, effectiveRoughness);
 
     //outColor = vec4(fragNormalWS * 0.5 + 0.5, 1.0);
-    outColor = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
-
+    vec4 litOutput = vec4(litColor.x, litColor.y, litColor.z, baseColor.w) + indirect;
+    outColor = litOutput;
+  
+ 
 }

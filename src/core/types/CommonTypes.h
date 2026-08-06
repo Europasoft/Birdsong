@@ -25,6 +25,7 @@ public:
 	constexpr Vector3D() : x{ 0 }, y{ 0 }, z{ 0 } {};
 	T x; T y; T z;
 	// operator mess, can be ignored
+	bool operator==(const Vector3D<T>& v) const noexcept { return x == v.x && y == v.y && z == v.z; }
 	Vector3D<T> operator+(const Vector3D<T>& v) const { return Vector3D{ x + v.x, y + v.y, z + v.z }; } // +
 	Vector3D<T> operator-(const Vector3D<T>& v) const { return Vector3D{ x - v.x, y - v.y, z - v.z }; } // -
 	Vector3D<T> operator*(const Vector3D<T>& v) const { return Vector3D{ x * v.x, y * v.y, z * v.z }; } // *

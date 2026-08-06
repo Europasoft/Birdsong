@@ -150,6 +150,7 @@ namespace EngineCore
 			glm::mat4 transform{ 1.f };
 			glm::mat4 normalMatrix{ 1.f };
 			glm::vec4 cameraPositionAndLOD{ 0.f };
+			glm::vec4 patchCenterDirectionAndPlanetRadius{ 0.f };
 		};
 
 		struct InterfaceElementPushConstants

@@ -68,7 +68,7 @@ namespace WorldSystem
 		// create a basic camera
 		currentCamera = std::make_shared<EngineCore::Camera>(CameraSettings{ .fieldOfViewDeg = 85, .nearDistance = 1.0, .farDistance = 8 * 1000 * 100 });
 		currentCamera->transform.rotation = { 0.f, 0.f, 0.f };
-		currentCamera->transform.translation = { -22222.f * 1000.f * 100.f, 0.f, 0.f }; // 22222 km away, good distance to test eart-sized planet at center
+		currentCamera->transform.translation = { -22222.f * 1000.f * 100.f, 0.f, 0.f }; // 22222 km away is a good distance to test eart-sized planet at center
 
 		// scene global descriptors
 		UBO_Struct ubo1{};
