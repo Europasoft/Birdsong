@@ -158,18 +158,17 @@ struct HeightResult
 	vec3 gradient;
 };
 
-const float lacunarity = 2.2; // how much frequency increases per octave (higher = sharper)
-const float persistence = 0.33; // how much amplitude scales per octave (higher = sharper)
-const int octaves = 8; // number of octaves to sum
-
-HeightResult fbm(vec3 p, float frequency, float amplitude)
+// frequency: base frequency of the noise
+// lacunarity: how much frequency increases per octave (higher = sharper)
+// persistence: how much amplitude scales per octave (higher = sharper)
+HeightResult fbm(vec3 p, int octaves, float frequency, float lacunarity,float persistence)
 {
 	HeightResult r;
 	r.height = 0.0;
 	r.gradient = vec3(0.0);
 
 	float freq = frequency;
-	float amp = amplitude;
+	float amp = 1.0;
 
 	float value = 0.0;
 	float totalAmp = 0.0;
@@ -179,9 +178,13 @@ HeightResult fbm(vec3 p, float frequency, float amplitude)
 		r.height += amp * s.value;
 		r.gradient += amp * freq * s.gradient;
 
+		totalAmp += amp;
+
 		freq *= lacunarity;
 		amp *= persistence;
 	}
+	r.height /= totalAmp;
+	r.gradient /= totalAmp;
 
 	return r;
 }
@@ -190,7 +193,11 @@ void main()
 {
 	vec3 sphereNormal = normalize(position);
 
-	HeightResult h = fbm(sphereNormal, 80.0, 0.0002);
+	HeightResult h = fbm(sphereNormal, 8, 80.0, 2.2, 0.33);
+	const float baseAmplitude = 0.0004;
+	h.height *= baseAmplitude;
+	h.gradient *= baseAmplitude;
+
 	vec3 tangentGrad = h.gradient - sphereNormal * dot(h.gradient, sphereNormal);
 	vec3 terrainNormal = normalize((1.0 + h.height) * sphereNormal - tangentGrad);
 
