@@ -84,7 +84,7 @@ namespace EngineCore
 		void cleanJunkPile(uint32_t cleaningFrameIndex);
 
 		double shaderReloadTimer = 2.5;
-		bool reloadShadersNextFrame = false;
+		std::atomic<bool> reloadShadersNextFrame = false;
 		void tickShaderDesignMode();
 	};
 

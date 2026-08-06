@@ -66,6 +66,8 @@ namespace EngineCore
 		// checks device properties to get the max samples supported for both color and depth
 		VkSampleCountFlagBits getMaxSampleCount();
 		AsyncCommandDispatcher& getAsyncCommandDispatcher() const;
+		void waitIdle(); // this waits on every queue, only use when necessary
+		void waitGraphicsQueueIdle(); // this stalls the graphics queue, only use when necessary
 
 		// Buffer Helper Functions
 		void createBuffer(

@@ -56,7 +56,7 @@ namespace EngineCore
 			extent = window.getExtent();
 			glfwWaitEvents(); // this happens during resize or minimization of the glfw window
 		}
-		vkDeviceWaitIdle(device.device());
+		device.waitIdle();
 
 		if (swapchain == nullptr)
 		{

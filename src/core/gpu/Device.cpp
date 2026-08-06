@@ -701,7 +701,15 @@ namespace EngineCore
 		endSingleTimeCommands(commandBuffer);
 	}
 
+	void EngineDevice::waitIdle()
+	{
+		vkDeviceWaitIdle(device());
+	}
 
+    void EngineDevice::waitGraphicsQueueIdle()
+    {
+		vkQueueWaitIdle(graphicsQueue());
+	}
 
 	AsyncCommandDispatcher& EngineDevice::getAsyncCommandDispatcher() const
 	{

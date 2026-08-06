@@ -54,7 +54,7 @@ namespace EngineCore
 		mainLoop();
 
 		// window pending close, wait for GPU
-		vkDeviceWaitIdle(device->device());
+		device->waitIdle();
 	}
 
 	struct EngineApplication::FrameContext
@@ -171,7 +171,7 @@ namespace EngineCore
 		exitApplication = exitApplicationEvent.consume();
 		if (toggleFullscreenEvent.consume()) 
 		{
-			vkDeviceWaitIdle(device->device());
+			device->waitIdle();
 			window->toggleFullscreen();
 		}
 	}
