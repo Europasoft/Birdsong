@@ -64,7 +64,7 @@ namespace EngineCore
 	constexpr uint32_t maxLOD = 16;			// maximum depth of the quadtree
 	constexpr double lodFactor = 2.4;		// distance split threshold multiplier
 	constexpr bool separateClosePatches = true; // render close patches at their true positions
-	constexpr bool shaderDesignMode = true; // periodically reload shaders, slow but useful for quick changes
+	constexpr bool shaderDesignMode = false; // periodically reload shaders, slow but useful for quick changes
 
 	PlanetDrawer::PlanetDrawer(EngineDevice& device, World& world, const RenderingFormats& formats, VkSampleCountFlagBits samples)
 		: device(device), world(world), junkPileMutexes({{},{}})
