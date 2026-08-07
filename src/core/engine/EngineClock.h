@@ -27,6 +27,7 @@ namespace EngineCore
 				lastFrameIndex = currentframeIndex;
 				return getDelta();
 			}
+			return 0.0;
 		}
 		const double& getDelta() const { return frameDelta; }
 		uint32_t getFps() const { return static_cast<uint32_t>(1 / frameDelta); }
