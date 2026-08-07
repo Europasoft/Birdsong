@@ -43,7 +43,11 @@ namespace EngineCore
 		renderer = std::make_unique<Renderer>(*window, *device, renderSettings);
 		world = std::make_unique<WorldSystem::World>(*device, *this);
 		gameLoader = std::make_unique<GameLoader>(this);
-		gameLoader->loadDll("Game");
+		try
+		{
+			gameLoader->loadDll("Game");
+		}
+		catch (...) { std::cout << "Failed to load Game DLL"; }
 
 		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
 
@@ -152,10 +156,13 @@ namespace EngineCore
 
 		debugDrawer->render(f.commandBuffer, *renderer);
 
+		
+
 		renderer->endRendering(f.commandBuffer);
 
 		// RENDER FX PASS
 		fxDrawer->render(f.commandBuffer, *renderer);
+
 
 		// submit command buffer
 		renderer->endFrame(); 
