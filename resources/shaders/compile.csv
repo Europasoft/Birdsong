@@ -9,4 +9,6 @@ fullscreen.frag,
 fx_test.vert,
 fx_test.frag,
 planet.frag,
-planet.vert
+planet.vert,
+ui_test.frag,
+ui_test.vert

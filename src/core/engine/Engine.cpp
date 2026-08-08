@@ -12,6 +12,7 @@
 #include "core/gpu/Image.h"
 #include "core/engine/interop/GameLoader.h"
 #include "core/draw/planets/PlanetDrawer.h"
+#include "core/ui/Fonts.h"
 
 #include <stdexcept>
 #include <array>
@@ -50,6 +51,9 @@ namespace EngineCore
 		catch (...) { std::cout << "Failed to load Game DLL"; }
 
 		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
+
+		Font f;
+		f.create();
 
 		setupDrawers();
 		setupDefaultInputs();
@@ -118,7 +122,7 @@ namespace EngineCore
 	{
 		InputSystem& inputSys = window->input;
 
-		inputSys.captureMouseCursor(true);
+		inputSys.captureMouseCursor(false);
 
 		moveForwardInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_W, 1), KeyBinding(GLFW_KEY_S, -1) });
 		moveSidewaysInput = inputSys.addInputAxis().addKeyBinding({ KeyBinding(GLFW_KEY_D, 1), KeyBinding(GLFW_KEY_A, -1) });
@@ -156,7 +160,7 @@ namespace EngineCore
 
 		debugDrawer->render(f.commandBuffer, *renderer);
 
-		
+		uiDrawer->render(f.commandBuffer, { window->input.getMousePosition().x, window->input.getMousePosition().y }, window->getExtent());
 
 		renderer->endRendering(f.commandBuffer);
 

@@ -34,6 +34,7 @@ namespace EngineCore
 		materialInfo.shadingProperties.enableDepth = false;
 		materialInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		defaultMaterial = std::make_shared<Material>(materialInfo, device);
+		defaultMaterial->finalize();
 
 		// add test ui element
 		InterfaceElement elem{};
