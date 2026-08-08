@@ -4,6 +4,3 @@
 [submodule "src/deps/europasoft-json"]
 	path = src/deps/europasoft-json
 	url = https://github.com/Europasoft/europasoft-json
-[submodule "src/thirdparty/msdf-atlas-gen"]
-	path = src/thirdparty/msdf-atlas-gen
-	url = https://github.com/Europasoft/msdf-atlas-gen.git
