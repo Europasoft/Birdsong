@@ -96,13 +96,14 @@ namespace EngineCore
 	void InterfaceDrawer::drawText(const std::string& text, const UI::Font& font, float fontScale, VkExtent2D windowExtent, VkCommandBuffer cmdBuf)
 	{
 		float offset = 0;
-		for (auto c : text)
+		for (size_t i = 0; i < text.size(); i++)
 		{
-			const GlyphInfo& g = font.getCharacter(c);
+			const GlyphInfo& g = font.getCharacter(text[i]);
 			TextGlyphPushConstants push = makePushConstantForGlyph(g, font, offset, fontScale);
 			textMaterial->writePushConstants(cmdBuf, push);
 			vkCmdDraw(cmdBuf, 6, 1, 0, 0); // bufferless draw (vertex attributes generated in shader)
-			offset += g.advance * fontScale * (2.0 / windowExtent.width);
+			const auto kerning = (i == text.size() - 1) ? 0.f : font.getKerning(text[i], text[i + 1]);
+			offset += (g.advance + kerning) * fontScale * (2.0 / windowExtent.width);
 		}
 	}
 

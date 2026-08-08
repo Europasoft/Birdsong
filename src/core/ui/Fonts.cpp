@@ -17,7 +17,11 @@ namespace UI
 		generateAtlas(device, filepath, texManager);
 	}
 
-	Font::~Font() = default;
+	Font::~Font()
+	{
+		if (fontHandle) msdfgen::destroyFont(fontHandle);
+		if (freetypeHandle) msdfgen::deinitializeFreetype(freetypeHandle);
+	}
 
 	const GlyphInfo& Font::getCharacter(char32_t c) const
 	{
@@ -31,13 +35,15 @@ namespace UI
 	{
 		using namespace msdf_atlas;
 		bool success = false;
-		if (msdfgen::FreetypeHandle* ft = msdfgen::initializeFreetype())
+		freetypeHandle = msdfgen::initializeFreetype();
+		if (freetypeHandle)
 		{
-			if (msdfgen::FontHandle* font = msdfgen::loadFont(ft, filepath.data()))
+			fontHandle = msdfgen::loadFont(freetypeHandle, filepath.data());
+			if (fontHandle)
 			{
 				std::vector<GlyphGeometry> glyphs;
 				FontGeometry fontGeometry(&glyphs);
-				fontGeometry.loadCharset(font, 1.0, Charset::ASCII);
+				fontGeometry.loadCharset(fontHandle, 1.0, Charset::ASCII);
 				// Apply MSDF edge coloring. See edge-coloring.h for other coloring strategies.
 				const double maxCornerAngle = 3.0;
 				for (GlyphGeometry& glyph : glyphs)
@@ -113,27 +119,21 @@ namespace UI
 					gl.advance = float(g.getAdvance());
 
 					glyphInfos[g.getCodepoint()] = gl;
-
-					//if (g.getCodepoint() != 'S') continue;
-					//double al, ab, ar, at;
-					//double pl, pb, pr, pt;
-					//g.getQuadAtlasBounds(al, ab, ar, at);
-					//g.getQuadPlaneBounds(pl, pb, pr, pt);
-					//printf(
-					//	"S:\n"
-					//	"  atlas: %f %f %f %f -> %f x %f\n"
-					//	"  plane: %f %f %f %f -> %f x %f\n",
-					//	al, ab, ar, at,
-					//	ar - al, at - ab,
-					//	pl, pb, pr, pt,
-					//	pr - pl, pt - pb
-					//);
 				}
-
-				msdfgen::destroyFont(font);
 			}
-			msdfgen::deinitializeFreetype(ft);
 		}
 		return success;
+	}
+
+	float Font::getKerning(char32_t a, char32_t b) const
+	{
+		msdfgen::GlyphIndex idxA{};
+		msdfgen::GlyphIndex idxB{};
+		msdfgen::getGlyphIndex(idxA, fontHandle, a);
+		msdfgen::getGlyphIndex(idxB, fontHandle, b);
+
+		double k = 0;
+		msdfgen::getKerning(k, fontHandle, idxA.getIndex(), idxB.getIndex());
+		return static_cast<float>(k);
 	}
 }

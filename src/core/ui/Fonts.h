@@ -12,6 +12,12 @@ namespace EngineCore
 	class Image;
 }
 
+namespace msdfgen
+{
+	class FontHandle;
+	class FreetypeHandle;
+}
+
 namespace UI
 {
 	struct GlyphInfo
@@ -30,6 +36,7 @@ namespace UI
 		const GlyphInfo& getCharacter(char32_t c) const;
 		uint32_t getTextureIndex() const { return texIndex; }
 		uint32_t getPixelRange() const { return sdfPixelRange; }
+		float getKerning(char32_t a, char32_t b) const;
 
 	private:
 		bool generateAtlas(EngineCore::EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager);
@@ -38,5 +45,7 @@ namespace UI
 		std::unique_ptr<EngineCore::Image> texture;
 		std::unordered_map<char32_t, GlyphInfo> glyphInfos;
 		uint32_t sdfPixelRange = 8;
+		msdfgen::FontHandle* fontHandle = nullptr;
+		msdfgen::FreetypeHandle* freetypeHandle = nullptr;
 	};
 }
