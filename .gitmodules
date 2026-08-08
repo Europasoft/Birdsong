@@ -7,3 +7,6 @@
 [submodule "src/thirdparty/msdf-atlas-gen-lite"]
 	path = src/thirdparty/msdf-atlas-gen-lite
 	url = https://github.com/Europasoft/msdf-atlas-gen-lite.git
+[submodule "src/thirdparty/freetype-es"]
+	path = src/thirdparty/freetype-es
+	url = https://github.com/Europasoft/freetype-es.git

@@ -280,6 +280,192 @@
     <ClCompile Include="..\src\core\types\Math.cpp">
       <Filter>core\types</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\draw\planets\DisplacementBuffer.cpp">
+      <Filter>core\draw\planets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\ui\Fonts.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\bitmap-blit.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Charset.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\charset-parser.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\csv-export.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\FontGeometry.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\glyph-generators.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\GlyphGeometry.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\GridAtlasPacker.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\image-encode.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\json-export.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Padding.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\RectanglePacker.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\shadron-preview-generator.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\size-selectors.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\TightAtlasPacker.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\utf8.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Workload.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\artery-font-export.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\import-svg.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\resolve-shape-geometry.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\save-png.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\import-font.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Contour.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\contour-combiners.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\convergent-curve-ordering.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\DistanceMapping.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\edge-coloring.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\EdgeHolder.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\edge-segments.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\edge-selectors.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\equation-solver.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\export-svg.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\MSDFErrorCorrection.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\msdf-error-correction.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\msdfgen.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Projection.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\rasterization.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\render-sdf.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-bmp.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-fl32.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-rgba.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-tiff.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Scanline.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\sdf-error-estimation.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\shape-description.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Shape.cpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbase.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbbox.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftdebug.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftglyph.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftinit.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftsystem.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\truetype\truetype.c">
+      <Filter>thirdparty\freetype-es\truetype</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\psnames\psnames.c">
+      <Filter>thirdparty\freetype-es\ps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\pshinter\pshinter.c">
+      <Filter>thirdparty\freetype-es\ps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\psaux\psaux.c">
+      <Filter>thirdparty\freetype-es\ps</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\sfnt\sfnt.c">
+      <Filter>thirdparty\freetype-es\sfnt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\cff\cff.c">
+      <Filter>thirdparty\freetype-es\cff</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbitmap.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftmm.c">
+      <Filter>thirdparty\freetype-es\base-required</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -585,6 +771,258 @@
     <ClInclude Include="..\src\core\types\Math.h">
       <Filter>core\types</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\draw\planets\DisplacementBuffer.h">
+      <Filter>core\draw\planets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\ui\Fonts.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\BitmapAtlasStorage.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\BitmapAtlasStorage.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\bitmap-blit.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Charset.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\csv-export.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\DynamicAtlas.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\DynamicAtlas.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\FontGeometry.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\GlyphBox.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\glyph-generators.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\GlyphGeometry.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\GridAtlasPacker.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\image-encode.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\image-save.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\image-save.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\ImmediateAtlasGenerator.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\ImmediateAtlasGenerator.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\json-export.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\msdf-atlas-gen.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Padding.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Rectangle.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\RectanglePacker.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\rectangle-packing.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\rectangle-packing.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Remap.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\shadron-preview-generator.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\size-selectors.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\TightAtlasPacker.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\types.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\utf8.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\utils.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\Workload.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\artery-font-export.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasGenerator.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasStorage.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\msdfgen-ext.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\msdfgen.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\import-svg.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\resolve-shape-geometry.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\save-png.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\ext\import-font.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\ext</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Contour.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\contour-combiners.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\convergent-curve-ordering.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\DistanceMapping.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\EdgeColor.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\edge-coloring.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\EdgeHolder.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\edge-segments.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\edge-selectors.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\equation-solver.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\export-svg.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\generator-config.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\MSDFErrorCorrection.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\msdf-error-correction.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\pixel-conversion.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Projection.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Range.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\rasterization.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\render-sdf.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-bmp.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-fl32.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-rgba.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\save-tiff.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Scanline.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\sdf-error-estimation.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\SDFTransformation.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Shape.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\shape-description.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\ShapeDistanceFinder.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\ShapeDistanceFinder.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\SignedDistance.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Vector2.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\YAxisOrientation.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\arithmetics.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\base.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Bitmap.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\Bitmap.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\bitmap-interpolation.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\core\BitmapRef.hpp">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\config.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\config.h">
+      <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -658,6 +1096,45 @@
     </Filter>
     <Filter Include="core\draw\planets">
       <UniqueIdentifier>{1a762a15-deca-47a3-8f93-d789dbd8a0b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\ui">
+      <UniqueIdentifier>{9e06e52f-af9d-4e61-b4b5-237047b4eaab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{70503eeb-59fc-4d61-8c12-f268ee3073fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\msdf-atlas-gen-lite">
+      <UniqueIdentifier>{9f991305-e07d-41e2-8e14-20a9f6bf4dfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen">
+      <UniqueIdentifier>{4f3533a0-c2e0-4e2d-8ae0-ec89378ce9cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\msdf-atlas-gen-lite\msdfgen">
+      <UniqueIdentifier>{ee7cd5da-b0ce-45bd-b479-442a7e456dc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\msdf-atlas-gen-lite\msdfgen\core">
+      <UniqueIdentifier>{b49cdd0d-cf17-4760-83a6-183da99d5fc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\msdf-atlas-gen-lite\msdfgen\ext">
+      <UniqueIdentifier>{72c287fa-3eec-4246-8c82-03ef5a8bc7aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\freetype-es">
+      <UniqueIdentifier>{c8d8b44a-25da-4f8e-b09a-3986707ee9ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\freetype-es\base-required">
+      <UniqueIdentifier>{a5ab85f1-4ce7-4fd2-95ff-ea59cb4531e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\freetype-es\truetype">
+      <UniqueIdentifier>{94ab74cd-fbd0-4cdd-88c7-86be6bc1b440}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\freetype-es\sfnt">
+      <UniqueIdentifier>{797b5de8-dabb-4f32-ab99-f49e58475475}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\freetype-es\cff">
+      <UniqueIdentifier>{6f528518-6700-46e8-a13d-2d5331ac87cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\freetype-es\ps">
+      <UniqueIdentifier>{ad281dd9-7756-4bc2-90fb-4a93cc37bad9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
