@@ -28,6 +28,20 @@ namespace EngineCore
 		create(memProps, info);
 	}
 
+	std::unique_ptr<Image> Image::fromFontAtlas(EngineDevice& device, const GBuffer& srcBuffer, uint32_t width, uint32_t height)
+	{
+		auto img = std::make_unique<Image>(device, VK_NULL_HANDLE);
+		VkImageCreateInfo info = makeImageCreateInfo(width, height);
+		info.format = VK_FORMAT_R8G8B8A8_UNORM;
+		img->create(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, info);
+		img->copyBufferToImage(srcBuffer, static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1, info.format);
+
+		img->updateView(info.format, VK_IMAGE_ASPECT_COLOR_BIT, VK_IMAGE_VIEW_TYPE_2D);
+		createSampler(img->sampler, device, 1.f);
+		img->setDebugName("font atlas");
+		return img;
+	}
+
 	Image::~Image() 
 	{
 		destroyView();
@@ -170,10 +184,10 @@ namespace EngineCore
 		device.endSingleTimeCommands(commandBuffer);
 	}
 
-	void Image::copyBufferToImage(const GBuffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount)
+	void Image::copyBufferToImage(const GBuffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount, VkFormat fmt)
 	{
 		// vkCmdCopyBufferToImage requires the right image layout, that is handled here
-		transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		transitionImageLayout(fmt, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		VkCommandBuffer commandBuffer = device.beginSingleTimeCommands();
 
@@ -192,7 +206,7 @@ namespace EngineCore
 		vkCmdCopyBufferToImage(commandBuffer, buffer.getBuffer(), image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 		device.endSingleTimeCommands(commandBuffer);
 		// transition (again) to a more useful format
-		transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		transitionImageLayout(fmt, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	void Image::createView(VkImageView& view, VkFormat format, VkImageAspectFlags aspect, VkImageViewType viewType)

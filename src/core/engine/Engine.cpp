@@ -52,9 +52,6 @@ namespace EngineCore
 
 		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
 
-		Font f;
-		f.create();
-
 		setupDrawers();
 		setupDefaultInputs();
 
@@ -113,9 +110,9 @@ namespace EngineCore
 		meshDrawer = std::make_unique<MeshDrawer>(*device);
 		skyDrawer = std::make_unique<SkyDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
 		fxDrawer = std::make_unique<FxDrawer>(*device, sceneGlobalDescriptorSet, fxFormats, renderer->getFxPassInputImageViews(), renderer->getFxPassInputDepthImageViews());
-		uiDrawer = std::make_unique<InterfaceDrawer>(*device, baseFormats, renderSettings.sampleCountMSAA);
+		uiDrawer = std::make_unique<InterfaceDrawer>(*device, baseFormats, renderSettings.sampleCountMSAA, world->getScene());
 		debugDrawer = std::make_unique<DebugDrawer>(*device, sceneGlobalDescriptorSet, baseFormats, renderSettings.sampleCountMSAA);
-		planetDrawer = std::make_unique<PlanetDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
+		//planetDrawer = std::make_unique<PlanetDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
 	}
 
 	void EngineApplication::setupDefaultInputs()
@@ -153,14 +150,14 @@ namespace EngineCore
 		skyDrawer->renderSky(f.bufferIndex, f.commandBuffer, f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->transform.translation);
 
 		// render planet (experimental)
-		planetDrawer->render(f.commandBuffer, f.bufferIndex, f.camera->transform, f.delta);
+		//planetDrawer->render(f.commandBuffer, f.bufferIndex, f.camera->transform, f.delta);
 
 		// render meshes
 		meshDrawer->renderMeshes(f.commandBuffer, *world, f.bufferIndex);
 
 		debugDrawer->render(f.commandBuffer, *renderer);
 
-		uiDrawer->render(f.commandBuffer, { window->input.getMousePosition().x, window->input.getMousePosition().y }, window->getExtent());
+		uiDrawer->render(f.commandBuffer, { window->input.getMousePosition().x, window->input.getMousePosition().y }, window->getExtent(), f.bufferIndex);
 
 		renderer->endRendering(f.commandBuffer);
 

@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 #pragma warning(pop)
 #include <string>
+#include <memory>
 
 namespace EngineCore
 {
@@ -16,6 +17,7 @@ namespace EngineCore
 		Image(EngineDevice& device, VkImage image);
 		Image(EngineDevice& device, const std::string& path);
 		Image(EngineDevice& device, VkImageCreateInfo info, VkMemoryPropertyFlags memProps = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		static std::unique_ptr<Image> fromFontAtlas(EngineDevice& device, const GBuffer& srcBuffer, uint32_t width, uint32_t height);
 		~Image();
 
 		Image(const Image&) = delete;
@@ -28,7 +30,7 @@ namespace EngineCore
 		void updateView(VkFormat format, VkImageAspectFlags aspect, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D);
 		// returns a new image view using the current image, does not update the default view
 		void createView(VkImageView& view, VkFormat format, VkImageAspectFlags aspect, VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D);
-		void copyBufferToImage(const GBuffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount);
+		void copyBufferToImage(const GBuffer& buffer, uint32_t width, uint32_t height, uint32_t layerCount, VkFormat fmt = VK_FORMAT_R8G8B8A8_SRGB);
 		
 		static VkImageCreateInfo makeImageCreateInfo(uint32_t width, uint32_t height);
 		static void createSampler(VkSampler& samplerHandleOut, EngineDevice& device, const float& anisotropy = 0.f);

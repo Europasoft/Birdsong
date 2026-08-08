@@ -161,6 +161,13 @@ namespace EngineCore
 			float timeSinceClick;
 		};
 
+		struct TextGlyphPushConstants
+		{
+			glm::vec4 uvs{ 0.f };
+			glm::vec4 vertexBounds{ 0.f };
+			glm::vec4 screenPositionAndTextureIndex{ 0.f };
+		};
+
 		struct DebugPrimitivePushConstants
 		{
 			glm::mat4 transform{ 1.f };

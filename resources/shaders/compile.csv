@@ -11,4 +11,6 @@ fx_test.frag,
 planet.frag,
 planet.vert,
 ui_test.frag,
-ui_test.vert
+ui_test.vert,
+text.frag,
+text.vert

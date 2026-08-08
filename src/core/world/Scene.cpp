@@ -73,6 +73,7 @@ namespace WorldSystem
 		// scene global descriptors
 		UBO_Struct ubo1{};
 		ubo1.add(uelem::mat4); // MVP matrix
+		ubo1.add(uelem::vec4); // viewport resolution
 		sceneGlobalDescriptorSet->addUBO(ubo1, device);
 		sceneGlobalDescriptorSet->finalize();
 

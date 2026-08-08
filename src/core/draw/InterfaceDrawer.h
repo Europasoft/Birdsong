@@ -9,9 +9,20 @@
 
 class Camera;
 
+namespace WorldSystem
+{
+	class Scene;
+}
+
+namespace UI
+{
+	class Font;
+}
+
 namespace EngineCore
 {
 	class EngineDevice;
+	class BindlessTextureManager;
 
 	class InterfaceElement 
 	{
@@ -32,20 +43,21 @@ namespace EngineCore
 	{
 	public:
 
-		InterfaceDrawer(EngineDevice& device, const RenderingFormats& formats, VkSampleCountFlagBits samples);
+		InterfaceDrawer(EngineDevice& device, const RenderingFormats& formats, VkSampleCountFlagBits samples, WorldSystem::Scene& scene);
 		InterfaceDrawer(const InterfaceDrawer&) = delete;
 		~InterfaceDrawer();
 		InterfaceDrawer& operator=(const InterfaceDrawer&) = delete;
 
-		void render(VkCommandBuffer cmdBuf, glm::vec2 mousePosition, VkExtent2D windowExtent);
+		void render(VkCommandBuffer cmdBuf, glm::vec2 mousePosition, VkExtent2D windowExtent, uint32_t frameIndex);
 
 	private:
 		EngineDevice& device;
+		WorldSystem::Scene& scene;
 		std::vector<InterfaceElement> elements;
 		std::shared_ptr<Material> defaultMaterial;
 
-		
-
+		std::vector<std::unique_ptr<UI::Font>> fonts;
+		std::shared_ptr<Material> textMaterial;
 	};
 
 }

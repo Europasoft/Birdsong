@@ -43,6 +43,7 @@ namespace WorldSystem
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
 		EngineCore::InstanceBuffer& getInstanceBuffer() const { return *instanceBuffer.get(); }
+		EngineCore::BindlessTextureManager& getTextureManager() const { return *textureManager.get(); }
 
 		// returns layouts for all global descriptor sets
 		std::vector<VkDescriptorSetLayout> getDescriptorSetLayouts() const;
