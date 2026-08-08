@@ -73,7 +73,7 @@ namespace WorldSystem
 		// scene global descriptors
 		UBO_Struct ubo1{};
 		ubo1.add(uelem::mat4); // MVP matrix
-		ubo1.add(uelem::vec4); // viewport resolution
+		ubo1.add(uelem::vec2); // viewport resolution
 		sceneGlobalDescriptorSet->addUBO(ubo1, device);
 		sceneGlobalDescriptorSet->finalize();
 
@@ -107,7 +107,11 @@ namespace WorldSystem
 		auto& cam = getCurrentCamera();
 		glm::mat4 pvm{ 1.f };
 		pvm = cam.getProjectionViewMatrix();
+		glm::vec2 wh{ 0.f };
+		wh.x = engine.renderer->getSwapchainExtent().width;
+		wh.y = engine.renderer->getSwapchainExtent().height;
 		sceneGlobalDescriptorSet->writeUBOMember(0, pvm, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);
+		sceneGlobalDescriptorSet->writeUBOMember(0, wh, EngineCore::UBO_Layout::ElementAccessor{ 1, 0, 0 }, frameIndex);
 	}
 
 	void Scene::updateInstanceData(uint32_t frameIndex)

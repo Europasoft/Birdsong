@@ -165,7 +165,7 @@ namespace EngineCore
 		{
 			glm::vec4 uvs{ 0.f };
 			glm::vec4 vertexBounds{ 0.f };
-			glm::vec4 screenPositionAndTextureIndex{ 0.f };
+			glm::vec4 screenPos_FontScale_TexIdx{ 0.f };
 		};
 
 		struct DebugPrimitivePushConstants

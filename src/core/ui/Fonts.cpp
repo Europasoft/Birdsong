@@ -45,9 +45,9 @@ namespace UI
 				TightAtlasPacker packer;
 				packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
 				// setScale for a fixed size or setMinimumScale to use the largest that fits
-				packer.setMinimumScale(24.0);
+				packer.setMinimumScale(36.0);
 				// setPixelRange or setUnitRange
-				packer.setPixelRange(2.0);
+				packer.setPixelRange(sdfPixelRange);
 				packer.setMiterLimit(1.0);
 				// Compute atlas layout - pack glyphs
 				packer.pack(glyphs.data(), glyphs.size());
@@ -82,8 +82,8 @@ namespace UI
 					device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 				};
+				// copy font atlas texture in reverse order
 				stagingBuffer.map(size);
-				//memcpy(stagingBuffer.getMappedMemory(), bitmap.pixels, size);
 				byte* p = reinterpret_cast<byte*>(stagingBuffer.getMappedMemory());
 				for (int y = 0; y < height; ++y)
 				{
@@ -105,32 +105,29 @@ namespace UI
 					gl.v0 = float(1.0 - t / height);
 					gl.u1 = float(r / width);
 					gl.v1 = float(1.0 - b / height);
-					//.u0 = float(l / width),
-					//.v0 = float(b / height),
-					//.u1 = float(r / width),
-					//.v1 = float(t / height),
 					g.getQuadPlaneBounds(l, b, r, t);
 					gl.l = float(l);
 					gl.b = float(b);
 					gl.r = float(r);
 					gl.t = float(t);
+					gl.advance = float(g.getAdvance());
 
 					glyphInfos[g.getCodepoint()] = gl;
 
-					if (g.getCodepoint() != 'S') continue;
-					double al, ab, ar, at;
-					double pl, pb, pr, pt;
-					g.getQuadAtlasBounds(al, ab, ar, at);
-					g.getQuadPlaneBounds(pl, pb, pr, pt);
-					printf(
-						"S:\n"
-						"  atlas: %f %f %f %f -> %f x %f\n"
-						"  plane: %f %f %f %f -> %f x %f\n",
-						al, ab, ar, at,
-						ar - al, at - ab,
-						pl, pb, pr, pt,
-						pr - pl, pt - pb
-					);
+					//if (g.getCodepoint() != 'S') continue;
+					//double al, ab, ar, at;
+					//double pl, pb, pr, pt;
+					//g.getQuadAtlasBounds(al, ab, ar, at);
+					//g.getQuadPlaneBounds(pl, pb, pr, pt);
+					//printf(
+					//	"S:\n"
+					//	"  atlas: %f %f %f %f -> %f x %f\n"
+					//	"  plane: %f %f %f %f -> %f x %f\n",
+					//	al, ab, ar, at,
+					//	ar - al, at - ab,
+					//	pl, pb, pr, pt,
+					//	pr - pl, pt - pb
+					//);
 				}
 
 				msdfgen::destroyFont(font);

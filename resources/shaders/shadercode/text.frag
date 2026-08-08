@@ -15,11 +15,19 @@ layout(push_constant) uniform Push
 {
   vec4 uvs;
   vec4 vertexBounds;
-  vec4 screenPositionAndTextureIndex;
+  vec4 screenPos_FontScale_TexIdx;
 } push;
+
+float median(float r, float g, float b)
+{
+	return max(min(r, g), min(max(r, g), b));
+}
 
 void main()
 {
-	//outColor = vec4(1,1,1,1);
-	outColor = texture(globalTextures[nonuniformEXT(2)], fragUV);
+	int textureIndex = int(push.screenPos_FontScale_TexIdx.w);
+	vec4 s = texture(globalTextures[nonuniformEXT(textureIndex)], fragUV);
+	float sd = median(s.r, s.g, s.b);
+	float opacity = clamp((sd - 0.5) * 10.0 + 0.5, 0.0, 1.0);
+	outColor = vec4(1.0, 1.0, 1.0, opacity);
 }

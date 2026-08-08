@@ -25,6 +25,7 @@ struct InstanceData
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
+    vec2 viewportExtent;
 } ubo1;
 
 // second descriptor set: unbounded texture array
