@@ -1,4 +1,5 @@
 #pragma once
+#include "core/draw/DrawBase.h"
 #include "core/gpu/Material.h"
 
 #include <glm/gtc/matrix_transform.hpp> // glm
@@ -17,13 +18,11 @@ namespace WorldSystem
 namespace UI
 {
 	class Font;
+	struct GlyphInfo;
 }
 
 namespace EngineCore
 {
-	class EngineDevice;
-	class BindlessTextureManager;
-
 	class InterfaceElement 
 	{
 	public:
@@ -39,25 +38,23 @@ namespace EngineCore
 	};
 
 
-	class InterfaceDrawer
+	class InterfaceDrawer : public DrawBase
 	{
 	public:
-
-		InterfaceDrawer(EngineDevice& device, const RenderingFormats& formats, VkSampleCountFlagBits samples, WorldSystem::Scene& scene);
-		InterfaceDrawer(const InterfaceDrawer&) = delete;
+		InterfaceDrawer(EngineDevice& device, const DrawContext& d);
 		~InterfaceDrawer();
-		InterfaceDrawer& operator=(const InterfaceDrawer&) = delete;
 
-		void render(VkCommandBuffer cmdBuf, glm::vec2 mousePosition, VkExtent2D windowExtent, uint32_t frameIndex);
+		virtual void render(const FrameContext& f) override;
 
 	private:
-		EngineDevice& device;
-		WorldSystem::Scene& scene;
 		std::vector<InterfaceElement> elements;
 		std::shared_ptr<Material> defaultMaterial;
 
 		std::vector<std::unique_ptr<UI::Font>> fonts;
 		std::shared_ptr<Material> textMaterial;
+
+		void drawText(const std::string& text, const UI::Font& font, float fontScale, VkExtent2D windowExtent, VkCommandBuffer cmdBuf);
+		ShaderPushConstants::TextGlyphPushConstants makePushConstantForGlyph(const UI::GlyphInfo& g, const UI::Font& font, float offset, float fontScale) const;
 	};
 
 }

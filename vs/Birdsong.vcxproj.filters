@@ -466,6 +466,9 @@
     <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftmm.c">
       <Filter>thirdparty\freetype-es\base-required</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\draw\DrawBase.cpp">
+      <Filter>core\draw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -1022,6 +1025,12 @@
     </ClInclude>
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\config.h">
       <Filter>thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\DrawBase.h">
+      <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\FrameContext.h">
+      <Filter>core\draw</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

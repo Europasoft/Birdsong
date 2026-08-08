@@ -1,4 +1,6 @@
 #include "core/draw/FxDrawer.h"
+#include "core/draw/FrameContext.h"
+
 #include "core/gpu/descriptors/DescriptorSetLayout.h"
 #include "core/gpu/descriptors/DescriptorPool.h"
 #include "core/engine/MeshData.h"
@@ -12,10 +14,8 @@
 
 namespace EngineCore
 {
-	FxDrawer::FxDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats,
-						const std::vector<VkImageView>& inputImageViews, 
-						const std::vector<VkImageView>& inputDepthImageViews)
-		: device{ device }, defaultSet{ defaultSet }
+	FxDrawer::FxDrawer(EngineDevice& device, const DrawContext& d)
+		: DrawBase(device, d)
 	{
 		// draws the whole frame again, sampling from the framebuffer attachment of the previous pass
 		// after the fullscreen draw, translucent meshes are drawn
@@ -23,6 +23,7 @@ namespace EngineCore
 
 		// descriptor set 1
 		// attachments use the same image count as the swapchain, so that number is used instead of MAX_FRAMES_IN_FLIGHT
+		auto inputImageViews = d.renderer->getFxPassInputImageViews();
 		attachmentSet = std::make_unique<DescriptorSet>(device, (uint32_t)inputImageViews.size());
 		ImageArrayDescriptor inputImages{}; // rendered attachment image(s) from the previous renderpass
 		inputImages.addImage(inputImageViews);
@@ -38,11 +39,11 @@ namespace EngineCore
 		uboSet->finalize();
 
 		// bind the scene-global set, and the 2 specialized ones
-		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout(), attachmentSet->getLayout(), uboSet->getLayout() };
+		auto layouts = std::vector<VkDescriptorSetLayout>{ d.world->getScene().getDescriptorSetLayouts()[0], attachmentSet->getLayout(), uboSet->getLayout()};
 
 		// setup material for the fullscreen shaders (no mesh, a fullscreen triangle is created in the vertex shader)
 		ShaderFilePaths fullscreenShader(makePath("shaders/compiled/fullscreen.vert.spv"), makePath("shaders/compiled/fullscreen.frag.spv"));
-		MaterialCreateInfo fullscreenInfo(fullscreenShader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, 0, EMatSet::NO);
+		MaterialCreateInfo fullscreenInfo(fullscreenShader, layouts, VK_SAMPLE_COUNT_1_BIT, d.fxPassFormats, 0, EMatSet::NO);
 		fullscreenInfo.shadingProperties.useVertexInput = false;
 		fullscreenInfo.shadingProperties.enableDepth = false;
 		fullscreenInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
@@ -56,46 +57,46 @@ namespace EngineCore
 		enode->mesh->build("meshes/teapot.obj"); // load mesh from file
 
 		ShaderFilePaths shader(makePath("shaders/compiled/fx_test.vert.spv"), makePath("shaders/compiled/fx_test.frag.spv"));
-		enode->mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, formats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO));
+		enode->mesh->setMaterial(MaterialCreateInfo(shader, layouts, VK_SAMPLE_COUNT_1_BIT, d.fxPassFormats, sizeof(ShaderPushConstants::EngineMeshPushConstants), EMatSet::NO));
 		enode->mesh->getMaterial()->finalize();
 		enode->engineTransform = Transform(Vec(-80.f, 0.f, 0.f), Vec(), Vec(5.f));
 	}
 
-	void FxDrawer::render(VkCommandBuffer cmdBuffer, Renderer& renderer)
+	void FxDrawer::render(const FrameContext& f)
 	{
-		const auto& frameIndex = renderer.getFrameIndex();
-		const auto& imageIndex = renderer.getSwapImageIndex();
+		const auto& frameIndex = d.renderer->getFrameIndex();
+		const auto& imageIndex = d.renderer->getSwapImageIndex();
 
 		// update viewport extent descriptor value
-		VkExtent2D extent = renderer.getSwapchainExtent();
+		VkExtent2D extent = d.renderer->getSwapchainExtent();
 		uboSet->writeUBOMember(0, extent, UBO_Layout::ElementAccessor{0, 0, 0}, frameIndex);
 
-		renderer.beginRenderingFx(cmdBuffer); // FX PASS START
+		d.renderer->beginRenderingFx(f.commandBuffer); // FX PASS START
 
 		// draw fullscreen
-		bindDescriptorSets(cmdBuffer, fullscreenMaterial.get()->getPipelineLayout(), frameIndex, imageIndex);
-		fullscreenMaterial->bindToCommandBuffer(cmdBuffer);
-		vkCmdDraw(cmdBuffer, 3, 1, 0, 0);
+		bindDescriptorSets(f.commandBuffer, fullscreenMaterial.get()->getPipelineLayout(), frameIndex, imageIndex);
+		fullscreenMaterial->bindToCommandBuffer(f.commandBuffer);
+		vkCmdDraw(f.commandBuffer, 3, 1, 0, 0);
 
 		// draw mesh
 		auto material = enode->mesh->getMaterial();
-		bindDescriptorSets(cmdBuffer, material->getPipelineLayout(), frameIndex, imageIndex);
-		material->bindToCommandBuffer(cmdBuffer);
+		bindDescriptorSets(f.commandBuffer, material->getPipelineLayout(), frameIndex, imageIndex);
+		material->bindToCommandBuffer(f.commandBuffer);
 		
 		ShaderPushConstants::EngineMeshPushConstants push{};
 		push.transform = cglm::transformToGLMmat4(enode->engineTransform);
-		material->writePushConstants(cmdBuffer, push);
+		material->writePushConstants(f.commandBuffer, push);
 
-		enode->mesh->bind(cmdBuffer);
-		enode->mesh->draw(cmdBuffer);
+		enode->mesh->bind(f.commandBuffer);
+		enode->mesh->draw(f.commandBuffer);
 
-		renderer.endRendering(cmdBuffer); // FX PASS END
+		d.renderer->endRendering(f.commandBuffer); // FX PASS END
 	}
 
 	void FxDrawer::bindDescriptorSets(VkCommandBuffer cmdBuffer, VkPipelineLayout pipelineLayout, uint32_t frameIndex, uint32_t swapImageIndex)
 	{
 		// note that sets 0-1 use frame index, but set 2 uses swapchain image index
-		std::array<VkDescriptorSet, 3> vkSets = { defaultSet.getDescriptorSet(frameIndex), attachmentSet->getDescriptorSet(swapImageIndex), uboSet->getDescriptorSet(frameIndex) };
+		std::array<VkDescriptorSet, 3> vkSets = { d.world->getScene().getDescriptorSets(frameIndex)[0], attachmentSet->getDescriptorSet(swapImageIndex), uboSet->getDescriptorSet(frameIndex)};
 		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 3, vkSets.data(), 0, nullptr);
 	}
 

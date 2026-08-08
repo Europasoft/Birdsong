@@ -1,4 +1,5 @@
 #pragma once
+#include "core/draw/DrawBase.h"
 #include "core/draw/MeshDrawer.h"
 #include "core/draw/SkyDrawer.h"
 #include "core/draw/FxDrawer.h"

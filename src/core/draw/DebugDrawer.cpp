@@ -1,4 +1,6 @@
 #include "core/draw/DebugDrawer.h"
+#include "core/draw/FrameContext.h"
+
 #include "core/engine/MeshData.h"
 #include "core/world/World.h"
 #include "core/gpu/Descriptors.h"
@@ -10,10 +12,8 @@
 
 namespace EngineCore
 {
-	DebugDrawer::~DebugDrawer() = default;
-
-	DebugDrawer::DebugDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples)
-		: device{ device }, defaultSet{ defaultSet }
+	DebugDrawer::DebugDrawer(EngineDevice& device, const DrawContext& d)
+		: DrawBase(device, d)
 	{
 		// setup box mesh
 		enodeBox = std::make_unique<WorldSystem::EngineNodeData>(nullptr, device);
@@ -24,8 +24,8 @@ namespace EngineCore
 
 		// setup debug primitive material
 		auto shader = ShaderFilePaths(makePath("shaders/compiled/debug_primitive.vert.spv"), makePath("shaders/compiled/debug_primitive.frag.spv"));
-		auto layouts = std::vector<VkDescriptorSetLayout>{ defaultSet.getLayout() };
-		auto matInfo = MaterialCreateInfo(shader, layouts, samples, formats, sizeof(ShaderPushConstants::DebugPrimitivePushConstants));
+		auto layouts = d.world->getScene().getDescriptorSetLayouts();
+		auto matInfo = MaterialCreateInfo(shader, layouts, d.samples, d.basePassFormats, sizeof(ShaderPushConstants::DebugPrimitivePushConstants));
 		//matInfo.shadingProperties.enableDepth = false;
 		matInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		matInfo.shadingProperties.polygonMode = VK_POLYGON_MODE_LINE;
@@ -33,6 +33,8 @@ namespace EngineCore
 		enodeBox->mesh->setMaterial(matInfo);
 		enodeBox->mesh->getMaterial()->finalize();
 	}
+	
+	DebugDrawer::~DebugDrawer() = default;
 
 	void DebugDrawer::addDebugBox(Vec dimensions, Vec location, Vec color, float opacity)
 	{
@@ -49,22 +51,21 @@ namespace EngineCore
 		boxPushConstants.clear();
 	}
 
-	void DebugDrawer::render(VkCommandBuffer cmdBuffer, Renderer& renderer)
+    void DebugDrawer::render(const FrameContext& f)
 	{
 		
 		// called after the base renderpass has been initiated'
 		auto material = enodeBox->mesh->getMaterial();
-		material->bindToCommandBuffer(cmdBuffer);
-		enodeBox->mesh->bind(cmdBuffer);
+		material->bindToCommandBuffer(f.commandBuffer);
+		enodeBox->mesh->bind(f.commandBuffer);
 
-		auto sets = std::vector<VkDescriptorSet>{ defaultSet.getDescriptorSet(renderer.getFrameIndex()) };
-
-		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+		auto sets = f.world->getScene().getDescriptorSets(f.bufferIndex);
+		vkCmdBindDescriptorSets(f.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->getPipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
 
 		for (DDPushConstant& box : boxPushConstants)
 		{
-			material->writePushConstants(cmdBuffer, box);
-			enodeBox->mesh->draw(cmdBuffer);
+			material->writePushConstants(f.commandBuffer, box);
+			enodeBox->mesh->draw(f.commandBuffer);
 		}
 	}
 

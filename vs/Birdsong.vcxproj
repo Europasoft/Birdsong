@@ -159,7 +159,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DebugDrawer.h" />
+    <ClInclude Include="..\src\core\draw\DrawBase.h" />
     <ClInclude Include="..\src\core\draw\DrawIncludes.h" />
+    <ClInclude Include="..\src\core\draw\FrameContext.h" />
     <ClInclude Include="..\src\core\draw\FxDrawer.h" />
     <ClInclude Include="..\src\core\draw\InterfaceDrawer.h" />
     <ClInclude Include="..\src\core\draw\MeshDrawer.h" />
@@ -346,6 +348,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\draw\DebugDrawer.cpp" />
+    <ClCompile Include="..\src\core\draw\DrawBase.cpp" />
     <ClCompile Include="..\src\core\draw\FxDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\InterfaceDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\MeshDrawer.cpp" />

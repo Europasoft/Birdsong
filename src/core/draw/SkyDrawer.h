@@ -1,4 +1,5 @@
 #pragma once
+#include "core/draw/DrawBase.h"
 #include "core/types/vk.h"
 #include "core/types/CommonTypes.h"
 
@@ -18,19 +19,18 @@ namespace EngineCore
 	class DescriptorSet;
 	struct RenderingFormats;
 
-	class SkyDrawer 
+	class SkyDrawer : public DrawBase
 	{
 	public:
-		SkyDrawer(EngineDevice& device, WorldSystem::World& world, const RenderingFormats& formats, VkSampleCountFlagBits samples);
+		SkyDrawer(EngineDevice& device, const DrawContext& d);
 		~SkyDrawer();
 
-		void renderSky(uint32_t frameIndex, VkCommandBuffer commandBuffer, VkDescriptorSet sceneGlobalDescriptorSet, Vec observerPosition);
+		virtual void render(const FrameContext& f) override;
 
 		float skyMeshScale = 1000.f * 10.f;
 
 	private:
 		std::unique_ptr<WorldSystem::EngineNodeData> enodeSky;
-		WorldSystem::World& world;
 		
 	};
 

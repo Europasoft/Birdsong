@@ -13,6 +13,7 @@
 namespace WorldSystem
 {
 	class World;
+	class Scene;
 }
 
 namespace EngineCore
@@ -28,6 +29,8 @@ namespace EngineCore
 	class PlanetDrawer;
 	class GameLoader;
 	class Camera;
+	struct FrameContext;
+	struct DrawContext;
 
 	// base class for an object representing the entire engine
 	class EngineApplication
@@ -51,6 +54,7 @@ namespace EngineCore
 	private:
 		friend class GameLoader;
 		friend class IEngineImpl;
+		friend class WorldSystem::Scene;
 
 		void setupDrawers();
 		void setupDefaultInputs();
@@ -58,7 +62,6 @@ namespace EngineCore
 		void onSwapchainCreated();
 
 		void mainLoop();
-		struct FrameContext;
 		void render(const FrameContext& frame);
 		void moveCamera(Camera& camera);
 		void inputTick(double delta);
@@ -76,6 +79,7 @@ namespace EngineCore
 
 		EngineClock engineClock{};
 
+		std::unique_ptr<DrawContext> drawContext;
 		std::unique_ptr<MeshDrawer> meshDrawer;
 		std::unique_ptr<SkyDrawer> skyDrawer;
 		std::unique_ptr<FxDrawer> fxDrawer;

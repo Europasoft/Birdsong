@@ -1,4 +1,5 @@
 #pragma once
+#include "core/draw/DrawBase.h"
 #include "core/types/vk.h"
 #include <array>
 #include <memory>
@@ -17,19 +18,15 @@ namespace EngineCore
 	class Material;
 	struct RenderingFormats;
 	
-	class FxDrawer
+	class FxDrawer : public DrawBase
 	{
 	public:
-		FxDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats,
-				const std::vector<VkImageView>& inputImageViews, const std::vector<VkImageView>& inputDepthImageViews);
+		FxDrawer(EngineDevice& device, const DrawContext& d);
 		~FxDrawer();
 
-		void render(VkCommandBuffer cmdBuffer, Renderer& renderer);
+		virtual void render(const FrameContext& f) override;
 
 	private:
-		EngineDevice& device;
-		
-		DescriptorSet& defaultSet;
 		std::unique_ptr<DescriptorSet> uboSet; // additional data, treated as any other descriptor set (using frames in flight number)
 		std::unique_ptr<DescriptorSet> attachmentSet; // attachment image bindings, same number of internal sets as swapchain images
 		VkSampler attachmentSampler;

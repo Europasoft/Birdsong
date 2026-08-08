@@ -1,5 +1,5 @@
 #include "core/engine/Engine.h"
-
+#include "core/draw/FrameContext.h"
 #include "core/engine/Window.h"
 #include "core/gpu/Device.h"
 #include "core/render/Renderer.h"
@@ -62,26 +62,19 @@ namespace EngineCore
 		device->waitIdle();
 	}
 
-	struct EngineApplication::FrameContext
-	{
-		VkCommandBuffer commandBuffer;
-		double delta = 0;
-		uint32_t bufferIndex = 0;
-		WorldSystem::Scene* scene;
-		Camera* camera;
-	};
-
 	void EngineApplication::mainLoop()
 	{
 		// window event loop
-		EngineApplication::FrameContext f = {};
+		FrameContext f = {};
 		while (not (window->getCloseWindow() || exitApplication))
 		{
 			inputTick(f.delta);
 
-			f.scene = &world->getScene();
+			f.world = world.get();
+			f.scene = &f.world->getScene();
 			f.camera = &f.scene->getCurrentCamera();
 			f.delta = engineClock.measureFrameDelta(f.bufferIndex);
+			f.viewportExtent = renderer->getSwapchainExtent();
 
 			// engine tick updates
 			moveCamera(*f.camera);
@@ -103,15 +96,19 @@ namespace EngineCore
 
 	void EngineApplication::setupDrawers() 
 	{
-		const auto& baseFormats =	renderer->getBasePassFormats();
-		const auto& fxFormats =		renderer->getFxPassFormats();
+		drawContext = std::make_unique<DrawContext>();
+		drawContext->world = world.get();
+		drawContext->renderer = renderer.get();
+		drawContext->basePassFormats = renderer->getBasePassFormats();
+		drawContext->fxPassFormats = renderer->getFxPassFormats();	
+		drawContext->samples = renderSettings.sampleCountMSAA;
 
 		auto& sceneGlobalDescriptorSet = world->getScene().getSceneGlobalDescriptorSet();
-		meshDrawer = std::make_unique<MeshDrawer>(*device);
-		skyDrawer = std::make_unique<SkyDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
-		fxDrawer = std::make_unique<FxDrawer>(*device, sceneGlobalDescriptorSet, fxFormats, renderer->getFxPassInputImageViews(), renderer->getFxPassInputDepthImageViews());
-		uiDrawer = std::make_unique<InterfaceDrawer>(*device, baseFormats, renderSettings.sampleCountMSAA, world->getScene());
-		debugDrawer = std::make_unique<DebugDrawer>(*device, sceneGlobalDescriptorSet, baseFormats, renderSettings.sampleCountMSAA);
+		meshDrawer = std::make_unique<MeshDrawer>(*device, *drawContext);
+		skyDrawer = std::make_unique<SkyDrawer>(*device, *drawContext);
+		fxDrawer = std::make_unique<FxDrawer>(*device, *drawContext);
+		uiDrawer = std::make_unique<InterfaceDrawer>(*device, *drawContext);
+		debugDrawer = std::make_unique<DebugDrawer>(*device, *drawContext);
 		//planetDrawer = std::make_unique<PlanetDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
 	}
 
@@ -147,23 +144,22 @@ namespace EngineCore
 		renderer->beginRenderingBase(f.commandBuffer); 
 
 		// render sky sphere
-		skyDrawer->renderSky(f.bufferIndex, f.commandBuffer, f.scene->getSceneGlobalDescriptorSet().getDescriptorSet(f.bufferIndex), f.camera->transform.translation);
+		skyDrawer->render(f);
 
 		// render planet (experimental)
 		//planetDrawer->render(f.commandBuffer, f.bufferIndex, f.camera->transform, f.delta);
 
 		// render meshes
-		meshDrawer->renderMeshes(f.commandBuffer, *world, f.bufferIndex);
+		meshDrawer->render(f);
 
-		debugDrawer->render(f.commandBuffer, *renderer);
+		debugDrawer->render(f);
 
-		uiDrawer->render(f.commandBuffer, { window->input.getMousePosition().x, window->input.getMousePosition().y }, window->getExtent(), f.bufferIndex);
+		uiDrawer->render(f);
 
 		renderer->endRendering(f.commandBuffer);
 
 		// RENDER FX PASS
-		fxDrawer->render(f.commandBuffer, *renderer);
-
+		fxDrawer->render(f);
 
 		// submit command buffer
 		renderer->endFrame(); 

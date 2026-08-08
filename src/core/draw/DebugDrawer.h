@@ -1,4 +1,5 @@
 #pragma once
+#include "core/draw/DrawBase.h"
 #include "core/types/vk.h"
 #include "core/types/CommonTypes.h"
 #include <array>
@@ -20,22 +21,19 @@ namespace EngineCore
 
 	namespace ShaderPushConstants { struct DebugPrimitivePushConstants; }
 
-	class DebugDrawer
+	class DebugDrawer : public DrawBase
 	{
 	public:
-		DebugDrawer(EngineDevice& device, DescriptorSet& defaultSet, const RenderingFormats& formats, VkSampleCountFlagBits samples);
+		DebugDrawer(EngineDevice& device, const DrawContext& d);
 		~DebugDrawer();
 
 		void addDebugBox(Vec dimensions, Vec location, Vec color, float opacity = 1.f);
 		void removeDebugBoxes();
 
-		void render(VkCommandBuffer cmdBuffer, Renderer& renderer);
+		virtual void render(const FrameContext& f) override;
 
 	private:
 		using DDPushConstant = ShaderPushConstants::DebugPrimitivePushConstants;
-
-		EngineDevice& device;
-		DescriptorSet& defaultSet;
 		std::unique_ptr<WorldSystem::EngineNodeData> enodeBox;
 		std::vector<DDPushConstant> boxPushConstants;
 

@@ -1,4 +1,5 @@
 #include "MeshDrawer.h"
+#include "core/draw/FrameContext.h"
 
 #include "core/gpu/Device.h"
 #include "core/engine/Camera.h"
@@ -23,6 +24,10 @@
 
 namespace EngineCore
 {
+	MeshDrawer::MeshDrawer(EngineDevice& device, const DrawContext& d)
+		: DrawBase(device, d)
+	{}
+
 	MeshDrawer::~MeshDrawer() = default;
 
 	struct MeshDrawer::DrawMeshContext
@@ -35,11 +40,11 @@ namespace EngineCore
 		std::vector<VkDescriptorSet> descriptorSets;
 	};
 
-	void MeshDrawer::renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world, uint32_t frameIndex)
+	void MeshDrawer::render(const FrameContext& f)
 	{
 		using namespace WorldSystem;
 
-		Scene& scene = world.getScene();
+		Scene& scene = f.world->getScene();
 
 		uint32_t instanceID = 0;
 		for (Sector* sector : scene.getLoadedSectors())
@@ -49,10 +54,10 @@ namespace EngineCore
 				WorldSystem::Mesh& mesh = *nodeData->mesh.get();
 				DrawMeshContext ctx
 				{
-						mesh, commandBuffer,
-						frameIndex, instanceID,
-						scene.getInstanceBuffer().getDeviceAddress(frameIndex),
-						scene.getDescriptorSets(frameIndex)
+						mesh, f.commandBuffer,
+						f.bufferIndex, instanceID,
+						scene.getInstanceBuffer().getDeviceAddress(f.bufferIndex),
+						scene.getDescriptorSets(f.bufferIndex)
 				};
 				renderOne(ctx);
 				instanceID++;

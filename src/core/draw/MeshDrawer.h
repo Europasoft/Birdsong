@@ -1,4 +1,5 @@
 #pragma once
+#include "core/draw/DrawBase.h"
 #include "core/gpu/Material.h"
 
 #include <glm/gtc/matrix_transform.hpp> // glm
@@ -17,19 +18,13 @@ namespace WorldSystem
 
 namespace EngineCore
 {
-	class EngineDevice;
-
-	class MeshDrawer
+	class MeshDrawer : public DrawBase
 	{
 	public:
-
-		MeshDrawer(EngineDevice& deviceIn) : device{ deviceIn } {};
+		MeshDrawer(EngineDevice& device, const DrawContext& d);
 		~MeshDrawer();
 
-		MeshDrawer(const MeshDrawer&) = delete;
-		MeshDrawer& operator=(const MeshDrawer&) = delete;
-
-		void renderMeshes(VkCommandBuffer commandBuffer, WorldSystem::World& world, uint32_t frameIndex);
+		virtual void render(const FrameContext& f) override;
 
 	private:
 		struct DrawMeshContext;
@@ -66,8 +61,6 @@ namespace EngineCore
 		{
 			return static_cast<float>((a * (1.0 - t)) + (b * t));
 		}
-
-		EngineDevice& device;
 	};
 
 }
