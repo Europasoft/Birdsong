@@ -17,8 +17,11 @@ namespace EngineCore
 	class Camera;
 	class DescriptorSet;
 	class BindlessTextureManager;
-	class InstanceBuffer;
 	class MeshCache;
+
+	struct InstanceData;
+	template <typename T>
+	class InstanceBuffer;
 }
 
 namespace WorldSystem
@@ -42,7 +45,7 @@ namespace WorldSystem
 
 		EngineCore::DescriptorSet& getSceneGlobalDescriptorSet() const;
 		EngineCore::Camera& getCurrentCamera() const;
-		EngineCore::InstanceBuffer& getInstanceBuffer() const { return *instanceBuffer.get(); }
+		EngineCore::InstanceBuffer<EngineCore::InstanceData>& getInstanceBuffer() const;
 		EngineCore::BindlessTextureManager& getTextureManager() const { return *textureManager.get(); }
 
 		// returns layouts for all global descriptor sets
@@ -63,7 +66,7 @@ namespace WorldSystem
 
 		std::unique_ptr<EngineCore::DescriptorSet> sceneGlobalDescriptorSet;
 		std::unique_ptr<EngineCore::BindlessTextureManager> textureManager;
-		std::unique_ptr<EngineCore::InstanceBuffer> instanceBuffer;
+		std::unique_ptr<EngineCore::InstanceBuffer<EngineCore::InstanceData>> instanceBuffer;
 
 		std::shared_ptr<EngineCore::Camera> currentCamera;
 

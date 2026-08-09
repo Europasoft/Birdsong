@@ -79,7 +79,7 @@ namespace WorldSystem
 
 		// initialize texture manager and instance buffer (SSBO)
 		textureManager = std::make_unique<EngineCore::BindlessTextureManager>(device);
-		instanceBuffer = std::make_unique<EngineCore::InstanceBuffer>(device);
+		instanceBuffer = std::make_unique<EngineCore::InstanceBuffer<EngineCore::InstanceData>>(device);
 
 		// load background texture
 		bgTexture = std::make_unique<Image>(device, makePath("textures/space2.png"));
@@ -138,6 +138,11 @@ namespace WorldSystem
 			}
 		}
 		instanceBuffer->pushBufferToGPU(frameIndex);
+	}
+
+	EngineCore::InstanceBuffer<EngineCore::InstanceData>& Scene::getInstanceBuffer() const
+	{
+		return *instanceBuffer.get();
 	}
 
 	void Scene::updateNodes()
