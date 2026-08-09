@@ -1,6 +1,8 @@
 #include "core/draw/InterfaceDrawer.h"
 #include "core/draw/FrameContext.h"
 
+#include "core/gpu/Material.h"
+#include "core/gpu/descriptors/InstanceBuffer.h"
 #include "core/ui/Fonts.h"
 #include "core/gpu/Device.h"
 #include "core/engine/Camera.h"
@@ -28,9 +30,12 @@ namespace EngineCore
 	InterfaceDrawer::InterfaceDrawer(EngineDevice& device, const DrawContext& d)
 		: DrawBase(device, d)
 	{
+		textGlyphInstanceBuffer = std::make_unique<InstanceBuffer<ShaderInstanceData::TextGlyphInstanceData>>(device, 10000);
+
 		// create default UI material
 		ShaderFilePaths shaderPaths(makePath("shaders/compiled/ui_test.vert.spv"), makePath("shaders/compiled/ui_test.frag.spv"));
-		MaterialCreateInfo materialInfo(shaderPaths, {}, d.samples, d.basePassFormats, sizeof(ShaderPushConstants::InterfaceElementPushConstants));
+		MaterialCreateInfo materialInfo(shaderPaths, {}, d.samples, d.basePassFormats, 
+			sizeof(ShaderPushConstants::InterfaceElementPushConstants));
 		materialInfo.shadingProperties.useVertexInput = false;
 		materialInfo.shadingProperties.enableDepth = false;
 		materialInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
@@ -50,7 +55,8 @@ namespace EngineCore
 		fonts.push_back(std::make_unique<Font>(device, makePath("fonts/Inter-VariableFont_opsz,wght.ttf"), scene.getTextureManager()));
 
 		ShaderFilePaths textShaderPaths(makePath("shaders/compiled/text.vert.spv"), makePath("shaders/compiled/text.frag.spv"));
-		MaterialCreateInfo textMatInfo(textShaderPaths, scene.getDescriptorSetLayouts(), d.samples, d.basePassFormats, sizeof(ShaderPushConstants::TextGlyphPushConstants));
+		MaterialCreateInfo textMatInfo(textShaderPaths, scene.getDescriptorSetLayouts(), d.samples, d.basePassFormats, 
+			sizeof(ShaderPushConstants::MeshPushConstants));
 		textMatInfo.shadingProperties.useVertexInput = false;
 		textMatInfo.shadingProperties.enableDepth = false;
 		textMatInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
@@ -72,7 +78,7 @@ namespace EngineCore
 		const float fontScale = 24;
 		const UI::Font& font = *fonts[0];
 		float offset = 0;
-		drawText(text, font, fontScale, f.viewportExtent, f.commandBuffer);
+		drawText(f, text, font, fontScale);
 
 		/*for (InterfaceElement& elem : elements)
 		{
@@ -93,36 +99,43 @@ namespace EngineCore
 				(cursor.y <= position.y + size.y/2) && (cursor.y >= position.y);
 	}
 
-	void InterfaceDrawer::drawText(const std::string& text, const UI::Font& font, float fontScale, VkExtent2D windowExtent, VkCommandBuffer cmdBuf)
+	void InterfaceDrawer::drawText(const FrameContext& f, const std::string& text, const UI::Font& font, float fontScale)
 	{
 		float offset = 0;
 		for (size_t i = 0; i < text.size(); i++)
 		{
 			const GlyphInfo& g = font.getCharacter(text[i]);
-			TextGlyphPushConstants push = makePushConstantForGlyph(g, font, offset, fontScale);
-			textMaterial->writePushConstants(cmdBuf, push);
-			vkCmdDraw(cmdBuf, 6, 1, 0, 0); // bufferless draw (vertex attributes generated in shader)
+
+			MeshPushConstants push = {};
+			push.instanceBufferAddress = textGlyphInstanceBuffer->getDeviceAddress(f.bufferIndex);
+			push.instanceID = addGlyphToInstanceBuffer(g, font, offset, fontScale);
+			textMaterial->writePushConstants(f.commandBuffer, push);
+
+			vkCmdDraw(f.commandBuffer, 6, 1, 0, 0); // bufferless draw (vertex attributes generated in shader)
+
 			const auto kerning = (i == text.size() - 1) ? 0.f : font.getKerning(text[i], text[i + 1]);
-			offset += (g.advance + kerning) * fontScale * (2.0 / windowExtent.width);
+			offset += (g.advance + kerning) * fontScale * (2.0 / f.viewportExtent.width);
 		}
+
+		textGlyphInstanceBuffer->pushBufferToGPU(f.bufferIndex);
 	}
 
-	TextGlyphPushConstants InterfaceDrawer::makePushConstantForGlyph(const GlyphInfo& g, const UI::Font& font, float offset, float fontScale) const
+	uint32_t InterfaceDrawer::addGlyphToInstanceBuffer(const UI::GlyphInfo& g, const UI::Font& font, float offset, float fontScale)
 	{
-		ShaderPushConstants::TextGlyphPushConstants push{};
-		push.uvs.x = g.u0;
-		push.uvs.y = g.v0;
-		push.uvs.z = g.u1;
-		push.uvs.w = g.v1;
-		push.vertexBounds.x = g.l;
-		push.vertexBounds.y = g.b;
-		push.vertexBounds.z = g.r;
-		push.vertexBounds.w = g.t;
-		push.screenPos_FontScale_TexIdx.x = -1.0f + offset;
-		push.screenPos_FontScale_TexIdx.y = 0.1f;
-		push.screenPos_FontScale_TexIdx.z = fontScale;
-		push.screenPos_FontScale_TexIdx.w = font.getTextureIndex();
-		return push;
+		ShaderInstanceData::TextGlyphInstanceData d = {};
+		d.uvs.x = g.u0;
+		d.uvs.y = g.v0;
+		d.uvs.z = g.u1;
+		d.uvs.w = g.v1;
+		d.vertexBounds.x = g.l;
+		d.vertexBounds.y = g.b;
+		d.vertexBounds.z = g.r;
+		d.vertexBounds.w = g.t;
+		d.basePos.x = 0.5f + (-1.0f + offset);
+		d.basePos.y = 0.f; // temporarily hardcoded position
+		d.fontScale = fontScale;
+		d.textureIndex = font.getTextureIndex();
+		return textGlyphInstanceBuffer->addInstanceData(d);
 	}
 
 

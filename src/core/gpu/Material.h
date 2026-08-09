@@ -161,17 +161,22 @@ namespace EngineCore
 			float timeSinceClick;
 		};
 
-		struct TextGlyphPushConstants
-		{
-			glm::vec4 uvs{ 0.f };
-			glm::vec4 vertexBounds{ 0.f };
-			glm::vec4 screenPos_FontScale_TexIdx{ 0.f };
-		};
-
 		struct DebugPrimitivePushConstants
 		{
 			glm::mat4 transform{ 1.f };
 			glm::vec4 color;
+		};
+	}
+
+	namespace ShaderInstanceData
+	{
+		struct TextGlyphInstanceData
+		{
+			glm::vec4 uvs{ 0.f };
+			glm::vec4 vertexBounds{ 0.f };
+			glm::vec2 basePos{ 0.f };
+			float fontScale = 0;
+			uint32_t textureIndex = 0;
 		};
 	}
 

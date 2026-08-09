@@ -13,18 +13,8 @@
 #include <queue>
 #include <memory>
 
-namespace WorldSystem
-{
-	class EngineNodeData;
-}
-
 namespace EngineCore
 {
-	class DescriptorPool;
-	class DSetLayoutBuilder;
-	class DescriptorSetLayout;
-	class GBuffer;
-
 	// common shader data for mesh instances
 	struct alignas(16) InstanceData
 	{
@@ -46,18 +36,18 @@ namespace EngineCore
 		std::vector<T> instances;
 
 	public:
-		static constexpr uint32_t MAX_INSTANCES = 1000000;
+		const uint32_t maxInstances;
 
 		InstanceBuffer(const InstanceBuffer&) = delete;
 		InstanceBuffer& operator=(const InstanceBuffer&) = delete;
 
-		InstanceBuffer(EngineDevice& device)
-			: device{ device }
+		InstanceBuffer(EngineDevice& device, uint32_t maxInstances)
+			: device(device), maxInstances(maxInstances)
 		{
 			// allocate an SSBO for all instance data
 			VkBufferUsageFlags useFlags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 			VkMemoryPropertyFlags memFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-			const auto sizeMult = MAX_INSTANCES * EngineSwapChain::MAX_FRAMES_IN_FLIGHT;
+			const auto sizeMult = maxInstances * EngineSwapChain::MAX_FRAMES_IN_FLIGHT;
 			buffer = std::make_unique<GBuffer>(device, sizeof(T), sizeMult, useFlags, memFlags, 0);
 			buffer->map();
 		}
@@ -65,15 +55,17 @@ namespace EngineCore
 		~InstanceBuffer()
 		{}
 
-		void addInstanceData(const T& d)
+		uint32_t addInstanceData(const T& d)
 		{
+			assert(instances.size() <= maxInstances && "InstanceBuffer instance count would exceed maxInstances");
+			if (instances.size() > maxInstances) return 0;
 			instances.push_back(d);
+			return instances.size() - 1;
 		}
 
 		void pushBufferToGPU(uint32_t frameIndex)
 		{
-			assert(instances.size() <= MAX_INSTANCES && "instance count exceeds MAX_INSTANCES");
-			const size_t frameOffsetBytes = frameIndex * MAX_INSTANCES * sizeof(T);
+			const size_t frameOffsetBytes = frameIndex * maxInstances * sizeof(T);
 			buffer->writeToBuffer((void*)instances.data(), instances.size() * sizeof(T), frameOffsetBytes);
 			instances.clear();
 		}
@@ -87,7 +79,7 @@ namespace EngineCore
 
 			VkDeviceAddress baseAddress = vkGetBufferDeviceAddress(device.device(), &addressInfo);
 			// offset the pointer to the start of the current frame's slice
-			const size_t frameOffsetBytes = currentFrame * MAX_INSTANCES * sizeof(T);
+			const size_t frameOffsetBytes = currentFrame * maxInstances * sizeof(T);
 			return baseAddress + frameOffsetBytes;
 		}
 

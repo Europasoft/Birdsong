@@ -14,21 +14,40 @@ layout(std430, set = 0, binding = 0) uniform UBO1
     vec2 viewportExtent;
 } ubo1;
 
-layout(push_constant) uniform Push
+// second scene-global descriptor set: unbounded texture array
+layout(set = 1, binding = 0) uniform sampler2D globalTextures[];
+
+// layout of an instance in the glyph instance buffer
+struct GlyphInstanceData 
 {
 	vec4 uvs;
 	vec4 vertexBounds;
-	vec4 screenPos_FontScale_TexIdx; // xy = screen position, z = texture index, w = font scale
+	vec2 basePos;
+	float fontScale;
+	uint textureIndex;
+};
+
+// glypth instance buffer passed by BDA
+layout(buffer_reference, scalar) readonly buffer GlyphInstanceBufferRef 
+{
+    GlyphInstanceData instances[];
+};
+
+// standard push constant (ShaderPushConstants::MeshPushConstants)
+layout(push_constant) uniform PushConstants 
+{
+    GlyphInstanceBufferRef glyphInstanceBuffer;
+    uint instanceID;
 } push;
 
 void main()
 {
-	float l = push.vertexBounds.x;
-	float b = push.vertexBounds.y;
-	float r = push.vertexBounds.z;
-	float t = push.vertexBounds.w;
+	GlyphInstanceData instance = push.glyphInstanceBuffer.instances[push.instanceID];
 
-	float fontScale = push.screenPos_FontScale_TexIdx.z;
+	float l = instance.vertexBounds.x;
+	float b = instance.vertexBounds.y;
+	float r = instance.vertexBounds.z;
+	float t = instance.vertexBounds.w;
 
 	vec2 ndcPerPixel = 2.0 / ubo1.viewportExtent;
 
@@ -44,21 +63,21 @@ void main()
 	);
 
 	vec2 position =
-		push.screenPos_FontScale_TexIdx.xy
+		instance.basePos
 		+ vertices[gl_VertexIndex] * vec2(1.0, -1.0) /* y flipped */
-		* fontScale * ndcPerPixel;
+		* instance.fontScale * ndcPerPixel;
 
 	gl_Position = vec4(position, 0.0, 1.0);
 
 	vec2 uvs[6] = vec2[]
 	(
-		vec2(push.uvs.x, push.uvs.w),
-		vec2(push.uvs.z, push.uvs.w),
-		vec2(push.uvs.z, push.uvs.y),
+		vec2(instance.uvs.x, instance.uvs.w),
+		vec2(instance.uvs.z, instance.uvs.w),
+		vec2(instance.uvs.z, instance.uvs.y),
 
-		vec2(push.uvs.x, push.uvs.w),
-		vec2(push.uvs.z, push.uvs.y),
-		vec2(push.uvs.x, push.uvs.y)
+		vec2(instance.uvs.x, instance.uvs.w),
+		vec2(instance.uvs.z, instance.uvs.y),
+		vec2(instance.uvs.x, instance.uvs.y)
 	);
 
 	fragUV = uvs[gl_VertexIndex];

@@ -79,7 +79,7 @@ namespace WorldSystem
 
 		// initialize texture manager and instance buffer (SSBO)
 		textureManager = std::make_unique<EngineCore::BindlessTextureManager>(device);
-		instanceBuffer = std::make_unique<EngineCore::InstanceBuffer<EngineCore::InstanceData>>(device);
+		instanceBuffer = std::make_unique<EngineCore::InstanceBuffer<EngineCore::InstanceData>>(device, 1000000);
 
 		// load background texture
 		bgTexture = std::make_unique<Image>(device, makePath("textures/space2.png"));

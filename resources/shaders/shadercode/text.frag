@@ -11,11 +11,27 @@ layout (location = 0) out vec4 outColor;
 // second scene-global descriptor set: unbounded texture array
 layout(set = 1, binding = 0) uniform sampler2D globalTextures[];
 
-layout(push_constant) uniform Push
+// layout of an instance in the glyph instance buffer
+struct GlyphInstanceData 
 {
-  vec4 uvs;
-  vec4 vertexBounds;
-  vec4 screenPos_FontScale_TexIdx;
+	vec4 uvs;
+	vec4 vertexBounds;
+	vec2 basePos;
+	float fontScale;
+	uint textureIndex;
+};
+
+// glypth instance buffer passed by BDA
+layout(buffer_reference, scalar) readonly buffer GlyphInstanceBufferRef 
+{
+    GlyphInstanceData instances[];
+};
+
+// standard push constant (ShaderPushConstants::MeshPushConstants)
+layout(push_constant) uniform PushConstants 
+{
+    GlyphInstanceBufferRef glyphInstanceBuffer;
+    uint instanceID;
 } push;
 
 float median(float r, float g, float b)
@@ -25,8 +41,9 @@ float median(float r, float g, float b)
 
 void main()
 {
-	int textureIndex = int(push.screenPos_FontScale_TexIdx.w);
-	vec4 s = texture(globalTextures[nonuniformEXT(textureIndex)], fragUV);
+	GlyphInstanceData instance = push.glyphInstanceBuffer.instances[push.instanceID];
+
+	vec4 s = texture(globalTextures[nonuniformEXT(instance.textureIndex)], fragUV);
 	float sd = median(s.r, s.g, s.b);
 	float opacity = clamp((sd - 0.5) * 10.0 + 0.5, 0.0, 1.0);
 	outColor = vec4(1.0, 1.0, 1.0, opacity);

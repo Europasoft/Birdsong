@@ -1,11 +1,11 @@
 #pragma once
 #include "core/draw/DrawBase.h"
-#include "core/gpu/Material.h"
 
 #include <glm/gtc/matrix_transform.hpp> // glm
 
 #include <memory>
 #include <vector>
+#include <string>
 #include <cmath> // only used in perspective calculation
 
 class Camera;
@@ -19,6 +19,17 @@ namespace UI
 {
 	class Font;
 	struct GlyphInfo;
+}
+
+namespace EngineCore
+{
+	class Material;
+	template <typename T>
+	class InstanceBuffer;
+	namespace ShaderInstanceData
+	{
+		struct TextGlyphInstanceData;
+	}
 }
 
 namespace EngineCore
@@ -50,11 +61,14 @@ namespace EngineCore
 		std::vector<InterfaceElement> elements;
 		std::shared_ptr<Material> defaultMaterial;
 
+		std::unique_ptr<InstanceBuffer<ShaderInstanceData::TextGlyphInstanceData>> textGlyphInstanceBuffer;
+
 		std::vector<std::unique_ptr<UI::Font>> fonts;
 		std::shared_ptr<Material> textMaterial;
 
-		void drawText(const std::string& text, const UI::Font& font, float fontScale, VkExtent2D windowExtent, VkCommandBuffer cmdBuf);
-		ShaderPushConstants::TextGlyphPushConstants makePushConstantForGlyph(const UI::GlyphInfo& g, const UI::Font& font, float offset, float fontScale) const;
+		void drawText(const FrameContext& f, const std::string& text, const UI::Font& font, float fontScale);
+
+		uint32_t addGlyphToInstanceBuffer(const UI::GlyphInfo& g, const UI::Font& font, float offset, float fontScale);
 	};
 
 }
