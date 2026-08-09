@@ -68,8 +68,8 @@ namespace EngineCore
 
 		textMaterial->bindToCommandBuffer(f.commandBuffer);
 
-		std::string text = "HELLO WORLD!";
-		const float fontScale = 40;
+		std::string text = "Hello world!";
+		const float fontScale = 24;
 		const UI::Font& font = *fonts[0];
 		float offset = 0;
 		drawText(text, font, fontScale, f.viewportExtent, f.commandBuffer);
@@ -118,7 +118,7 @@ namespace EngineCore
 		push.vertexBounds.y = g.b;
 		push.vertexBounds.z = g.r;
 		push.vertexBounds.w = g.t;
-		push.screenPos_FontScale_TexIdx.x = offset;
+		push.screenPos_FontScale_TexIdx.x = -1.0f + offset;
 		push.screenPos_FontScale_TexIdx.y = 0.1f;
 		push.screenPos_FontScale_TexIdx.z = fontScale;
 		push.screenPos_FontScale_TexIdx.w = font.getTextureIndex();

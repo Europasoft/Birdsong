@@ -43,25 +43,22 @@ void main()
 		vec2(l, t)
 	);
 
-	vec2 offset = push.screenPos_FontScale_TexIdx.xy * 2.0 - 1.0;
-
 	vec2 position =
-		offset +
-		vertices[gl_VertexIndex] *
-		fontScale *
-		ndcPerPixel;
+		push.screenPos_FontScale_TexIdx.xy
+		+ vertices[gl_VertexIndex] * vec2(1.0, -1.0) /* y flipped */
+		* fontScale * ndcPerPixel;
 
 	gl_Position = vec4(position, 0.0, 1.0);
 
 	vec2 uvs[6] = vec2[]
 	(
-		vec2(push.uvs.x, push.uvs.y),
+		vec2(push.uvs.x, push.uvs.w),
+		vec2(push.uvs.z, push.uvs.w),
 		vec2(push.uvs.z, push.uvs.y),
-		vec2(push.uvs.z, push.uvs.w),
 
-		vec2(push.uvs.x, push.uvs.y),
-		vec2(push.uvs.z, push.uvs.w),
-		vec2(push.uvs.x, push.uvs.w)
+		vec2(push.uvs.x, push.uvs.w),
+		vec2(push.uvs.z, push.uvs.y),
+		vec2(push.uvs.x, push.uvs.y)
 	);
 
 	fragUV = uvs[gl_VertexIndex];
