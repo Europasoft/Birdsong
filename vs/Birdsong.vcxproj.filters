@@ -469,6 +469,9 @@
     <ClCompile Include="..\src\core\draw\DrawBase.cpp">
       <Filter>core\draw</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\ui\Element.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -1031,6 +1034,9 @@
     </ClInclude>
     <ClInclude Include="..\src\core\draw\FrameContext.h">
       <Filter>core\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\ui\Element.h">
+      <Filter>core\ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

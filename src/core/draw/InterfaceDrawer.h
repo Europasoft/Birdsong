@@ -17,6 +17,7 @@ namespace WorldSystem
 
 namespace UI
 {
+	class RootElement;
 	class Font;
 	struct GlyphInfo;
 }
@@ -58,6 +59,7 @@ namespace EngineCore
 		virtual void render(const FrameContext& f) override;
 
 	private:
+		std::unique_ptr<UI::RootElement> root;
 		std::vector<InterfaceElement> elements;
 		std::shared_ptr<Material> defaultMaterial;
 

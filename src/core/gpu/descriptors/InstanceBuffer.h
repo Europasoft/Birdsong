@@ -31,6 +31,7 @@ namespace EngineCore
 	class InstanceBuffer
 	{
 	private:
+		friend class InstanceBufferUtil;
 		EngineDevice& device;
 		std::unique_ptr<GBuffer> buffer;
 		std::vector<T> instances;
@@ -57,8 +58,8 @@ namespace EngineCore
 
 		uint32_t addInstanceData(const T& d)
 		{
-			assert(instances.size() <= maxInstances && "InstanceBuffer instance count would exceed maxInstances");
-			if (instances.size() > maxInstances) return 0;
+			assert(instances.size() < maxInstances && "InstanceBuffer instance count would exceed maxInstances");
+			if (instances.size() >= maxInstances) return 0;
 			instances.push_back(d);
 			return instances.size() - 1;
 		}
@@ -82,7 +83,15 @@ namespace EngineCore
 			const size_t frameOffsetBytes = currentFrame * maxInstances * sizeof(T);
 			return baseAddress + frameOffsetBytes;
 		}
-
 	};
 
+	class InstanceBufferUtil
+	{
+	public:
+		template <typename T>
+		static std::unique_ptr<InstanceBuffer<T>> allocate(EngineDevice& d, uint32_t numInstancesMax)
+		{
+			return std::make_unique<InstanceBuffer<T>>(d, numInstancesMax);
+		}
+	};
 }

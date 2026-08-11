@@ -3,6 +3,7 @@
 
 #include "core/gpu/Material.h"
 #include "core/gpu/descriptors/InstanceBuffer.h"
+#include "core/ui/Element.h"
 #include "core/ui/Fonts.h"
 #include "core/gpu/Device.h"
 #include "core/engine/Camera.h"
@@ -30,8 +31,9 @@ namespace EngineCore
 	InterfaceDrawer::InterfaceDrawer(EngineDevice& device, const DrawContext& d)
 		: DrawBase(device, d)
 	{
-		textGlyphInstanceBuffer = std::make_unique<InstanceBuffer<ShaderInstanceData::TextGlyphInstanceData>>(device, 10000);
-
+		textGlyphInstanceBuffer = InstanceBufferUtil::allocate<ShaderInstanceData::TextGlyphInstanceData>(device, 10000);
+		root = RootElement::create(device);
+		
 		// create default UI material
 		ShaderFilePaths shaderPaths(makePath("shaders/compiled/ui_test.vert.spv"), makePath("shaders/compiled/ui_test.frag.spv"));
 		MaterialCreateInfo materialInfo(shaderPaths, {}, d.samples, d.basePassFormats, 
@@ -42,16 +44,8 @@ namespace EngineCore
 		defaultMaterial = std::make_shared<Material>(materialInfo, device);
 		defaultMaterial->finalize();
 
-		// add test ui element
-		InterfaceElement elem{};
-		elem.size = glm::vec2(0.33f, 0.33f);
-		elem.position = glm::vec2(0.5f, 0.5f);
-		elem.setMaterial(defaultMaterial);
-		elements.push_back(elem);
-
-		auto& scene = d.world->getScene();
-
 		// load font
+		auto& scene = d.world->getScene();
 		fonts.push_back(std::make_unique<Font>(device, makePath("fonts/Inter-VariableFont_opsz,wght.ttf"), scene.getTextureManager()));
 
 		ShaderFilePaths textShaderPaths(makePath("shaders/compiled/text.vert.spv"), makePath("shaders/compiled/text.frag.spv"));
@@ -62,6 +56,19 @@ namespace EngineCore
 		textMatInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
 		textMaterial = std::make_shared<Material>(textMatInfo, device);
 		textMaterial->finalize();
+
+		VerticalBox& box = root->addElement<VerticalBox>();
+		box.loadMaterial(device, d);
+		box.size = Vec2(0.2);
+		box.position = Vec2(0.5);
+		box.backgroundColor = Vec(0.1f, 0.1f, 0.6f);
+		box.pivotPoint = (0.5, 0.5);
+
+		VerticalBox& box2 = box.addElement<VerticalBox>();
+		box2.size = Vec2(0.02);
+		box2.position = Vec2(0.5);
+		box2.backgroundColor = Vec(0.2f, 0.2f, 0.5f);
+		box2.pivotPoint = (1);
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;
@@ -79,6 +86,10 @@ namespace EngineCore
 		const UI::Font& font = *fonts[0];
 		float offset = 0;
 		drawText(f, text, font, fontScale);
+
+
+		root->drawAll(f);
+
 
 		/*for (InterfaceElement& elem : elements)
 		{

@@ -178,6 +178,12 @@ namespace EngineCore
 			float fontScale = 0;
 			uint32_t textureIndex = 0;
 		};
+
+		struct UIElementInstanceData
+		{
+			glm::vec4 positionAndSize{ 0.f };
+			glm::vec4 backgroundColor{ 1.f };
+		};
 	}
 
 }

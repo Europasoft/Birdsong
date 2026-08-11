@@ -105,10 +105,10 @@ public:
 	Vector2D<T>(const T& v) : x{ v }, y{ v } {};
 	Vector2D() : x{ 0 }, y{ 0 } {};
 	T x; T y;
-	Vector2D operator+(const Vector2D& other) { return Vector2D{ x + other.x, y + other.y }; }
-	Vector2D operator-(const Vector2D& other) { return Vector2D{ x - other.x, y - other.y }; }
-	Vector2D operator*(const Vector2D& other) { return Vector2D{ x * other.x, y * other.y }; }
-	Vector2D operator/(const Vector2D& other) { return Vector2D{ x / other.x, y / other.y }; }
+	Vector2D operator+(const Vector2D& other) const { return Vector2D{ x + other.x, y + other.y }; }
+	Vector2D operator-(const Vector2D& other) const { return Vector2D{ x - other.x, y - other.y }; }
+	Vector2D operator*(const Vector2D& other) const { return Vector2D{ x * other.x, y * other.y }; }
+	Vector2D operator/(const Vector2D& other) const { return Vector2D{ x / other.x, y / other.y }; }
 	friend bool operator==(const Vector2D& lh, const Vector2D& rh) { return lh.x == rh.x && lh.y == rh.y; }
 	friend bool operator!=(const Vector2D& lh, const Vector2D& rh) { return !(lh == rh); }
 };

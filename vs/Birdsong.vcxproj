@@ -205,6 +205,7 @@
     <ClInclude Include="..\src\core\types\glm_conversions.h" />
     <ClInclude Include="..\src\core\types\Math.h" />
     <ClInclude Include="..\src\core\types\vk.h" />
+    <ClInclude Include="..\src\core\ui\Element.h" />
     <ClInclude Include="..\src\core\ui\Fonts.h" />
     <ClInclude Include="..\src\core\world\NodeContainer.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
@@ -383,6 +384,7 @@
     <ClCompile Include="..\src\core\render\Renderpass.cpp" />
     <ClCompile Include="..\src\core\types\glm_conversions.cpp" />
     <ClCompile Include="..\src\core\types\Math.cpp" />
+    <ClCompile Include="..\src\core\ui\Element.cpp" />
     <ClCompile Include="..\src\core\ui\Fonts.cpp" />
     <ClCompile Include="..\src\core\world\NodeContainer.cpp" />
     <ClCompile Include="..\src\core\world\Scene.cpp" />
