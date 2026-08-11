@@ -60,17 +60,9 @@ namespace EngineCore
 
 	private:
 		std::unique_ptr<UI::RootElement> root;
-		std::vector<InterfaceElement> elements;
 		std::shared_ptr<Material> defaultMaterial;
 
-		std::unique_ptr<InstanceBuffer<ShaderInstanceData::TextGlyphInstanceData>> textGlyphInstanceBuffer;
-
-		std::vector<std::unique_ptr<UI::Font>> fonts;
-		std::shared_ptr<Material> textMaterial;
-
-		void drawText(const FrameContext& f, const std::string& text, const UI::Font& font, float fontScale);
-
-		uint32_t addGlyphToInstanceBuffer(const UI::GlyphInfo& g, const UI::Font& font, float offset, float fontScale);
+		std::vector<std::shared_ptr<UI::Font>> fonts;
 	};
 
 }

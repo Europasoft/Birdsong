@@ -3,6 +3,7 @@
 #include "core/gpu/Image.h"
 #include "core/gpu/Buffer.h"
 #include "core/gpu/descriptors/BindlessTextureManager.h"
+#include "core/types/CommonTypes.h"
 
 #include "thirdparty/msdf-atlas-gen-lite/msdf-atlas-gen/msdf-atlas-gen.h"
 
@@ -22,6 +23,11 @@ namespace UI
 		if (fontHandle) msdfgen::destroyFont(fontHandle);
 		if (freetypeHandle) msdfgen::deinitializeFreetype(freetypeHandle);
 	}
+
+    std::shared_ptr<UI::Font> Font::load(EngineCore::EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager)
+    {
+        return std::shared_ptr<UI::Font>(new Font(device, makePath(filepath), texManager));
+    }
 
 	const GlyphInfo& Font::getCharacter(char32_t c) const
 	{

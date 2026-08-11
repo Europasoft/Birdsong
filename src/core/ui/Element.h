@@ -16,6 +16,7 @@ namespace EngineCore
 	namespace ShaderInstanceData
 	{
 		struct UIElementInstanceData;
+		struct TextGlyphInstanceData;
 	}
 }
 
@@ -23,8 +24,7 @@ namespace UI
 {
 	class RootElement;
 	using UIInst = EngineCore::ShaderInstanceData::UIElementInstanceData;
-
-
+	using GlyphInst = EngineCore::ShaderInstanceData::TextGlyphInstanceData;
 
 	class Element
 	{
@@ -77,12 +77,14 @@ namespace UI
 			return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 		}
 		virtual void postAddElement(Element& e);
-		virtual void preDrawRecursive();
-		virtual void preDraw();
+		virtual void preDrawRecursive(const EngineCore::FrameContext& f);
 		virtual void drawRecursive(const EngineCore::FrameContext& f, EngineCore::Material*& m);
+		virtual void preDraw(const EngineCore::FrameContext& f);
 		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m);
 		Vec2 calculatePosition() const;
+		Vec2 calculateSize() const;
 	};
+
 
 	class RootElement : public Element
 	{
@@ -95,10 +97,13 @@ namespace UI
 
 		void drawAll(const EngineCore::FrameContext& f);
 
+		EngineCore::InstanceBuffer<GlyphInst>& getTextGlyphInstanceBuffer() const;
+
 	protected:
 		friend Element;
-		std::unique_ptr<EngineCore::InstanceBuffer<UIInst>> hierarchyInstanceBuffer;
 		uint32_t numElements = 0;
+		std::unique_ptr<EngineCore::InstanceBuffer<UIInst>> hierarchyInstanceBuffer;
+		std::unique_ptr<EngineCore::InstanceBuffer<GlyphInst>> textGlyphInstanceBuffer;
 
 	private:
 		// these are hidden - not useful on root element
@@ -107,6 +112,11 @@ namespace UI
 		void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m) override {};
 	};
 
+	class HorizontalBox : public Element
+	{
+	public:
+		HorizontalBox() = default;
+	};
 
 	class VerticalBox : public Element
 	{

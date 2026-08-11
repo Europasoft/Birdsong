@@ -66,6 +66,7 @@ namespace EngineCore
 
 		void pushBufferToGPU(uint32_t frameIndex)
 		{
+			if (instances.size() == 0) return;
 			const size_t frameOffsetBytes = frameIndex * maxInstances * sizeof(T);
 			buffer->writeToBuffer((void*)instances.data(), instances.size() * sizeof(T), frameOffsetBytes);
 			instances.clear();

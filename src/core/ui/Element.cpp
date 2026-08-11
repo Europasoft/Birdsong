@@ -10,11 +10,11 @@
 namespace UI
 {
 	RootElement::RootElement(EngineCore::EngineDevice& device)
+		: hierarchyInstanceBuffer(EngineCore::InstanceBufferUtil::allocate<UIInst>(device, 800)),
+		textGlyphInstanceBuffer(EngineCore::InstanceBufferUtil::allocate<GlyphInst>(device, 2000))
 	{
-		using namespace EngineCore;
 		parent = nullptr;
 		root = this;
-		hierarchyInstanceBuffer = InstanceBufferUtil::allocate<UIInst>(device, 800);
 	}
 
 	RootElement::~RootElement()
@@ -48,10 +48,16 @@ namespace UI
 
 	void RootElement::drawAll(const EngineCore::FrameContext& f)
 	{
-		for (auto& e : nested) e->preDrawRecursive();
+		for (auto& e : nested) e->preDrawRecursive(f);
 		hierarchyInstanceBuffer->pushBufferToGPU(f.bufferIndex);
+		textGlyphInstanceBuffer->pushBufferToGPU(f.bufferIndex);
 		EngineCore::Material* m = nullptr;
 		for (auto& e : nested) e->drawRecursive(f, m);
+	}
+
+	EngineCore::InstanceBuffer<GlyphInst>& RootElement::getTextGlyphInstanceBuffer() const
+	{
+		return *textGlyphInstanceBuffer.get();
 	}
 
 	void Element::postAddElement(Element& e)
@@ -59,15 +65,15 @@ namespace UI
 		root->numElements++;
 	}
 
-	void Element::preDrawRecursive()
+	void Element::preDrawRecursive(const EngineCore::FrameContext& f)
 	{
-		this->preDraw();
-		for (auto& e : nested) e->preDrawRecursive();
+		preDraw(f);
+		for (auto& e : nested) e->preDrawRecursive(f);
 	}
 
 	void Element::drawRecursive(const EngineCore::FrameContext& f, EngineCore::Material*& m)
 	{
-		this->draw(f, m);
+		draw(f, m);
 		for (auto& e : nested) e->drawRecursive(f, m);
 	}
 
@@ -77,21 +83,28 @@ namespace UI
 		Vec2 parentSize(1.f);
 		if (not isNextToRoot())
 		{
-			const Vec2 parentPivot = Vec2(parent->pivotPoint.x * parent->size.x, parent->pivotPoint.y * parent->size.y);
+			const Vec2 parentPivot = parent->pivotPoint * parent->size;
 			parentPosition = parent->position - parentPivot;
 			parentSize = parent->size;
 		}
 		return (position * parentSize) + parentPosition;
 	}
 
-	void Element::preDraw()
+	Vec2 Element::calculateSize() const
+	{
+		const Vec2 parentSize = (not isNextToRoot()) ? parent->size : Vec2(1.f);
+		return size * parentSize;
+	}
+
+	void Element::preDraw(const EngineCore::FrameContext& f)
 	{
 		UIInst d = {};
 		const Vec2 finalPosition = calculatePosition();
+		const Vec2 finalSize = calculateSize();
 		d.positionAndSize.x = finalPosition.x - (pivotPoint.x * size.x);
 		d.positionAndSize.y = finalPosition.y - (pivotPoint.y * size.y);
-		d.positionAndSize.z = size.x;
-		d.positionAndSize.w = size.y;
+		d.positionAndSize.z = finalSize.x;
+		d.positionAndSize.w = finalSize.y;
 		d.backgroundColor.x = backgroundColor.x;
 		d.backgroundColor.y = backgroundColor.y;
 		d.backgroundColor.z = backgroundColor.z;

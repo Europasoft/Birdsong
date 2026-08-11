@@ -32,6 +32,7 @@ namespace UI
 	public:
 		Font(EngineCore::EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager);
 		~Font();
+		static std::shared_ptr<UI::Font> load(EngineCore::EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager);
 
 		const GlyphInfo& getCharacter(char32_t c) const;
 		uint32_t getTextureIndex() const { return texIndex; }

@@ -62,10 +62,10 @@ void main()
 		vec2(l, t)
 	);
 
-	vec2 position =
-		instance.basePos
-		+ vertices[gl_VertexIndex] * vec2(1.0, -1.0) /* y flipped */
-		* instance.fontScale * ndcPerPixel;
+	// convert basePos from [0..1] normalized space to [-1..1] NDC space
+    vec2 p = instance.basePos * 2.0 - 1.0;
+    // add pixel offset converted to NDC space
+    vec2 position = p + vertices[gl_VertexIndex] * vec2(1.0, -1.0) * instance.fontScale * ndcPerPixel;
 
 	gl_Position = vec4(position, 0.0, 1.0);
 

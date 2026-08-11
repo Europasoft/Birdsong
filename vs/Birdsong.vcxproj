@@ -207,6 +207,7 @@
     <ClInclude Include="..\src\core\types\vk.h" />
     <ClInclude Include="..\src\core\ui\Element.h" />
     <ClInclude Include="..\src\core\ui\Fonts.h" />
+    <ClInclude Include="..\src\core\ui\TextBox.h" />
     <ClInclude Include="..\src\core\world\NodeContainer.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
@@ -386,6 +387,7 @@
     <ClCompile Include="..\src\core\types\Math.cpp" />
     <ClCompile Include="..\src\core\ui\Element.cpp" />
     <ClCompile Include="..\src\core\ui\Fonts.cpp" />
+    <ClCompile Include="..\src\core\ui\TextBox.cpp" />
     <ClCompile Include="..\src\core\world\NodeContainer.cpp" />
     <ClCompile Include="..\src\core\world\Scene.cpp" />
     <ClCompile Include="..\src\core\world\Sector.cpp" />

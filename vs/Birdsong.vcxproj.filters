@@ -472,6 +472,9 @@
     <ClCompile Include="..\src\core\ui\Element.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\ui\TextBox.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -1036,6 +1039,9 @@
       <Filter>core\draw</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\ui\Element.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\ui\TextBox.h">
       <Filter>core\ui</Filter>
     </ClInclude>
   </ItemGroup>
