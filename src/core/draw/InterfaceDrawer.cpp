@@ -33,37 +33,26 @@ namespace EngineCore
 	{
 		root = RootElement::create(device);
 		
-		// create default UI material
-		ShaderFilePaths shaderPaths(makePath("shaders/compiled/ui_test.vert.spv"), makePath("shaders/compiled/ui_test.frag.spv"));
-		MaterialCreateInfo materialInfo(shaderPaths, {}, d.samples, d.basePassFormats, 
-			sizeof(ShaderPushConstants::InterfaceElementPushConstants));
-		materialInfo.shadingProperties.useVertexInput = false;
-		materialInfo.shadingProperties.enableDepth = false;
-		materialInfo.shadingProperties.cullModeFlags = VK_CULL_MODE_NONE;
-		defaultMaterial = std::make_shared<Material>(materialInfo, device);
-		defaultMaterial->finalize();
-
 		// load font
 		auto& texMgr = d.world->getScene().getTextureManager();
 		fonts.push_back(Font::load(device, "fonts/Inter-VariableFont_opsz,wght.ttf", texMgr));
 
-
 		VerticalBox& box = root->addElement<VerticalBox>();
 		box.loadMaterial(device, d);
-		box.size = Vec2(0.2f);
+		box.size = Vec2(0.33f);
 		box.position = Vec2(0.5f);
+		box.pivotPoint = Vec2(0.5f);
 		box.backgroundColor = Vec(0.1f, 0.1f, 0.6f);
-		box.pivotPoint = Vec2(0.5f, 0.5f);
 		box.backgroundOpacity = 0.5f;
 
 		TextBox& text = box.addElement<TextBox>();
 		text.loadMaterial(device, d);
 		text.setFont(fonts[0]);
 		text.text = "Hello!";
-		text.size = Vec2(0.7f, 0.2f);
-		text.position = Vec2(0.01f);
-		text.backgroundColor = Vec(0.2f, 0.2f, 0.5f);
+		text.size = Vec2(1.f, 0.33f);
+		text.position = Vec2(0.0f);
 		text.pivotPoint = Vec2(0.f, 0.f);
+		text.backgroundColor = Vec(0.2f, 0.2f, 0.5f);
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;

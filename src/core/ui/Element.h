@@ -26,6 +26,13 @@ namespace UI
 	using UIInst = EngineCore::ShaderInstanceData::UIElementInstanceData;
 	using GlyphInst = EngineCore::ShaderInstanceData::TextGlyphInstanceData;
 
+	struct PreDrawData
+	{
+		Vec2 size;
+		Vec2 position;
+		Vec2 pivot;
+	};
+
 	class Element
 	{
 	protected:
@@ -77,12 +84,11 @@ namespace UI
 			return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 		}
 		virtual void postAddElement(Element& e);
-		virtual void preDrawRecursive(const EngineCore::FrameContext& f);
+		virtual void preDrawRecursive(const EngineCore::FrameContext& f, const PreDrawData& parentData);
 		virtual void drawRecursive(const EngineCore::FrameContext& f, EngineCore::Material*& m);
-		virtual void preDraw(const EngineCore::FrameContext& f);
+		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data);
 		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m);
-		Vec2 calculatePosition() const;
-		Vec2 calculateSize() const;
+		Vec2 calculatePosition(Vec2 effectiveSize) const;
 	};
 
 

@@ -37,15 +37,15 @@ namespace UI
 		textMaterial->finalize();
 	}
 
-	void TextBox::preDraw(const EngineCore::FrameContext& f)
+	void TextBox::preDraw(const EngineCore::FrameContext& f, const PreDrawData& data)
 	{
-		HorizontalBox::preDraw(f);
+		HorizontalBox::preDraw(f, data);
 
 		if (not (text.size() && font && textMaterial)) return;
 
 		// add text info to glyph instance buffer
 		float offset = 0;
-		Vec2 basePosition = Element::calculatePosition();
+		Vec2 basePosition = Element::calculatePosition(data.size);
 		basePosition.y += size.y * (parent ? parent->size.y : 0.f); // make text rest on the bottom edge of the element
 		for (size_t i = 0; i < text.size(); i++)
 		{

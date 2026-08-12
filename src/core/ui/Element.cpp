@@ -5,6 +5,7 @@
 
 #include "core/types/vk.h"
 
+#include <algorithm>
 #include <cassert>
 
 namespace UI
@@ -48,11 +49,23 @@ namespace UI
 
 	void RootElement::drawAll(const EngineCore::FrameContext& f)
 	{
-		for (auto& e : nested) e->preDrawRecursive(f);
+		PreDrawData data =
+		{
+			.size = Vec2(1.f), // elements directly under root get 100% space
+			.position = Vec2(0.f)
+		};
+		for (auto& e : nested) 
+		{
+			e->preDrawRecursive(f, data);
+		}
 		hierarchyInstanceBuffer->pushBufferToGPU(f.bufferIndex);
 		textGlyphInstanceBuffer->pushBufferToGPU(f.bufferIndex);
+
 		EngineCore::Material* m = nullptr;
-		for (auto& e : nested) e->drawRecursive(f, m);
+		for (auto& e : nested) 
+		{
+			e->drawRecursive(f, m);
+		}
 	}
 
 	EngineCore::InstanceBuffer<GlyphInst>& RootElement::getTextGlyphInstanceBuffer() const
@@ -65,10 +78,21 @@ namespace UI
 		root->numElements++;
 	}
 
-	void Element::preDrawRecursive(const EngineCore::FrameContext& f)
+	void Element::preDrawRecursive(const EngineCore::FrameContext& f, const PreDrawData& parentData)
 	{
-		preDraw(f);
-		for (auto& e : nested) e->preDrawRecursive(f);
+		PreDrawData currentData = {};
+		const Vec2 parentTopLeft = parentData.position - parentData.pivot;
+		currentData.size = parentData.size * size; // calculate absolute size
+		currentData.position = parentTopLeft + (position * parentData.size); // calculate top-left origin ignoring parent pivot
+		currentData.pivot = pivotPoint * currentData.size; // store absolute pivot offset for this element
+
+		preDraw(f, currentData);
+
+		// pass down currentData (children only care about currentData.position, not currentData.pivot)
+		for (auto& e : nested)
+		{
+			e->preDrawRecursive(f, currentData);
+		}
 	}
 
 	void Element::drawRecursive(const EngineCore::FrameContext& f, EngineCore::Material*& m)
@@ -77,34 +101,24 @@ namespace UI
 		for (auto& e : nested) e->drawRecursive(f, m);
 	}
 
-	Vec2 Element::calculatePosition() const
+	Vec2 Element::calculatePosition(Vec2 effectiveSize) const
 	{
 		Vec2 parentPosition(0.f);
-		Vec2 parentSize(1.f);
 		if (not isNextToRoot())
 		{
-			const Vec2 parentPivot = parent->pivotPoint * parent->size;
-			parentPosition = parent->position - parentPivot;
-			parentSize = parent->size;
+			parentPosition = parent->position - (parent->pivotPoint * parent->size);
 		}
-		return (position * parentSize) + parentPosition;
+		return (position * effectiveSize) + parentPosition;
 	}
 
-	Vec2 Element::calculateSize() const
-	{
-		const Vec2 parentSize = (not isNextToRoot()) ? parent->size : Vec2(1.f);
-		return size * parentSize;
-	}
-
-	void Element::preDraw(const EngineCore::FrameContext& f)
+	void Element::preDraw(const EngineCore::FrameContext& f, const PreDrawData& data)
 	{
 		UIInst d = {};
-		const Vec2 finalPosition = calculatePosition();
-		const Vec2 finalSize = calculateSize();
-		d.positionAndSize.x = finalPosition.x - (pivotPoint.x * size.x);
-		d.positionAndSize.y = finalPosition.y - (pivotPoint.y * size.y);
-		d.positionAndSize.z = finalSize.x;
-		d.positionAndSize.w = finalSize.y;
+		const Vec2 renderPosition = data.position - data.pivot;
+		d.positionAndSize.x = renderPosition.x;
+		d.positionAndSize.y = renderPosition.y;
+		d.positionAndSize.z = data.size.x;
+		d.positionAndSize.w = data.size.y;
 		d.backgroundColor.x = backgroundColor.x;
 		d.backgroundColor.y = backgroundColor.y;
 		d.backgroundColor.z = backgroundColor.z;
