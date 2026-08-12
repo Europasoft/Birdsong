@@ -23,7 +23,7 @@ namespace UI
 
 	void TextBox::loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d)
 	{
-		HorizontalBox::loadMaterial(device, d);
+		Element::loadMaterial(device, d);
 
 		// text needs a material with special shaders
 		using namespace EngineCore;
@@ -39,18 +39,17 @@ namespace UI
 
 	void TextBox::preDraw(const EngineCore::FrameContext& f, const PreDrawData& data)
 	{
-		HorizontalBox::preDraw(f, data);
+		Element::preDraw(f, data);
 
 		if (not (text.size() && font && textMaterial)) return;
 
 		// add text info to glyph instance buffer
 		float offset = 0;
-		Vec2 basePosition = Element::calculatePosition(data.size);
-		basePosition.y += size.y * (parent ? parent->size.y : 0.f); // make text rest on the bottom edge of the element
+		const Vec2 p = (data.position - data.pivot) + (data.size * Vec2(0, 1)); // text rests on element's bottom edge
 		for (size_t i = 0; i < text.size(); i++)
 		{
 			const GlyphInfo& g = font->getCharacter(text[i]);
-			const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, offset, basePosition);
+			const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, offset, p);
 			firstGlyphInstanceBufferID = (i == 0) ? glyphInstanceID : firstGlyphInstanceBufferID;
 			const auto kerning = (i == text.size() - 1) ? 0.f : font->getKerning(text[i], text[i + 1]);
 			float addOffset = (g.advance + kerning) * fontScale / f.viewportExtent.width; // convert (advance + kerning) to normalized [0, 1] width
@@ -61,7 +60,7 @@ namespace UI
 	void TextBox::draw(const EngineCore::FrameContext & f, EngineCore::Material * &m)
 	{
 		// draw background behind the text
-		HorizontalBox::draw(f, m);
+		Element::draw(f, m);
 
 		if (not (text.size() && font && textMaterial)) return;
 

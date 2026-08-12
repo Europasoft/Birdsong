@@ -89,6 +89,11 @@ namespace UI
 		preDraw(f, currentData);
 
 		// pass down currentData (children only care about currentData.position, not currentData.pivot)
+		preDrawNested(f, currentData);
+	}
+
+	void Element::preDrawNested(const EngineCore::FrameContext& f, const PreDrawData& currentData)
+	{
 		for (auto& e : nested)
 		{
 			e->preDrawRecursive(f, currentData);
@@ -99,16 +104,6 @@ namespace UI
 	{
 		draw(f, m);
 		for (auto& e : nested) e->drawRecursive(f, m);
-	}
-
-	Vec2 Element::calculatePosition(Vec2 effectiveSize) const
-	{
-		Vec2 parentPosition(0.f);
-		if (not isNextToRoot())
-		{
-			parentPosition = parent->position - (parent->pivotPoint * parent->size);
-		}
-		return (position * effectiveSize) + parentPosition;
 	}
 
 	void Element::preDraw(const EngineCore::FrameContext& f, const PreDrawData& data)

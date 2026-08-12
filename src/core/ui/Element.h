@@ -57,6 +57,11 @@ namespace UI
 		uint32_t instanceDataIndex = 0;
 
 	public:
+		virtual void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d);
+		bool isRoot() const;
+		bool isNextToRoot() const;
+		bool isLeaf() const;
+
 		template <typename T, typename... Args> requires std::derived_from<T, Element>
 		T& addElement(Args&&... args)
 		{
@@ -69,28 +74,23 @@ namespace UI
 			return result;
 		}
 
-		virtual void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d);
-
-		bool isRoot() const;
-		bool isNextToRoot() const;
-		bool isLeaf() const;
+	public:
+		virtual void preDrawRecursive(const EngineCore::FrameContext& f, const PreDrawData& parentData);
+		virtual void drawRecursive(const EngineCore::FrameContext& f, EngineCore::Material*& m);
 
 	protected:
-		friend class RootElement;
-
 		template <typename T, typename... Args> requires std::derived_from<T, Element>
 		static std::unique_ptr<T> create(Args&&... args)
 		{
 			return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 		}
 		virtual void postAddElement(Element& e);
-		virtual void preDrawRecursive(const EngineCore::FrameContext& f, const PreDrawData& parentData);
-		virtual void drawRecursive(const EngineCore::FrameContext& f, EngineCore::Material*& m);
+
+		virtual void preDrawNested(const EngineCore::FrameContext& f, const PreDrawData& currentData);
+
 		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data);
 		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m);
-		Vec2 calculatePosition(Vec2 effectiveSize) const;
 	};
-
 
 	class RootElement : public Element
 	{
@@ -110,24 +110,6 @@ namespace UI
 		uint32_t numElements = 0;
 		std::unique_ptr<EngineCore::InstanceBuffer<UIInst>> hierarchyInstanceBuffer;
 		std::unique_ptr<EngineCore::InstanceBuffer<GlyphInst>> textGlyphInstanceBuffer;
-
-	private:
-		// these are hidden - not useful on root element
-		void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d) override {};
-		void drawRecursive(const EngineCore::FrameContext& f, EngineCore::Material*& m) override {};
-		void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m) override {};
-	};
-
-	class HorizontalBox : public Element
-	{
-	public:
-		HorizontalBox() = default;
-	};
-
-	class VerticalBox : public Element
-	{
-	public:
-		VerticalBox() = default;
 	};
 
 }

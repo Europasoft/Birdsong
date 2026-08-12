@@ -1,6 +1,7 @@
 #include "core/draw/InterfaceDrawer.h"
 #include "core/draw/FrameContext.h"
 #include "core/ui/TextBox.h"
+#include "core/ui/Box.h"
 #include "core/gpu/Material.h"
 #include "core/gpu/descriptors/InstanceBuffer.h"
 #include "core/ui/Element.h"
@@ -37,22 +38,31 @@ namespace EngineCore
 		auto& texMgr = d.world->getScene().getTextureManager();
 		fonts.push_back(Font::load(device, "fonts/Inter-VariableFont_opsz,wght.ttf", texMgr));
 
-		VerticalBox& box = root->addElement<VerticalBox>();
+		HorizontalBox& box = root->addElement<HorizontalBox>();
 		box.loadMaterial(device, d);
 		box.size = Vec2(0.33f);
 		box.position = Vec2(0.5f);
 		box.pivotPoint = Vec2(0.5f);
 		box.backgroundColor = Vec(0.1f, 0.1f, 0.6f);
-		box.backgroundOpacity = 0.5f;
+		box.backgroundOpacity = 0.2f;
 
 		TextBox& text = box.addElement<TextBox>();
 		text.loadMaterial(device, d);
 		text.setFont(fonts[0]);
-		text.text = "Hello!";
-		text.size = Vec2(1.f, 0.33f);
+		text.text = "Hello";
+		text.size = Vec2(0.5f, 0.33f);
 		text.position = Vec2(0.0f);
 		text.pivotPoint = Vec2(0.f, 0.f);
 		text.backgroundColor = Vec(0.2f, 0.2f, 0.5f);
+
+		TextBox& text2 = box.addElement<TextBox>();
+		text2.loadMaterial(device, d);
+		text2.setFont(fonts[0]);
+		text2.text = "world";
+		text2.size = Vec2(0.6f, 0.1f);
+		text2.position = Vec2(0.0f);
+		text2.pivotPoint = Vec2(0.f, 0.f);
+		text2.backgroundColor = Vec(0.15f, 0.15f, 0.25f);
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;

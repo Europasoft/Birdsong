@@ -15,7 +15,7 @@ namespace UI
 	class Font;
 	struct GlyphInfo;
 
-	class TextBox : public HorizontalBox
+	class TextBox : public Element
 	{
 	public:
 		TextBox();

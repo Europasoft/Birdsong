@@ -475,6 +475,9 @@
     <ClCompile Include="..\src\core\ui\TextBox.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\ui\Box.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -1042,6 +1045,9 @@
       <Filter>core\ui</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\ui\TextBox.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\ui\Box.h">
       <Filter>core\ui</Filter>
     </ClInclude>
   </ItemGroup>
