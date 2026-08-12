@@ -10,6 +10,7 @@
 #include <limits>
 #include <cmath>
 #include <cstdlib>
+#include <cctype>
 
 namespace UI
 {
@@ -48,16 +49,128 @@ namespace UI
 
 		if (not (text.size() && font && textMaterial)) return;
 
-		Vec2 textPosition = alignText((data.position - data.pivot), f, data);
-	
-		// add text info to glyph instance buffer
-		float offset = 0;
+		const ScaledFontMetrics metrics = font->getScaledMetrics(f.viewportExtent.height, fontScale);
+		std::vector<Line> lines = processLines(f, data);
+		generateInstances(lines, metrics, f, data);
+	}
+
+	std::vector<Line> TextBox::processLines(const EngineCore::FrameContext& f, const PreDrawData& data) const
+	{
+		std::vector<Line> lines;
+		size_t currentLineStart = 0;
+		float currentLineWidth = 0.f;
+
+		size_t lastSpaceIndex = std::string::npos;
+		float widthAtLastSpace = 0.f;
+
 		for (size_t i = 0; i < text.size(); i++)
 		{
 			const GlyphInfo& g = font->getCharacter(text[i]);
-			const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, offset, textPosition);
-			firstGlyphInstanceBufferID = (i == 0) ? glyphInstanceID : firstGlyphInstanceBufferID;
-			offset += getAdvanceForChar(i, g, f);
+			const float charAdvance = getAdvanceForChar(i, g, f);
+
+			if (std::isspace(text[i]))
+			{
+				lastSpaceIndex = i;
+				widthAtLastSpace = currentLineWidth;
+			}
+
+			// check if adding this character exceeds container width
+			if (currentLineWidth + charAdvance > data.size.x && i > currentLineStart)
+			{
+				if (lastSpaceIndex != std::string::npos && lastSpaceIndex >= currentLineStart)
+				{
+					// break line at the last space
+					size_t lineLength = lastSpaceIndex - currentLineStart;
+					lines.push_back({ currentLineStart, lineLength, widthAtLastSpace });
+
+					// resume from character after the space
+					currentLineStart = lastSpaceIndex + 1;
+
+					// recalculate width of the current word being carried over
+					currentLineWidth = 0.0f;
+					for (size_t j = currentLineStart; j <= i; j++)
+					{
+						const GlyphInfo& wG = font->getCharacter(text[j]);
+						currentLineWidth += getAdvanceForChar(j, wG, f);
+					}
+				}
+				else
+				{
+					// single word exceeds container width: hard break at current character
+					lines.push_back({ currentLineStart, i - currentLineStart, currentLineWidth });
+					currentLineStart = i;
+					currentLineWidth = charAdvance;
+				}
+				lastSpaceIndex = std::string::npos;
+			}
+			else
+			{
+				currentLineWidth += charAdvance;
+			}
+		}
+
+		// push final remaining line
+		if (currentLineStart < text.size())
+		{
+			lines.push_back({ currentLineStart, text.size() - currentLineStart, currentLineWidth });
+		}
+
+		return lines;
+	}
+
+	void TextBox::generateInstances(const std::vector<Line>& lines, const ScaledFontMetrics& metrics,
+		const EngineCore::FrameContext& f, const PreDrawData& data)
+	{
+		// calculate vertical alignment for the entire block of lines
+		const float totalTextHeight = lines.size() * metrics.lineHeight; // line height normalized [0, 1]
+		Vec2 blockPosition = data.position - data.pivot;
+		if (alignVertical == EAlignV::CENTER)
+		{
+			blockPosition.y += (data.size.y - totalTextHeight) * 0.5f;
+		}
+		else if (alignVertical == EAlignV::BOTTOM)
+		{
+			blockPosition.y += data.size.y - totalTextHeight;
+		}
+
+		// shift block position down by the ascender so line 0's baseline 
+		// is positioned correctly relative to the top of the text block
+		blockPosition.y += metrics.ascender;
+
+		bool isFirstGlyph = true;
+
+		for (size_t lineIdx = 0; lineIdx < lines.size(); lineIdx++)
+		{
+			const auto& line = lines[lineIdx];
+
+			// calculate horizontal starting position per line
+			Vec2 linePos = blockPosition;
+			linePos.y += lineIdx * metrics.lineHeight;
+
+			if (alignHorizontal == EAlignH::CENTER)
+			{
+				linePos.x += (data.size.x - line.width) * 0.5f;
+			}
+			else if (alignHorizontal == EAlignH::RIGHT)
+			{
+				linePos.x += data.size.x - line.width;
+			}
+
+			float xOffset = 0.0f;
+			for (size_t i = line.startIndex; i < line.startIndex + line.length; i++)
+			{
+				// add instance data for glyph to storage buffer
+				const GlyphInfo& g = font->getCharacter(text[i]);
+				const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, xOffset, linePos);
+
+				if (isFirstGlyph)
+				{
+					firstGlyphInstanceBufferID = glyphInstanceID;
+					isFirstGlyph = false;
+				}
+
+				xOffset += getAdvanceForChar(i, g, f);
+			}
 		}
 	}
 
@@ -102,58 +215,6 @@ namespace UI
 		d.fontScale = fontScale;
 		d.textureIndex = font->getTextureIndex();
 		return root->getTextGlyphInstanceBuffer().addInstanceData(d);
-	}
-
-	Vec2 TextBox::alignText(Vec2 textPosition, const EngineCore::FrameContext& f, const PreDrawData& data)
-	{
-		float maxTop = -std::numeric_limits<float>::infinity();
-		float minBottom = std::numeric_limits<float>::infinity();
-		float normalizedWidth = 0.f;
-		if (alignVertical != EAlignV::BOTTOM || alignHorizontal != EAlignH::LEFT)
-		{
-			for (size_t i = 0; i < text.size(); i++)
-			{
-				const GlyphInfo& g = font->getCharacter(text[i]);
-				maxTop = std::max(maxTop, g.t);
-				minBottom = std::min(minBottom, g.b);
-				normalizedWidth += getAdvanceForChar(i, g, f);
-			}
-		}
-
-		// vertical alignment
-		if (alignVertical == EAlignV::BOTTOM)
-		{
-			textPosition += data.size * Vec2(0, 1); // text rests on element's bottom edge
-		}
-		else if (alignVertical == EAlignV::CENTER)
-		{
-			// find the midpoint of the text's bounding box relative to the baseline
-			const float textMidpointPixels = (maxTop + minBottom) * 0.5f;
-			// pixel offset to normalized screen space
-			const float normalizedMidpoint = (textMidpointPixels * fontScale) / f.viewportExtent.height;
-			// position baseline so the text's bounding box center sits at containerCenterY
-			const float containerCenterY = data.position.y + (data.size.y * 0.5f);
-			textPosition.y = containerCenterY + normalizedMidpoint;
-		}
-		else if (alignVertical == EAlignV::TOP)
-		{
-			textPosition.y = data.position.y + (maxTop * fontScale) / f.viewportExtent.height;
-		}
-
-		// horizontal alignment
-		if (alignHorizontal == EAlignH::CENTER)
-		{
-			const float containerCenterX = data.position.x + (data.size.x * 0.5f);
-			textPosition.x = containerCenterX - (normalizedWidth * 0.5f);
-		}
-		else if (alignHorizontal == EAlignH::RIGHT)
-		{
-			const float containerEndX = data.position.x + data.size.x ;
-			textPosition.x = containerEndX - normalizedWidth;
-		}
-
-		
-		return textPosition;
 	}
 
 	float TextBox::getAdvanceForChar(size_t i, const GlyphInfo& g, const EngineCore::FrameContext& f) const

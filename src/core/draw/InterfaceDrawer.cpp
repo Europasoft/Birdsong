@@ -49,7 +49,7 @@ namespace EngineCore
 		TextBox& text = box.addElement<TextBox>();
 		text.loadMaterial(device, d);
 		text.setFont(fonts[0]);
-		text.text = "Hello";
+		text.text = U"Hello";
 		text.size = Vec2(0.66f, 0.25f);
 		text.position = Vec2(0.0f);
 		text.pivotPoint = Vec2(0.f, 0.f);
@@ -58,19 +58,19 @@ namespace EngineCore
 		TextBox& text2 = box.addElement<TextBox>();
 		text2.loadMaterial(device, d);
 		text2.setFont(fonts[0]);
-		text2.text = "world";
+		text2.text = U"abc 123 \u00E5\u00E4\u00F6 \u00C5\u00C4\u00D6 \u00E0 \u00E1 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod";
 		text2.size = Vec2(0.33f, 0.2f);
 		text2.position = Vec2(0.0f);
 		text2.pivotPoint = Vec2(0.f, 0.f);
 		text2.backgroundColor = Vec(0.15f, 0.15f, 0.25f);
-		tmpTextBox = &text2;
+		text2.alignHorizontal = UI::TextBox::EAlignH::CENTER;
+		text2.alignVertical = UI::TextBox::EAlignV::CENTER;
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;
 
 	void InterfaceDrawer::render(const FrameContext& f)
 	{
-		tmpTextBox->size.x += f.delta * 0.005;
 
 		root->drawAll(f);
 	}

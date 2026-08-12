@@ -14,6 +14,14 @@ namespace UI
 {
 	class Font;
 	struct GlyphInfo;
+	struct ScaledFontMetrics;
+
+	struct Line
+	{
+		size_t startIndex;
+		size_t length;
+		float width;
+	};
 
 	class TextBox : public Element
 	{
@@ -21,7 +29,7 @@ namespace UI
 		TextBox();
 		virtual ~TextBox();
 
-		std::string text;
+		std::u32string text;
 		float fontScale = 24.f;
 		enum class EAlignV : uint32_t { CENTER, TOP, BOTTOM };
 		EAlignV alignVertical = EAlignV::CENTER;
@@ -35,8 +43,10 @@ namespace UI
 		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data) override;
 		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m) override;
 
+		std::vector<Line> processLines(const EngineCore::FrameContext& f, const PreDrawData& data) const;
+		void generateInstances(const std::vector<Line>& lines, const ScaledFontMetrics& metrics,
+							const EngineCore::FrameContext& f, const PreDrawData& data);
 		uint32_t addGlyphToInstanceBuffer(const UI::GlyphInfo& g, float offset, const Vec2& basePosition);
-		Vec2 alignText(Vec2 textPosition, const EngineCore::FrameContext& f, const PreDrawData& data);
 		float getAdvanceForChar(size_t i, const GlyphInfo& g, const EngineCore::FrameContext& f) const;
 
 	protected:

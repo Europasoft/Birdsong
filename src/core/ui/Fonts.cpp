@@ -6,6 +6,7 @@
 #include "core/types/CommonTypes.h"
 
 #include "thirdparty/msdf-atlas-gen-lite/msdf-atlas-gen/msdf-atlas-gen.h"
+#include "thirdparty/msdf-atlas-gen-lite/msdfgen/ext/import-font.h"
 
 #include <cassert>
 
@@ -37,6 +38,17 @@ namespace UI
 		return it->second;
 	}
 
+	static msdf_atlas::Charset createExtendedLatinCharset()
+	{
+		msdf_atlas::Charset charset = msdf_atlas::Charset::ASCII; // 0x20 to 0x7E
+		// latin-1 supplement: includes western european accents (Swedish, Norwegian, German, etc.)
+		for (msdf_atlas::unicode_t c = 0xA0; c <= 0xFF; ++c)
+		{
+			charset.add(c);
+		}
+		return charset;
+	}
+
 	bool Font::generateAtlas(EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager)
 	{
 		using namespace msdf_atlas;
@@ -49,7 +61,7 @@ namespace UI
 			{
 				std::vector<GlyphGeometry> glyphs;
 				FontGeometry fontGeometry(&glyphs);
-				fontGeometry.loadCharset(fontHandle, 1.0, Charset::ASCII);
+				fontGeometry.loadCharset(fontHandle, 1.0, createExtendedLatinCharset());
 				// Apply MSDF edge coloring. See edge-coloring.h for other coloring strategies.
 				const double maxCornerAngle = 3.0;
 				for (GlyphGeometry& glyph : glyphs)
@@ -128,6 +140,7 @@ namespace UI
 				}
 			}
 		}
+		getMetrics();
 		return success;
 	}
 
@@ -141,5 +154,28 @@ namespace UI
 		double k = 0;
 		msdfgen::getKerning(k, fontHandle, idxA.getIndex(), idxB.getIndex());
 		return static_cast<float>(k);
+	}
+
+	void Font::getMetrics()
+	{
+		if (not fontMetrics)
+		{
+			fontMetrics = std::make_unique<msdfgen::FontMetrics>();
+			const bool r = msdfgen::getFontMetrics(*fontMetrics, fontHandle, msdfgen::FontCoordinateScaling::FONT_SCALING_EM_NORMALIZED);
+			assert(r && "could not get font metrics");
+		}
+	}
+
+	ScaledFontMetrics Font::getScaledMetrics(float viewportHeight, float fontScale) const
+	{
+		const float scale = fontScale / static_cast<float>(fontMetrics->emSize);
+		const float invViewportH = 1.f / viewportHeight;
+
+		ScaledFontMetrics metrics = {};
+		metrics.ascender = static_cast<float>(fontMetrics->ascenderY) * scale * invViewportH;
+		metrics.descender = static_cast<float>(fontMetrics->descenderY) * scale * invViewportH;
+		metrics.lineHeight = static_cast<float>(fontMetrics->lineHeight) * scale * invViewportH;
+		metrics.totalFontHeight = metrics.ascender - metrics.descender;
+		return metrics;
 	}
 }

@@ -65,7 +65,6 @@ namespace EngineCore
 
 		std::vector<std::shared_ptr<UI::Font>> fonts;
 
-		UI::TextBox* tmpTextBox = nullptr;
 	};
 
 }
