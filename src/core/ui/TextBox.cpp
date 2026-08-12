@@ -6,6 +6,11 @@
 
 #include "core/types/vk.h"
 
+#include <algorithm>
+#include <limits>
+#include <cmath>
+#include <cstdlib>
+
 namespace UI
 {
 	TextBox::TextBox()
@@ -43,21 +48,20 @@ namespace UI
 
 		if (not (text.size() && font && textMaterial)) return;
 
+		Vec2 textPosition = alignText((data.position - data.pivot), f, data);
+	
 		// add text info to glyph instance buffer
 		float offset = 0;
-		const Vec2 p = (data.position - data.pivot) + (data.size * Vec2(0, 1)); // text rests on element's bottom edge
 		for (size_t i = 0; i < text.size(); i++)
 		{
 			const GlyphInfo& g = font->getCharacter(text[i]);
-			const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, offset, p);
+			const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, offset, textPosition);
 			firstGlyphInstanceBufferID = (i == 0) ? glyphInstanceID : firstGlyphInstanceBufferID;
-			const auto kerning = (i == text.size() - 1) ? 0.f : font->getKerning(text[i], text[i + 1]);
-			float addOffset = (g.advance + kerning) * fontScale / f.viewportExtent.width; // convert (advance + kerning) to normalized [0, 1] width
-			offset += addOffset;
+			offset += getAdvanceForChar(i, g, f);
 		}
 	}
 
-	void TextBox::draw(const EngineCore::FrameContext & f, EngineCore::Material * &m)
+	void TextBox::draw(const EngineCore::FrameContext& f, EngineCore::Material * &m)
 	{
 		// draw background behind the text
 		Element::draw(f, m);
@@ -99,5 +103,65 @@ namespace UI
 		d.textureIndex = font->getTextureIndex();
 		return root->getTextGlyphInstanceBuffer().addInstanceData(d);
 	}
+
+	Vec2 TextBox::alignText(Vec2 textPosition, const EngineCore::FrameContext& f, const PreDrawData& data)
+	{
+		float maxTop = -std::numeric_limits<float>::infinity();
+		float minBottom = std::numeric_limits<float>::infinity();
+		float normalizedWidth = 0.f;
+		if (alignVertical != EAlignV::BOTTOM || alignHorizontal != EAlignH::LEFT)
+		{
+			for (size_t i = 0; i < text.size(); i++)
+			{
+				const GlyphInfo& g = font->getCharacter(text[i]);
+				maxTop = std::max(maxTop, g.t);
+				minBottom = std::min(minBottom, g.b);
+				normalizedWidth += getAdvanceForChar(i, g, f);
+			}
+		}
+
+		// vertical alignment
+		if (alignVertical == EAlignV::BOTTOM)
+		{
+			textPosition += data.size * Vec2(0, 1); // text rests on element's bottom edge
+		}
+		else if (alignVertical == EAlignV::CENTER)
+		{
+			// find the midpoint of the text's bounding box relative to the baseline
+			const float textMidpointPixels = (maxTop + minBottom) * 0.5f;
+			// pixel offset to normalized screen space
+			const float normalizedMidpoint = (textMidpointPixels * fontScale) / f.viewportExtent.height;
+			// position baseline so the text's bounding box center sits at containerCenterY
+			const float containerCenterY = data.position.y + (data.size.y * 0.5f);
+			textPosition.y = containerCenterY + normalizedMidpoint;
+		}
+		else if (alignVertical == EAlignV::TOP)
+		{
+			textPosition.y = data.position.y + (maxTop * fontScale) / f.viewportExtent.height;
+		}
+
+		// horizontal alignment
+		if (alignHorizontal == EAlignH::CENTER)
+		{
+			const float containerCenterX = data.position.x + (data.size.x * 0.5f);
+			textPosition.x = containerCenterX - (normalizedWidth * 0.5f);
+		}
+		else if (alignHorizontal == EAlignH::RIGHT)
+		{
+			const float containerEndX = data.position.x + data.size.x ;
+			textPosition.x = containerEndX - normalizedWidth;
+		}
+
+		
+		return textPosition;
+	}
+
+	float TextBox::getAdvanceForChar(size_t i, const GlyphInfo& g, const EngineCore::FrameContext& f) const
+	{
+		const float kerning = (i == text.size() - 1) ? 0.f : font->getKerning(text[i], text[i + 1]);
+		// convert (advance + kerning) to normalized [0, 1] width
+		return (g.advance + kerning) * fontScale / f.viewportExtent.width; 
+	}
+
 
 }

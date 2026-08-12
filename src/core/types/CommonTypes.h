@@ -110,6 +110,8 @@ public:
 	Vector2D operator*(const Vector2D& other) const { return Vector2D{ x * other.x, y * other.y }; }
 	Vector2D operator/(const Vector2D& other) const { return Vector2D{ x / other.x, y / other.y }; }
 	Vector2D operator*=(const Vector2D& v) { *this = *this * v; return *this; }
+	Vector2D operator+=(const Vector2D& v) { *this = *this + v; return *this; }
+	Vector2D operator-=(const Vector2D& v) { *this = *this - v; return *this; }
 	friend bool operator==(const Vector2D& lh, const Vector2D& rh) { return lh.x == rh.x && lh.y == rh.y; }
 	friend bool operator!=(const Vector2D& lh, const Vector2D& rh) { return !(lh == rh); }
 };
