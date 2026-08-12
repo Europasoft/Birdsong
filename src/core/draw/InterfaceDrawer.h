@@ -20,6 +20,7 @@ namespace UI
 	class RootElement;
 	class Font;
 	struct GlyphInfo;
+	class TextBox;
 }
 
 namespace EngineCore
@@ -63,6 +64,8 @@ namespace EngineCore
 		std::shared_ptr<Material> defaultMaterial;
 
 		std::vector<std::shared_ptr<UI::Font>> fonts;
+
+		UI::TextBox* tmpTextBox = nullptr;
 	};
 
 }

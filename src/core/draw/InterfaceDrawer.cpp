@@ -40,7 +40,7 @@ namespace EngineCore
 
 		HorizontalBox& box = root->addElement<HorizontalBox>();
 		box.loadMaterial(device, d);
-		box.size = Vec2(0.33f);
+		box.size = Vec2(0.66f);
 		box.position = Vec2(0.5f);
 		box.pivotPoint = Vec2(0.5f);
 		box.backgroundColor = Vec(0.1f, 0.1f, 0.6f);
@@ -50,7 +50,7 @@ namespace EngineCore
 		text.loadMaterial(device, d);
 		text.setFont(fonts[0]);
 		text.text = "Hello";
-		text.size = Vec2(0.5f, 0.33f);
+		text.size = Vec2(0.66f, 0.25f);
 		text.position = Vec2(0.0f);
 		text.pivotPoint = Vec2(0.f, 0.f);
 		text.backgroundColor = Vec(0.2f, 0.2f, 0.5f);
@@ -59,16 +59,19 @@ namespace EngineCore
 		text2.loadMaterial(device, d);
 		text2.setFont(fonts[0]);
 		text2.text = "world";
-		text2.size = Vec2(0.6f, 0.1f);
+		text2.size = Vec2(0.33f, 0.2f);
 		text2.position = Vec2(0.0f);
 		text2.pivotPoint = Vec2(0.f, 0.f);
 		text2.backgroundColor = Vec(0.15f, 0.15f, 0.25f);
+		tmpTextBox = &text2;
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;
 
 	void InterfaceDrawer::render(const FrameContext& f)
 	{
+		tmpTextBox->size.x += f.delta * 0.005;
+
 		root->drawAll(f);
 	}
 

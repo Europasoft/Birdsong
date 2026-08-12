@@ -24,7 +24,7 @@ namespace UI
 		std::string text;
 		float fontScale = 24.f;
 		enum class EAlignV : uint32_t { CENTER, TOP, BOTTOM };
-		EAlignV alignVertical = EAlignV::TOP;
+		EAlignV alignVertical = EAlignV::CENTER;
 		enum class EAlignH : uint32_t { LEFT, CENTER, RIGHT };
 		EAlignH alignHorizontal = EAlignH::CENTER;
 
