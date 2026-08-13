@@ -183,6 +183,7 @@ namespace EngineCore
 		{
 			glm::vec4 positionAndSize{ 0.f };
 			glm::vec4 backgroundColor{ 1.f };
+			glm::vec4 cornerRadius{ 0.f };
 		};
 	}
 

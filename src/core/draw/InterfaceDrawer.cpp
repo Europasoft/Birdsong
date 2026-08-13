@@ -36,7 +36,7 @@ namespace EngineCore
 		
 		// load font
 		auto& texMgr = d.world->getScene().getTextureManager();
-		fonts.push_back(Font::load(device, "fonts/Inter-VariableFont_opsz,wght.ttf", texMgr));
+		fonts.push_back(Font::load(device, "fonts/InterDisplay-Regular.ttf", texMgr));
 
 		HorizontalBox& box = root->addElement<HorizontalBox>();
 		box.loadMaterial(device, d);
@@ -44,16 +44,19 @@ namespace EngineCore
 		box.position = Vec2(0.5f);
 		box.pivotPoint = Vec2(0.5f);
 		box.backgroundColor = Vec(0.1f, 0.1f, 0.6f);
-		box.backgroundOpacity = 0.2f;
+		box.backgroundOpacity = 0.1f;
 
 		TextBox& text = box.addElement<TextBox>();
 		text.loadMaterial(device, d);
 		text.setFont(fonts[0]);
 		text.text = U"Hello";
+		text.fontScale = 60;
 		text.size = Vec2(0.66f, 0.25f);
 		text.position = Vec2(0.0f);
 		text.pivotPoint = Vec2(0.f, 0.f);
 		text.backgroundColor = Vec(0.2f, 0.2f, 0.5f);
+		text.cornerRadiusTop = Vec2(8.f, 32.f);
+		text.cornerRadiusBottom = Vec2(32.f, 8.f);
 
 		TextBox& text2 = box.addElement<TextBox>();
 		text2.loadMaterial(device, d);
@@ -63,8 +66,10 @@ namespace EngineCore
 		text2.position = Vec2(0.0f);
 		text2.pivotPoint = Vec2(0.f, 0.f);
 		text2.backgroundColor = Vec(0.15f, 0.15f, 0.25f);
+		text2.backgroundOpacity = 0.3f;
 		text2.alignHorizontal = UI::TextBox::EAlignH::CENTER;
 		text2.alignVertical = UI::TextBox::EAlignV::CENTER;
+		text2.setCornerRadius(64.f);
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;

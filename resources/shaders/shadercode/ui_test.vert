@@ -6,6 +6,8 @@
 // no vertex inputs, vertices are generated here
 layout(location = 0) out vec2 fragUV; // texture coordinate output
 layout(location = 1) out vec4 vertexColor;
+layout(location = 2) out vec2 boxSize; // size in pixels
+layout(location = 3) out vec4 boxCornerRadii;
 
 // SCENE GLOBAL DESCRIPTOR SET
 layout(std430, set = 0, binding = 0) uniform UBO1 
@@ -22,6 +24,7 @@ struct UIInstanceData
 {
 	vec4 positionAndSize;
 	vec4 backgroundColor;
+	vec4 cornerRadius;
 };
 
 // UI element instance buffer passed by BDA
@@ -59,5 +62,17 @@ void main()
 	gl_Position = vec4(p + vertex, 0.0, 1.0);
 
 	vertexColor = instance.backgroundColor;
-	fragUV = p;
+	
+	fragUV = vec2[]
+    (
+        vec2(0.0, 1.0),
+        vec2(0.0, 0.0),
+        vec2(1.0, 0.0),
+        vec2(1.0, 1.0),
+        vec2(0.0, 1.0),
+        vec2(1.0, 0.0)
+    )[gl_VertexIndex];
+
+	boxSize = size * ubo1.viewportExtent; // pass size in actual screen pixels
+	boxCornerRadii = instance.cornerRadius;
 }

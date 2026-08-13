@@ -50,6 +50,8 @@ namespace UI
 		Vec2 pivotPoint;
 		Vec backgroundColor;
 		float backgroundOpacity = 1.f;
+		Vec2 cornerRadiusTop;
+		Vec2 cornerRadiusBottom;
 		std::shared_ptr<EngineCore::Material> material;
 		std::vector<std::unique_ptr<Element>> nested;
 		Element* parent = nullptr;
@@ -61,6 +63,7 @@ namespace UI
 		bool isRoot() const;
 		bool isNextToRoot() const;
 		bool isLeaf() const;
+		void setCornerRadius(float r);
 
 		template <typename T, typename... Args> requires std::derived_from<T, Element>
 		T& addElement(Args&&... args)

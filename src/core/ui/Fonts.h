@@ -56,7 +56,7 @@ namespace UI
 		uint32_t texIndex = 0;
 		std::unique_ptr<EngineCore::Image> texture;
 		std::unordered_map<char32_t, GlyphInfo> glyphInfos;
-		uint32_t sdfPixelRange = 8;
+		uint32_t sdfPixelRange = 9;
 		msdfgen::FontHandle* fontHandle = nullptr;
 		msdfgen::FreetypeHandle* freetypeHandle = nullptr;
 		std::unique_ptr<msdfgen::FontMetrics> fontMetrics = nullptr;

@@ -118,6 +118,10 @@ namespace UI
 		d.backgroundColor.y = backgroundColor.y;
 		d.backgroundColor.z = backgroundColor.z;
 		d.backgroundColor.w = backgroundOpacity;
+		d.cornerRadius.x = cornerRadiusTop.x;
+		d.cornerRadius.y = cornerRadiusTop.y;
+		d.cornerRadius.z = cornerRadiusBottom.x;
+		d.cornerRadius.w = cornerRadiusBottom.y;
 		instanceDataIndex = root->hierarchyInstanceBuffer->addInstanceData(d);
 	}
 
@@ -152,6 +156,12 @@ namespace UI
 	bool Element::isLeaf() const
 	{
 		return nested.size() == 0;
+	}
+
+	void Element::setCornerRadius(float r)
+	{
+		cornerRadiusTop = Vec2(r);
+		cornerRadiusBottom = cornerRadiusTop;
 	}
 
 	

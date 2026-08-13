@@ -52,6 +52,7 @@ namespace UI
 	bool Font::generateAtlas(EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager)
 	{
 		using namespace msdf_atlas;
+		using namespace msdfgen;
 		bool success = false;
 		freetypeHandle = msdfgen::initializeFreetype();
 		if (freetypeHandle)
@@ -61,7 +62,7 @@ namespace UI
 			{
 				std::vector<GlyphGeometry> glyphs;
 				FontGeometry fontGeometry(&glyphs);
-				fontGeometry.loadCharset(fontHandle, 1.0, createExtendedLatinCharset());
+				fontGeometry.loadCharset(fontHandle, 1.0, createExtendedLatinCharset(), true, true);
 				// Apply MSDF edge coloring. See edge-coloring.h for other coloring strategies.
 				const double maxCornerAngle = 3.0;
 				for (GlyphGeometry& glyph : glyphs)
@@ -69,16 +70,18 @@ namespace UI
 				TightAtlasPacker packer;
 				packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
 				// setScale for a fixed size or setMinimumScale to use the largest that fits
-				packer.setMinimumScale(36.0);
+				packer.setMinimumScale(38.0);
 				// setPixelRange or setUnitRange
 				packer.setPixelRange(sdfPixelRange);
+				packer.setInnerPixelPadding(Padding(2));
+				packer.setOuterPixelPadding(Padding(2));
 				packer.setMiterLimit(1.0);
 				// Compute atlas layout - pack glyphs
 				packer.pack(glyphs.data(), glyphs.size());
 				// Get final atlas dimensions
 				int width = 0, height = 0;
 				packer.getDimensions(width, height);
-				using MtsdfGeneratorFunction = void (*)(const msdfgen::BitmapSection<float, 4>&, const GlyphGeometry&, const GeneratorAttributes&);
+				using MtsdfGeneratorFunction = void (*)(const BitmapSection<float, 4>&, const GlyphGeometry&, const GeneratorAttributes&);
 				constexpr MtsdfGeneratorFunction fn = &mtsdfGenerator;
 				// The ImmediateAtlasGenerator class facilitates the generation of the atlas bitmap.
 				ImmediateAtlasGenerator<
@@ -90,12 +93,17 @@ namespace UI
 				> generator(width, height);
 				// GeneratorAttributes can be modified to change the generator's default settings.
 				GeneratorAttributes attributes;
+				{
+					ErrorCorrectionConfig correctionConf(ErrorCorrectionConfig::Mode::EDGE_PRIORITY,
+							ErrorCorrectionConfig::DistanceCheckMode::CHECK_DISTANCE_AT_EDGE);
+					attributes.config = MSDFGeneratorConfig(true, correctionConf);
+				}
 				generator.setAttributes(attributes);
 				generator.setThreadCount(4);
 				// Generate atlas bitmap
 				// The glyphs array (or fontGeometry) contains positioning data for typesetting text.
 				generator.generate(glyphs.data(), glyphs.size());
-				auto bitmap = static_cast<msdfgen::BitmapConstRef<byte, 4>>(generator.atlasStorage());
+				auto bitmap = static_cast<BitmapConstRef<byte, 4>>(generator.atlasStorage());
 				width = bitmap.width;
 				height = bitmap.height;
 

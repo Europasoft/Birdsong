@@ -178,8 +178,9 @@ namespace EngineCore
 		cfg.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		cfg.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 		cfg.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		cfg.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		cfg.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
 		cfg.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
 		// logic op is an alternate way of blending colors, replaces the default mode if enabled
 		cfg.colorBlendInfo.logicOpEnable = VK_FALSE;
 		// one VkPipelineColorBlendAttachmentState for each color attachment in the framebuffer
