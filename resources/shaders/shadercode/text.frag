@@ -39,22 +39,32 @@ float median(float r, float g, float b)
 	return max(min(r, g), min(max(r, g), b));
 }
 
+float sdfOpacity(GlyphInstanceData instance)
+{
+	vec4 s = texture(globalTextures[nonuniformEXT(instance.textureIndex)], fragUV); // sample SDF atlas texture
+    float sd = median(s.r, s.g, s.b) - 0.5; // raw distance centred at 0
+
+    // texture size in pixels
+    vec2 atlasSize = vec2(textureSize(globalTextures[nonuniformEXT(instance.textureIndex)], 0));
+
+    // screen-space scale factor, converts texels to screen pixels
+    float pxRange = 9.0; // should match the sdfPixelRange used during atlas generation (see Fonts.h)
+    vec2 unitSize = vec2(pxRange) / atlasSize;
+    vec2 screenTexSize = vec2(1.0) / fwidth(fragUV);
+    float screenPxRange = max(0.5 * dot(unitSize, screenTexSize), 1.0);
+
+    // distance in screen pixels
+    float screenPxDistance = sd * screenPxRange;
+
+    // linear 1-pixel anti-aliased edge
+    return clamp(screenPxDistance + 0.5, 0.0, 1.0);
+}
+
 void main()
 {
 	GlyphInstanceData instance = push.glyphInstanceBuffer.instances[push.instanceID];
 
-    vec4 s = texture(globalTextures[nonuniformEXT(instance.textureIndex)], fragUV);
-    float sd = median(s.r, s.g, s.b);
-
-    // calculate the screen-space rate of change for the distance field
-    float unitRange = 9.0; // ideally matching the sdfPixelRange used during atlas generation
-    vec2 screenTexSize = vec2(textureSize(globalTextures[nonuniformEXT(instance.textureIndex)], 0));
-    
-    // convert SDF distance to screen pixels
-    float screenPxDistance = unitRange * (sd - 0.5) * length(fwidth(fragUV) * screenTexSize);
-
-    // smoothstep over 1 pixel
-    float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
+    float opacity = sdfOpacity(instance);
 
     outColor = vec4(1.0, 1.0, 1.0, opacity);
 }

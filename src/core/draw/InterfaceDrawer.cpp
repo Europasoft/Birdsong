@@ -69,7 +69,7 @@ namespace EngineCore
 		text2.backgroundOpacity = 0.3f;
 		text2.alignHorizontal = UI::TextBox::EAlignH::CENTER;
 		text2.alignVertical = UI::TextBox::EAlignV::CENTER;
-		text2.setCornerRadius(64.f);
+		text2.setCornerRadius(35.f);
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;
