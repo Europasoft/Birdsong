@@ -21,6 +21,8 @@ namespace EngineCore
 		WorldSystem::Scene* scene;
 		Camera* camera;
 		VkExtent2D viewportExtent;
+		Vec264 mousePosition;
+		bool leftClick, rightClick;
 	};
 
 	struct DrawContext

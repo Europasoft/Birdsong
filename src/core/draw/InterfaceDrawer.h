@@ -41,7 +41,6 @@ namespace EngineCore
 	public:
 		void setMaterial(std::shared_ptr<Material> m) { material = m; }
 		Material& getMaterial() { return *material.get(); }
-		bool cursorHitTest(glm::vec2 cursor) const;
 
 		glm::vec2 position, size;
 		float timeSinceHover, timeSinceClick;
@@ -64,6 +63,8 @@ namespace EngineCore
 		std::shared_ptr<Material> defaultMaterial;
 
 		std::vector<std::shared_ptr<UI::Font>> fonts;
+
+		void createDemoUI();
 
 	};
 

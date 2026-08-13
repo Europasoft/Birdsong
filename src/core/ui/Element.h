@@ -31,6 +31,7 @@ namespace UI
 		Vec2 size;
 		Vec2 position;
 		Vec2 pivot;
+		bool hovered, clicked;
 	};
 
 	class Element
@@ -50,8 +51,13 @@ namespace UI
 		Vec2 pivotPoint;
 		Vec backgroundColor;
 		float backgroundOpacity = 1.f;
+		Vec hoverBackgroundColor;
+		float hoverBackgroundOpacity = 1.f;
 		Vec2 cornerRadiusTop;
 		Vec2 cornerRadiusBottom;
+		enum class ECursorBehavior : uint32_t { IGNORE, RESPOND_PASS, RESPOND_CONSUME };
+		ECursorBehavior cursorBehavior = ECursorBehavior::RESPOND_PASS;
+
 		std::shared_ptr<EngineCore::Material> material;
 		std::vector<std::unique_ptr<Element>> nested;
 		Element* parent = nullptr;
@@ -91,8 +97,12 @@ namespace UI
 
 		virtual void preDrawNested(const EngineCore::FrameContext& f, const PreDrawData& currentData);
 
-		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data);
+		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data, Vec2 renderPosition);
 		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m);
+
+		virtual void handleInput(const EngineCore::FrameContext& f, PreDrawData& currentData, Vec2 renderPosition);
+		virtual bool cursorHitTest(const EngineCore::FrameContext& f, Vec2 renderPosition, Vec2 renderSize) const;
+		virtual void onClick() {};
 	};
 
 	class RootElement : public Element

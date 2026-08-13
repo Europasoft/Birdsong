@@ -40,7 +40,7 @@ namespace UI
 		virtual void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d) override;
 
 	protected:
-		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data) override;
+		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data, Vec2 renderPosition) override;
 		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m) override;
 
 		std::vector<Line> processLines(const EngineCore::FrameContext& f, const PreDrawData& data) const;

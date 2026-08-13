@@ -75,6 +75,9 @@ namespace EngineCore
 			f.camera = &f.scene->getCurrentCamera();
 			f.delta = engineClock.measureFrameDelta(f.bufferIndex);
 			f.viewportExtent = renderer->getSwapchainExtent();
+			f.mousePosition = window->input.getMousePosition();
+			f.leftClick = window->input.wasMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT);
+			f.rightClick = window->input.wasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT);
 
 			// engine tick updates
 			moveCamera(*f.camera);

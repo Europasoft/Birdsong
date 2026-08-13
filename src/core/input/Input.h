@@ -52,6 +52,7 @@ namespace EngineCore
 
 		InputAxisHandle addInputAxis(const std::string& name = "");
 		InputEventHandle addInputEvent(EInputEvent trigger = EInputEvent::COMBO, const std::string& name = "");
+		bool wasMouseButtonPressed(int button) const;
 
 		void updateInputs();
 
@@ -62,6 +63,7 @@ namespace EngineCore
 		const Vector2D<double>& getMousePosition() const;
 
 		void mousePosUpdatedCallback(const double& x, const double& y);
+		void onMouseButtonPressed(int button);
 
 	private:
 		EngineWindow* parentWindow;

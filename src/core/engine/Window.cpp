@@ -109,8 +109,9 @@ namespace EngineCore
 
 	void EngineWindow::mouseButtonCallbackHandler(GLFWwindow* window, int button, int action, int mods) 
 	{
-		if (action != GLFW_PRESS) { return; }
-
+		if (action != GLFW_PRESS && action != GLFW_REPEAT) { return; }
+		EngineWindow* wp = reinterpret_cast<EngineWindow*>(glfwGetWindowUserPointer(window));
+		wp->input.onMouseButtonPressed(button);
 	}
 		
 	void EngineWindow::toggleFullscreen()

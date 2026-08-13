@@ -43,9 +43,9 @@ namespace UI
 		textMaterial->finalize();
 	}
 
-	void TextBox::preDraw(const EngineCore::FrameContext& f, const PreDrawData& data)
+	void TextBox::preDraw(const EngineCore::FrameContext& f, const PreDrawData& data, Vec2 renderPosition)
 	{
-		Element::preDraw(f, data);
+		Element::preDraw(f, data, renderPosition);
 
 		if (not (text.size() && font && textMaterial)) return;
 

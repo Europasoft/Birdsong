@@ -4,6 +4,7 @@
 
 #include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 
@@ -28,6 +29,7 @@ namespace EngineCore
 		Vector2D<double> mousePosition{0};
 		Vector2D<double> mouseDelta{0};
 		bool isFirstMouseMove = true;
+		std::vector<int> mouseButtonsPressed;
 		Mouse() = default;
 		~Mouse() = default;
 	};
@@ -40,6 +42,7 @@ namespace EngineCore
 		mouse->mousePosition = { 0.f };
 		mouse->mouseDelta = { 0.f };
 		mouse->isFirstMouseMove = true;
+		mouse->mouseButtonsPressed.reserve(10);
 	}
 
 	InputSystem::~InputSystem()
@@ -60,6 +63,20 @@ namespace EngineCore
 		mouse->mouseDelta.x += (currentPos.x - mouse->mousePosition.x);
 		mouse->mouseDelta.y += (currentPos.y - mouse->mousePosition.y);
 		mouse->mousePosition = currentPos;
+	}
+
+	void InputSystem::onMouseButtonPressed(int button)
+	{
+		if (not wasMouseButtonPressed(button))
+		{
+			mouse->mouseButtonsPressed.push_back(button);
+		}
+	}
+
+	bool InputSystem::wasMouseButtonPressed(int button) const
+	{
+		const auto& p = mouse->mouseButtonsPressed;
+		return std::find(p.begin(), p.end(), button) != p.end();
 	}
 
 	void InputSystem::captureMouseCursor(const bool& capture)
@@ -85,6 +102,7 @@ namespace EngineCore
 	void InputSystem::updateInputs()
 	{
 		mouse->mouseDelta = { 0 };
+		mouse->mouseButtonsPressed.clear();
 
 		assert(parentWindow->getGLFWwindow() && "input system: could not access glfw window");
 		for (std::shared_ptr<InputAxis> axis : axes)
