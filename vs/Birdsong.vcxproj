@@ -158,6 +158,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\core\asset\BlendLoader.h" />
     <ClInclude Include="..\src\core\draw\DebugDrawer.h" />
     <ClInclude Include="..\src\core\draw\DrawBase.h" />
     <ClInclude Include="..\src\core\draw\DrawIncludes.h" />
@@ -266,6 +267,8 @@
     <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_types.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_world.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\private\b3cpp_utils.h" />
+    <ClInclude Include="..\src\thirdparty\fbtblend-header-only\502_lts\Blender.h" />
+    <ClInclude Include="..\src\thirdparty\fbtblend-header-only\502_lts\fbtBlend.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\artery-font-export.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasGenerator.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasStorage.h" />
@@ -350,6 +353,7 @@
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\msdfgen.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\core\asset\BlendLoader.cpp" />
     <ClCompile Include="..\src\core\draw\DebugDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\DrawBase.cpp" />
     <ClCompile Include="..\src\core\draw\FxDrawer.cpp" />

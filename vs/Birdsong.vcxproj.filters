@@ -478,6 +478,9 @@
     <ClCompile Include="..\src\core\ui\Box.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\asset\BlendLoader.cpp">
+      <Filter>core\asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -1050,6 +1053,15 @@
     <ClInclude Include="..\src\core\ui\Box.h">
       <Filter>core\ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\asset\BlendLoader.h">
+      <Filter>core\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\fbtblend-header-only\502_lts\Blender.h">
+      <Filter>thirdparty\fbtblend-header-only\502_lts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\thirdparty\fbtblend-header-only\502_lts\fbtBlend.h">
+      <Filter>thirdparty\fbtblend-header-only\502_lts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -1162,6 +1174,15 @@
     </Filter>
     <Filter Include="thirdparty\freetype-es\ps">
       <UniqueIdentifier>{ad281dd9-7756-4bc2-90fb-4a93cc37bad9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\asset">
+      <UniqueIdentifier>{cbfc5b89-087f-465a-a9d0-92ac4b63d356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\fbtblend-header-only">
+      <UniqueIdentifier>{cf664d44-94b5-4c4d-8f89-a2ec608d1240}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\fbtblend-header-only\502_lts">
+      <UniqueIdentifier>{ea4c71e1-4c64-44af-a94a-e4a6cea6d8a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -22,7 +22,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-
+#include "core/asset/BlendLoader.h"//TEMP
 namespace EngineCore
 {
 	using namespace UI;
@@ -39,6 +39,11 @@ namespace EngineCore
 		fonts.push_back(Font::load(device, "fonts/InterDisplay-Regular.ttf", texMgr));
 
 		createDemoUI();
+
+		// TEMP
+		BlendLoader b = BlendLoader();
+		bool r = b.loadFromFileByCollection("C:/Users/RPG/Desktop/untitled.blend");
+		assert(r);
 	}
 
 	InterfaceDrawer::~InterfaceDrawer() = default;
