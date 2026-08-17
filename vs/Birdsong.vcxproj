@@ -158,6 +158,8 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\core\asset\Collection.h" />
+    <ClInclude Include="..\src\core\asset\glTFLoader.h" />
     <ClInclude Include="..\src\core\draw\DebugDrawer.h" />
     <ClInclude Include="..\src\core\draw\DrawBase.h" />
     <ClInclude Include="..\src\core\draw\DrawIncludes.h" />
@@ -266,6 +268,7 @@
     <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_types.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_world.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\private\b3cpp_utils.h" />
+    <ClInclude Include="..\src\deps\europasoft-json\Source\Parser.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\artery-font-export.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasGenerator.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasStorage.h" />
@@ -350,6 +353,8 @@
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdfgen\msdfgen.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\core\asset\Collection.cpp" />
+    <ClCompile Include="..\src\core\asset\glTFLoader.cpp" />
     <ClCompile Include="..\src\core\draw\DebugDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\DrawBase.cpp" />
     <ClCompile Include="..\src\core\draw\FxDrawer.cpp" />
@@ -449,6 +454,7 @@
     <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_contact.cpp" />
     <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_shape.cpp" />
     <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_world.cpp" />
+    <ClCompile Include="..\src\deps\europasoft-json\Source\Parser.cpp" />
     <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbase.c" />
     <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbbox.c" />
     <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbitmap.c" />

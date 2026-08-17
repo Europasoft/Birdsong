@@ -478,6 +478,15 @@
     <ClCompile Include="..\src\core\ui\Box.cpp">
       <Filter>core\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\asset\glTFLoader.cpp">
+      <Filter>core\asset</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\deps\europasoft-json\Source\Parser.cpp">
+      <Filter>deps\europasoft-json</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\asset\Collection.cpp">
+      <Filter>core\asset</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -1050,6 +1059,15 @@
     <ClInclude Include="..\src\core\ui\Box.h">
       <Filter>core\ui</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\core\asset\glTFLoader.h">
+      <Filter>core\asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\deps\europasoft-json\Source\Parser.h">
+      <Filter>deps\europasoft-json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\asset\Collection.h">
+      <Filter>core\asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -1162,6 +1180,9 @@
     </Filter>
     <Filter Include="thirdparty\freetype-es\ps">
       <UniqueIdentifier>{ad281dd9-7756-4bc2-90fb-4a93cc37bad9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\asset">
+      <UniqueIdentifier>{6ab7aeb9-e001-4986-b8a7-e85dab6752c2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
