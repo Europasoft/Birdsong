@@ -42,6 +42,7 @@ namespace UI
 		Font(EngineCore::EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager);
 		~Font();
 		static std::shared_ptr<UI::Font> load(EngineCore::EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager);
+		bool isReady() const;
 
 		const GlyphInfo& getCharacter(char32_t c) const;
 		uint32_t getTextureIndex() const { return texIndex; }
@@ -50,7 +51,9 @@ namespace UI
 		ScaledFontMetrics getScaledMetrics(float viewportHeight, float fontScale) const;
 
 	private:
+		struct GenResult;
 		bool generateAtlas(EngineCore::EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager);
+		std::unique_ptr<GenResult> generateSdf(std::string_view filepath);
 		void getMetrics();
 
 		uint32_t texIndex = 0;

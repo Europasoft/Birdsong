@@ -30,6 +30,11 @@ namespace UI
         return std::shared_ptr<UI::Font>(new Font(device, makePath(filepath), texManager));
     }
 
+	bool Font::isReady() const
+	{
+		return texture.get();
+	}
+
 	const GlyphInfo& Font::getCharacter(char32_t c) const
 	{
 		auto it = glyphInfos.find(c);
@@ -49,107 +54,136 @@ namespace UI
 		return charset;
 	}
 
-	bool Font::generateAtlas(EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager)
+	using byte = msdfgen::byte;
+
+	struct Font::GenResult
+	{
+		bool success = false;
+		int width = 0;
+		int height = 0;
+		std::vector<msdf_atlas::GlyphGeometry> glyphs;
+		std::vector<byte> pixels;
+	};
+
+	std::unique_ptr<Font::GenResult> Font::generateSdf(std::string_view filepath)
 	{
 		using namespace msdf_atlas;
 		using namespace msdfgen;
-		bool success = false;
+
+		auto res = std::make_unique<Font::GenResult>();
+
 		freetypeHandle = msdfgen::initializeFreetype();
-		if (freetypeHandle)
+		if (not freetypeHandle) return res;
+
+		fontHandle = msdfgen::loadFont(freetypeHandle, filepath.data());
+		if (not fontHandle) return res;
+
+		auto& glyphs = res->glyphs;
+		msdf_atlas::FontGeometry fontGeometry(&glyphs);
+		fontGeometry.loadCharset(fontHandle, 1.0, createExtendedLatinCharset(), true, true);
+		// Apply MSDF edge coloring. See edge-coloring.h for other coloring strategies.
+		const double maxCornerAngle = 3.0;
+		for (GlyphGeometry& glyph : glyphs)
+			glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, maxCornerAngle, 0);
+
+		msdf_atlas::TightAtlasPacker packer;
+		packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
+		// setScale for a fixed size or setMinimumScale to use the largest that fits
+		packer.setMinimumScale(38.0);
+		// setPixelRange or setUnitRange
+		packer.setPixelRange(sdfPixelRange);
+		packer.setInnerPixelPadding(Padding(2));
+		packer.setOuterPixelPadding(Padding(2));
+		packer.setMiterLimit(1.0);
+		// Compute atlas layout - pack glyphs
+		packer.pack(glyphs.data(), glyphs.size());
+		// Get final atlas dimensions
+		auto& width = res->width;
+		auto& height = res->height;
+		packer.getDimensions(width, height);
+		using MtsdfGeneratorFunction = void (*)(const BitmapSection<float, 4>&, const GlyphGeometry&, const GeneratorAttributes&);
+		constexpr MtsdfGeneratorFunction fn = &mtsdfGenerator;
+		// The ImmediateAtlasGenerator class facilitates the generation of the atlas bitmap.
+		ImmediateAtlasGenerator<
+			float, // pixel type of buffer for individual glyphs depends on generator function
+			4, // number of atlas color channels
+			fn, // function to generate bitmaps for individual glyphs
+			BitmapAtlasStorage<byte, 4> // class that stores the atlas bitmap
+			// For example, a custom atlas storage class that stores it in VRAM can be used.
+		> generator(width, height);
+		// GeneratorAttributes can be modified to change the generator's default settings.
+		GeneratorAttributes attributes;
 		{
-			fontHandle = msdfgen::loadFont(freetypeHandle, filepath.data());
-			if (fontHandle)
-			{
-				std::vector<GlyphGeometry> glyphs;
-				FontGeometry fontGeometry(&glyphs);
-				fontGeometry.loadCharset(fontHandle, 1.0, createExtendedLatinCharset(), true, true);
-				// Apply MSDF edge coloring. See edge-coloring.h for other coloring strategies.
-				const double maxCornerAngle = 3.0;
-				for (GlyphGeometry& glyph : glyphs)
-					glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, maxCornerAngle, 0);
-				TightAtlasPacker packer;
-				packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
-				// setScale for a fixed size or setMinimumScale to use the largest that fits
-				packer.setMinimumScale(38.0);
-				// setPixelRange or setUnitRange
-				packer.setPixelRange(sdfPixelRange);
-				packer.setInnerPixelPadding(Padding(2));
-				packer.setOuterPixelPadding(Padding(2));
-				packer.setMiterLimit(1.0);
-				// Compute atlas layout - pack glyphs
-				packer.pack(glyphs.data(), glyphs.size());
-				// Get final atlas dimensions
-				int width = 0, height = 0;
-				packer.getDimensions(width, height);
-				using MtsdfGeneratorFunction = void (*)(const BitmapSection<float, 4>&, const GlyphGeometry&, const GeneratorAttributes&);
-				constexpr MtsdfGeneratorFunction fn = &mtsdfGenerator;
-				// The ImmediateAtlasGenerator class facilitates the generation of the atlas bitmap.
-				ImmediateAtlasGenerator<
-					float, // pixel type of buffer for individual glyphs depends on generator function
-					4, // number of atlas color channels
-					fn, // function to generate bitmaps for individual glyphs
-					BitmapAtlasStorage<byte, 4> // class that stores the atlas bitmap
-					// For example, a custom atlas storage class that stores it in VRAM can be used.
-				> generator(width, height);
-				// GeneratorAttributes can be modified to change the generator's default settings.
-				GeneratorAttributes attributes;
-				{
-					ErrorCorrectionConfig correctionConf(ErrorCorrectionConfig::Mode::EDGE_PRIORITY,
-							ErrorCorrectionConfig::DistanceCheckMode::CHECK_DISTANCE_AT_EDGE);
-					attributes.config = MSDFGeneratorConfig(true, correctionConf);
-				}
-				generator.setAttributes(attributes);
-				generator.setThreadCount(4);
-				// Generate atlas bitmap
-				// The glyphs array (or fontGeometry) contains positioning data for typesetting text.
-				generator.generate(glyphs.data(), glyphs.size());
-				auto bitmap = static_cast<BitmapConstRef<byte, 4>>(generator.atlasStorage());
-				width = bitmap.width;
-				height = bitmap.height;
-
-				// upload atlas texture to GPU
-				const size_t size = static_cast<size_t>(width) * static_cast<size_t>(height) * (sizeof(byte) * 4);
-				GBuffer stagingBuffer
-				{
-					device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-				};
-				// copy font atlas texture in reverse order
-				stagingBuffer.map(size);
-				byte* p = reinterpret_cast<byte*>(stagingBuffer.getMappedMemory());
-				for (int y = 0; y < height; ++y)
-				{
-					const byte* src = bitmap.pixels + (height - 1 - y) * width * 4;
-					void* dst = (p + y * width * 4);
-					memcpy(dst, src, width * 4);
-				}
-				stagingBuffer.unmap();
-
-				texture = Image::fromFontAtlas(device, stagingBuffer, width, height);
-				texIndex = texManager.registerTexture(texture);
-
-				for (const GlyphGeometry& g : glyphs)
-				{
-					double l, b, r, t;
-					g.getQuadAtlasBounds(l, b, r, t);
-					GlyphInfo gl = {};
-					gl.u0 = float(l / width);
-					gl.v0 = float(1.0 - t / height);
-					gl.u1 = float(r / width);
-					gl.v1 = float(1.0 - b / height);
-					g.getQuadPlaneBounds(l, b, r, t);
-					gl.l = float(l);
-					gl.b = float(b);
-					gl.r = float(r);
-					gl.t = float(t);
-					gl.advance = float(g.getAdvance());
-
-					glyphInfos[g.getCodepoint()] = gl;
-				}
-			}
+			ErrorCorrectionConfig correctionConf(ErrorCorrectionConfig::Mode::EDGE_PRIORITY,
+				ErrorCorrectionConfig::DistanceCheckMode::CHECK_DISTANCE_AT_EDGE);
+			attributes.config = MSDFGeneratorConfig(true, correctionConf);
 		}
+		generator.setAttributes(attributes);
+		generator.setThreadCount(4);
+		// Generate atlas bitmap
+		// The glyphs array (or fontGeometry) contains positioning data for typesetting text.
+		generator.generate(glyphs.data(), glyphs.size());
+
+		msdfgen::BitmapConstRef<byte, 4> atlasView = generator.atlasStorage();
+		width = atlasView.width;
+		height = atlasView.height;
+		res->pixels.resize(static_cast<size_t>(width) * height * 4);
+		std::memcpy(res->pixels.data(), atlasView.pixels, res->pixels.size());
+
+		res->success = true;
+		return res;
+	}
+
+	bool Font::generateAtlas(EngineDevice& device, std::string_view filepath, EngineCore::BindlessTextureManager& texManager)
+	{
+		auto res = generateSdf(filepath);
+		if (not res->success) return false;
+		const auto& w = res->width;
+		const auto& h = res->height;
+
+		// upload atlas texture to GPU
+		const size_t size = static_cast<size_t>(w) * static_cast<size_t>(h) * (sizeof(byte) * 4);
+		GBuffer stagingBuffer
+		{
+			device, size, 1, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+		// copy font atlas texture in reverse order
+		stagingBuffer.map(size);
+		byte* p = reinterpret_cast<msdfgen::byte*>(stagingBuffer.getMappedMemory());
+		for (int y = 0; y < h; ++y)
+		{
+			const byte* src = res->pixels.data() + (h - 1 - y) * w * 4;
+			void* dst = (p + y * w * 4);
+			memcpy(dst, src, w * 4);
+		}
+		stagingBuffer.unmap();
+
+		auto atlasTexture = Image::fromFontAtlas(device, stagingBuffer, w, h);
+		texIndex = texManager.registerTexture(atlasTexture);
+
+		for (const msdf_atlas::GlyphGeometry& g : res->glyphs)
+		{
+			double l, b, r, t;
+			g.getQuadAtlasBounds(l, b, r, t);
+			GlyphInfo gl = {};
+			gl.u0 = float(l / w);
+			gl.v0 = float(1.0 - t / h);
+			gl.u1 = float(r / w);
+			gl.v1 = float(1.0 - b / h);
+			g.getQuadPlaneBounds(l, b, r, t);
+			gl.l = float(l);
+			gl.b = float(b);
+			gl.r = float(r);
+			gl.t = float(t);
+			gl.advance = float(g.getAdvance());
+
+			glyphInfos[g.getCodepoint()] = gl;
+		}
+
 		getMetrics();
-		return success;
+		texture = std::move(atlasTexture);
+		return true;
 	}
 
 	float Font::getKerning(char32_t a, char32_t b) const
