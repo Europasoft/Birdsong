@@ -13,6 +13,7 @@
 #include "core/engine/interop/GameLoader.h"
 #include "core/draw/planets/PlanetDrawer.h"
 #include "core/ui/Fonts.h"
+#include "editor/Editor.h"
 
 #include <stdexcept>
 #include <array>
@@ -44,6 +45,7 @@ namespace EngineCore
 		renderer = std::make_unique<Renderer>(*window, *device, renderSettings);
 		world = std::make_unique<WorldSystem::World>(*device, *this);
 		gameLoader = std::make_unique<GameLoader>(this);
+		editor = std::make_unique<Editor::Editor>();
 		try
 		{
 			gameLoader->loadDll("Game");
@@ -113,6 +115,7 @@ namespace EngineCore
 		uiDrawer = std::make_unique<InterfaceDrawer>(*device, *drawContext);
 		debugDrawer = std::make_unique<DebugDrawer>(*device, *drawContext);
 		//planetDrawer = std::make_unique<PlanetDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
+		editor->initEditorUI(*device, *drawContext);
 	}
 
 	void EngineApplication::setupDefaultInputs()
@@ -157,7 +160,7 @@ namespace EngineCore
 
 		debugDrawer->render(f);
 
-		uiDrawer->render(f);
+		editor->renderUI(f);
 
 		renderer->endRendering(f.commandBuffer);
 

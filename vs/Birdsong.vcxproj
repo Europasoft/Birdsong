@@ -269,6 +269,8 @@
     <ClInclude Include="..\src\deps\box3d-cpp\include\b3cpp_world.h" />
     <ClInclude Include="..\src\deps\box3d-cpp\private\b3cpp_utils.h" />
     <ClInclude Include="..\src\deps\europasoft-json\Source\Parser.h" />
+    <ClInclude Include="..\src\editor\Editor.h" />
+    <ClInclude Include="..\src\editor\EditorUI.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\artery-font-export.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasGenerator.h" />
     <ClInclude Include="..\src\thirdparty\msdf-atlas-gen-lite\msdf-atlas-gen\AtlasStorage.h" />
@@ -455,6 +457,8 @@
     <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_shape.cpp" />
     <ClCompile Include="..\src\deps\box3d-cpp\private\b3cpp_world.cpp" />
     <ClCompile Include="..\src\deps\europasoft-json\Source\Parser.cpp" />
+    <ClCompile Include="..\src\editor\Editor.cpp" />
+    <ClCompile Include="..\src\editor\EditorUI.cpp" />
     <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbase.c" />
     <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbbox.c" />
     <ClCompile Include="..\src\thirdparty\freetype-es\src\base\ftbitmap.c" />

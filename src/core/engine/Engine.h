@@ -16,6 +16,11 @@ namespace WorldSystem
 	class Scene;
 }
 
+namespace Editor
+{
+	class Editor;
+}
+
 namespace EngineCore
 {
 	class EngineWindow;
@@ -76,6 +81,9 @@ namespace EngineCore
 		
 		// the renderer manages the swapchain, renderpasses, and the vulkan command buffers
 		std::unique_ptr<Renderer> renderer;
+
+		// the editor handles development mode interactions and UI
+		std::unique_ptr<Editor::Editor> editor;
 
 		EngineClock engineClock{};
 

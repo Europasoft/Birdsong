@@ -487,6 +487,12 @@
     <ClCompile Include="..\src\core\asset\Collection.cpp">
       <Filter>core\asset</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\editor\Editor.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\editor\EditorUI.cpp">
+      <Filter>editor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -1068,6 +1074,12 @@
     <ClInclude Include="..\src\core\asset\Collection.h">
       <Filter>core\asset</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\editor\Editor.h">
+      <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\editor\EditorUI.h">
+      <Filter>editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">
@@ -1183,6 +1195,9 @@
     </Filter>
     <Filter Include="core\asset">
       <UniqueIdentifier>{6ab7aeb9-e001-4986-b8a7-e85dab6752c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="editor">
+      <UniqueIdentifier>{7608409e-a2cf-405e-8b30-7e4cf5d381a0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

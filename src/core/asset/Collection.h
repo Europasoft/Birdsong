@@ -1,3 +1,4 @@
+// Copyright 2026 Simon Liimatainen. All rights reserved.
 #pragma once
 
 #include <vector>
