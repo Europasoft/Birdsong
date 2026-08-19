@@ -166,6 +166,11 @@ namespace EngineCore
 			glm::mat4 transform{ 1.f };
 			glm::vec4 color;
 		};
+
+		struct ViewportPushConstants
+		{
+			glm::vec4 positionAndSize;
+		};
 	}
 
 	namespace ShaderInstanceData

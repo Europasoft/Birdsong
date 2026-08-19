@@ -30,16 +30,13 @@ namespace EngineCore
 		attachmentSet->addImageArray(inputImages);
 		attachmentSet->finalize();
 
-		// descriptor set 2
-		uboSet = std::make_unique<DescriptorSet>(device);
-		UBO_Struct ubo{};
-		ubo.add(uelem::vec2); // viewport extent value to be used in shader
-		uboSet->addUBO(ubo, device);
-		uboSet->addSampler(createSampler()); // the sampler is not connected to any specific image, but the shader needs one
-		uboSet->finalize();
+		// descriptor set 2 (sampler)
+		samplerSet = std::make_unique<DescriptorSet>(device);
+		samplerSet->addSampler(createSampler()); // the sampler is not connected to any specific image, but the shader needs one
+		samplerSet->finalize();
 
 		// bind the scene-global set, and the 2 specialized ones
-		auto layouts = std::vector<VkDescriptorSetLayout>{ d.world->getScene().getDescriptorSetLayouts()[0], attachmentSet->getLayout(), uboSet->getLayout()};
+		auto layouts = std::vector<VkDescriptorSetLayout>{ d.world->getScene().getDescriptorSetLayouts()[0], attachmentSet->getLayout(), samplerSet->getLayout()};
 
 		// setup material for the fullscreen shaders (no mesh, a fullscreen triangle is created in the vertex shader)
 		ShaderFilePaths fullscreenShader(makePath("shaders/compiled/fullscreen.vert.spv"), makePath("shaders/compiled/fullscreen.frag.spv"));
@@ -67,10 +64,6 @@ namespace EngineCore
 		const auto& frameIndex = d.renderer->getFrameIndex();
 		const auto& imageIndex = d.renderer->getSwapImageIndex();
 
-		// update viewport extent descriptor value
-		VkExtent2D extent = d.renderer->getSwapchainExtent();
-		uboSet->writeUBOMember(0, extent, UBO_Layout::ElementAccessor{0, 0, 0}, frameIndex);
-
 		d.renderer->beginRenderingFx(f.commandBuffer); // FX PASS START
 
 		// draw fullscreen
@@ -96,7 +89,7 @@ namespace EngineCore
 	void FxDrawer::bindDescriptorSets(VkCommandBuffer cmdBuffer, VkPipelineLayout pipelineLayout, uint32_t frameIndex, uint32_t swapImageIndex)
 	{
 		// note that sets 0-1 use frame index, but set 2 uses swapchain image index
-		std::array<VkDescriptorSet, 3> vkSets = { d.world->getScene().getDescriptorSets(frameIndex)[0], attachmentSet->getDescriptorSet(swapImageIndex), uboSet->getDescriptorSet(frameIndex)};
+		std::array<VkDescriptorSet, 3> vkSets = { d.world->getScene().getDescriptorSets(frameIndex)[0], attachmentSet->getDescriptorSet(swapImageIndex), samplerSet->getDescriptorSet(frameIndex)};
 		vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 3, vkSets.data(), 0, nullptr);
 	}
 

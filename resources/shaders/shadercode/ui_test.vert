@@ -13,7 +13,7 @@ layout(location = 3) out vec4 boxCornerRadii;
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
-    vec2 viewportExtent;
+    vec4 resolution; // viewport and swapchain resolutions in pixels;
 } ubo1;
 
 // second scene-global descriptor set: unbounded texture array
@@ -73,6 +73,7 @@ void main()
         vec2(1.0, 0.0)
     )[gl_VertexIndex];
 
-	boxSize = size * ubo1.viewportExtent; // pass size in actual screen pixels
+	// TODO: when rendering editor UI, the full swapchain extent should be used instead of viewport extent
+	boxSize = size * ubo1.resolution.xy; // pass size in actual screen pixels to fragment shader
 	boxCornerRadii = instance.cornerRadius;
 }

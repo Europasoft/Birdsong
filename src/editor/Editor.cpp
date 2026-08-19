@@ -27,9 +27,9 @@ namespace Editor
 		ui = std::make_unique<EditorUI>(device, d);
 	}
 
-	void Editor::renderUI(const FrameContext& f)
+	void Editor::renderUI(EngineCore::EngineDevice& device, const EngineCore::FrameContext& f, const EngineCore::DrawContext& d)
 	{
-		if (ui) ui->render(f);
+		if (ui) ui->render(device, f, d);
 	}
 
 

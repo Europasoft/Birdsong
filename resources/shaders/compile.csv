@@ -13,4 +13,6 @@ planet.vert,
 ui_test.frag,
 ui_test.vert,
 text.frag,
-text.vert
+text.vert,
+viewport.frag,
+viewport.vert

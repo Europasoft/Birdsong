@@ -103,6 +103,8 @@ namespace UI
 		virtual void handleInput(const EngineCore::FrameContext& f, PreDrawData& currentData, Vec2 renderPosition);
 		virtual bool cursorHitTest(const EngineCore::FrameContext& f, Vec2 renderPosition, Vec2 renderSize) const;
 		virtual void onClick() {};
+
+		const std::unique_ptr<EngineCore::InstanceBuffer<UIInst>>& getHierarchyInstanceBuffer() const;
 	};
 
 	class RootElement : public Element
@@ -124,5 +126,15 @@ namespace UI
 		std::unique_ptr<EngineCore::InstanceBuffer<UIInst>> hierarchyInstanceBuffer;
 		std::unique_ptr<EngineCore::InstanceBuffer<GlyphInst>> textGlyphInstanceBuffer;
 	};
+
+	constexpr float operator""_pct(unsigned long long vInt)
+	{
+		return static_cast<float>(vInt / 100.0);
+	}
+
+	constexpr float operator""_pct(long double vFloat)
+	{
+		return static_cast<float>(vFloat / 100.0);
+	}
 
 }

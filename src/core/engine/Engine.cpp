@@ -76,7 +76,7 @@ namespace EngineCore
 			f.scene = &f.world->getScene();
 			f.camera = &f.scene->getCurrentCamera();
 			f.delta = engineClock.measureFrameDelta(f.bufferIndex);
-			f.viewportExtent = renderer->getSwapchainExtent();
+			f.viewportExtent = renderer->getViewportExtent();
 			f.mousePosition = window->input.getMousePosition();
 			f.leftClick = window->input.wasMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT);
 			f.rightClick = window->input.wasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT);
@@ -105,17 +105,19 @@ namespace EngineCore
 		drawContext->world = world.get();
 		drawContext->renderer = renderer.get();
 		drawContext->basePassFormats = renderer->getBasePassFormats();
-		drawContext->fxPassFormats = renderer->getFxPassFormats();	
+		drawContext->fxPassFormats = renderer->getFxPassFormats();
+		drawContext->postFxPassFormats = renderer->getPostFxPassFormats();
 		drawContext->samples = renderSettings.sampleCountMSAA;
 
 		auto& sceneGlobalDescriptorSet = world->getScene().getSceneGlobalDescriptorSet();
 		meshDrawer = std::make_unique<MeshDrawer>(*device, *drawContext);
 		skyDrawer = std::make_unique<SkyDrawer>(*device, *drawContext);
 		fxDrawer = std::make_unique<FxDrawer>(*device, *drawContext);
-		uiDrawer = std::make_unique<InterfaceDrawer>(*device, *drawContext);
 		debugDrawer = std::make_unique<DebugDrawer>(*device, *drawContext);
 		//planetDrawer = std::make_unique<PlanetDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
 		editor->initEditorUI(*device, *drawContext);
+		viewportDrawer = std::make_unique<ViewportDrawer>(*device, *drawContext);
+		drawContext->viewportDrawer = viewportDrawer.get();
 	}
 
 	void EngineApplication::setupDefaultInputs()
@@ -160,12 +162,15 @@ namespace EngineCore
 
 		debugDrawer->render(f);
 
-		editor->renderUI(f);
+		editor->renderUI(*device.get(), f, *drawContext);
 
 		renderer->endRendering(f.commandBuffer);
 
 		// RENDER FX PASS
 		fxDrawer->render(f);
+
+		// RENDER VIEWPORT (POST-FX PASS)
+		viewportDrawer->render(f);
 
 		// submit command buffer
 		renderer->endFrame(); 

@@ -12,29 +12,25 @@ layout (location = 0) out vec4 outColor;
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
+	vec4 resolution; // viewport and swapchain resolutions in pixels
 } ubo1;
 // FX DESCRIPTOR SET - ATTACHMENT FROM PREVIOUS PASS
 layout(set = 1, binding = 0) uniform texture2D attachment;
-// FX DESCRIPTOR SET - UBO
-layout(std430, set = 2, binding = 0) uniform UBO2
-{
-	vec2 extent;
-} fx;
-layout(set = 2, binding = 1) uniform sampler _attachmentSampler;
+// FX DESCRIPTOR SET - SAMPLER
+layout(set = 2, binding = 0) uniform sampler _attachmentSampler;
 
 
 void main()
 {
-	vec2 resolution = vec2(1920, 1080); // hardcoded resolution!
-
+	vec2 res = ubo1.resolution.xy; // viewport extent in pixels
 
 	float Pi = 6.28318530718; // Pi*2
     float Directions = 16.0; // BLUR DIRECTIONS (Default 16.0 - More is better but slower)
     float Quality = 6.0; // BLUR QUALITY (Default 4.0 - More is better but slower)
     float Size = 7.0; // BLUR SIZE (Radius)
-    vec2 Radius = Size/resolution;
-	vec2 uv = gl_FragCoord.xy / resolution;
-	uv = gl_FragCoord.xy / resolution + fragNormalWS.xy / 20.0;
+    vec2 Radius = Size / res;
+	vec2 uv = gl_FragCoord.xy / res;
+	uv = gl_FragCoord.xy / res + fragNormalWS.xy / 20.0;
 	vec4 color = texture(sampler2D(attachment, _attachmentSampler), uv);
 	for(float d=0.0; d<Pi; d+=Pi/Directions)
     {

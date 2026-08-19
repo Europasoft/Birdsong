@@ -25,6 +25,7 @@ namespace EngineCore
 		// rendering format info for pipeline creation (VK_KHR_dynamic_rendering)
 		const RenderingFormats& getBasePassFormats() const { return basePassFormats; }
 		const RenderingFormats& getFxPassFormats() const { return fxPassFormats; }
+		const RenderingFormats& getPostFxPassFormats() const { return postFxPassFormats; }
 
 		bool getIsFrameInProgress() const { return isFrameStarted; }
 
@@ -44,6 +45,8 @@ namespace EngineCore
 
 		float getSwapchainAspectRatio() const;
 		VkExtent2D getSwapchainExtent() const { return swapchain->getExtent(); }
+		VkExtent2D getViewportExtent() const;
+		void setViewportExtent(VkExtent2D ext) { viewportExtent = ext; }
 
 		// returns a command buffer to record commands into
 		VkCommandBuffer beginFrame();
@@ -53,10 +56,12 @@ namespace EngineCore
 		// dynamic rendering (VK_KHR_dynamic_rendering)
 		void beginRenderingBase(VkCommandBuffer cmdBuffer);
 		void beginRenderingFx(VkCommandBuffer cmdBuffer);
+		void beginRenderingPostFx(VkCommandBuffer cmdBuffer);
 		void endRendering(VkCommandBuffer cmdBuffer);
 
 		const std::vector<VkImageView>& getFxPassInputImageViews() const { return fxPassInputImageViews; }
 		const std::vector<VkImageView>& getFxPassInputDepthImageViews() const { return fxPassInputDepthImageViews; }
+		const std::vector<VkImageView>& getPostFxPassInputImageViews() const { return postFxPassInputImageViews; }
 
 		std::function<void(void)> swapchainCreatedCallback;
 
@@ -76,7 +81,8 @@ namespace EngineCore
 		}
 
 		// image layout transition helper
-		void transitionImageLayout(VkCommandBuffer cmdBuffer, VkImage image, 
+		friend struct ImageLayoutChanger;
+		static void transitionImageLayout(VkCommandBuffer cmdBuffer, VkImage image, 
 									VkImageLayout oldLayout, VkImageLayout newLayout,
 									VkAccessFlags srcAccess, VkAccessFlags dstAccess,
 									VkPipelineStageFlags srcStage, VkPipelineStageFlags dstStage,
@@ -85,17 +91,21 @@ namespace EngineCore
 		std::vector<std::unique_ptr<Attachment>> attachments;
 		std::vector<VkImageView> fxPassInputImageViews; // view(s) to the color attachment image rendered by the first renderpass
 		std::vector<VkImageView> fxPassInputDepthImageViews;
+		std::vector<VkImageView> postFxPassInputImageViews;
 		
 		// rendering format info for VK_KHR_dynamic_rendering
 		RenderingFormats basePassFormats;
 		RenderingFormats fxPassFormats;
+		RenderingFormats postFxPassFormats;
 
 		// attachment pointers for dynamic rendering (non-owning, attachments vector owns them)
 		const Attachment* colorAttachment = nullptr;
 		const Attachment* colorResolveAttachment = nullptr;
 		const Attachment* depthAttachment = nullptr;
 		const Attachment* depthResolveAttachment = nullptr;
+		const Attachment* fxColorAttachment = nullptr;
 
+		VkExtent2D viewportExtent = { 1400, 900 };
 		EngineWindow& window;
 		EngineDevice& device;
 		EngineRenderSettings& renderSettings;

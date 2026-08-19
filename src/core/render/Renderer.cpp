@@ -2,6 +2,7 @@
 #include "core/engine/Window.h"
 #include "core/gpu/Device.h"
 #include "core/engine/EngineSettings.h"
+#include "core/engine/Engine.h"
 
 #include <GLFW/glfw3.h> // GL Framework (GLFW) used to create an engine window
 
@@ -75,9 +76,13 @@ namespace EngineCore
 		// clear previous attachments
 		attachments.clear();
 
+		// attachment resolution may be smaller than swapchain when in editor
+		const auto extent = getViewportExtent();
+
 		AttachmentProperties color = swapchain->getAttachmentProperties();
 		color.type = AttachmentType::COLOR;
 		color.samples = renderSettings.sampleCountMSAA;
+		color.extent = extent;
 
 		AttachmentProperties resolve = color;
 		resolve.type = AttachmentType::RESOLVE;
@@ -91,22 +96,33 @@ namespace EngineCore
 		depthResolve.type = AttachmentType::DEPTH_STENCIL_RESOLVE;
 		depthResolve.samples = VK_SAMPLE_COUNT_1_BIT;
 
+		AttachmentProperties fxColor = resolve;
+		fxColor.type = AttachmentType::COLOR; // non-MSAA color target
+
 		// create attachments and store pointers for rendering
 		colorAttachment = &addAttachment(color, false, false);
 		colorResolveAttachment = &addAttachment(resolve, false, true);
 		depthAttachment = &addAttachment(depth, false, false);
 		depthResolveAttachment = &addAttachment(depthResolve, false, true);
+		fxColorAttachment = &addAttachment(fxColor, false, true);
 
-		// bound to descriptor set to be sampled in fx pass
+		// bound to descriptor set to be sampled in FX pass
 		fxPassInputImageViews = colorResolveAttachment->getImageViews();
 		fxPassInputDepthImageViews = depthAttachment->getImageViews();
+
+		// bound to descriptor set for post-FX pass
+		postFxPassInputImageViews = fxColorAttachment->getImageViews();
 
 		// setup rendering formats for VK_KHR_dynamic_rendering pipeline creation
 		basePassFormats.colorFormats = { color.format };
 		basePassFormats.depthFormat = depth.format;
 
-		fxPassFormats.colorFormats = { swapchain->getSwapChainImageFormat() };
+		// FX pass renders to the intermediate attachment
+		fxPassFormats.colorFormats = { fxColor.format };
 		fxPassFormats.depthFormat = depthResolve.format;
+
+		postFxPassFormats.colorFormats = { swapchain->getSwapChainImageFormat() };
+		postFxPassFormats.depthFormat = depthResolve.format;
 	}
 
 	void Renderer::transitionImageLayout(VkCommandBuffer cmdBuffer, VkImage image, 
@@ -132,6 +148,39 @@ namespace EngineCore
 
 		vkCmdPipelineBarrier(cmdBuffer, srcStage, dstStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 	}
+
+	struct ImageLayoutChanger
+	{
+		VkCommandBuffer cmdBuffer;
+		VkImage image;
+		VkImageLayout oldLayout_ = VK_IMAGE_LAYOUT_UNDEFINED;
+		VkAccessFlags srcAccess_ = 0;
+		VkPipelineStageFlags srcStage_ = 0;
+
+		ImageLayoutChanger(VkCommandBuffer cmdBuffer, VkImage image)
+			: cmdBuffer(cmdBuffer), image(image) {};
+
+		ImageLayoutChanger change(VkCommandBuffer cmdBuffer, VkImage image)
+		{
+			return ImageLayoutChanger(cmdBuffer, image);
+		}
+		
+		ImageLayoutChanger& from(VkImageLayout oldLayout, VkAccessFlags srcAccess, VkPipelineStageFlags srcStage)
+		{
+			oldLayout_ = oldLayout;
+			srcAccess_ = srcAccess;
+			srcStage_ = srcStage;
+			return *this;
+		}
+
+		void to(VkImageLayout newLayout, VkAccessFlags dstAccess, VkPipelineStageFlags dstStage)
+		{
+			Renderer::transitionImageLayout(cmdBuffer, image,
+				oldLayout_, newLayout,
+				srcAccess_, dstAccess,
+				srcStage_, dstStage);
+		}
+	};
 
 	void Renderer::beginRenderingBase(VkCommandBuffer cmdBuffer)
 	{
@@ -200,9 +249,11 @@ namespace EngineCore
 		depthAttachmentInfo.resolveImageView = depthResolveViews[currentImageIndex];
 		depthAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+		const auto extent = getViewportExtent();
+
 		VkRenderingInfo renderingInfo{};
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-		renderingInfo.renderArea = {{0, 0}, swapchain->getExtent()};
+		renderingInfo.renderArea = {{0, 0}, extent };
 		renderingInfo.layerCount = 1;
 		renderingInfo.colorAttachmentCount = 1;
 		renderingInfo.pColorAttachments = &colorAttachmentInfo;
@@ -212,12 +263,12 @@ namespace EngineCore
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(swapchain->getExtent().width);
-		viewport.height = static_cast<float>(swapchain->getExtent().height);
+		viewport.width = static_cast<float>(extent.width);
+		viewport.height = static_cast<float>(extent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
-		VkRect2D scissor{{0, 0}, swapchain->getExtent()};
+		VkRect2D scissor{{0, 0}, extent };
 
 		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
@@ -231,7 +282,7 @@ namespace EngineCore
 
 		auto resolveImages = colorResolveAttachment->getImages();
 		auto depthResolveViews = depthResolveAttachment->getImageViews();
-		auto swapchainViews = swapchain->getSwapchainAttachment().getImageViews();
+		auto fxColorViews = fxColorAttachment->getImageViews();
 
 		// transition the resolved color attachment to shader read for sampling in FX pass
 		transitionImageLayout(cmdBuffer, 
@@ -240,17 +291,17 @@ namespace EngineCore
 			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
 
-		// transition swapchain image to color attachment
-		transitionImageLayout(cmdBuffer, 
-			swapchain->getSwapChainImages()[currentImageIndex],
+		// transition intermediate FX image to color attachment
+		transitionImageLayout(cmdBuffer,
+			fxColorAttachment->getImages()[currentImageIndex],
 			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 			0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 
-		// swapchain color attachment
+		// intermediate FX color attachment
 		VkRenderingAttachmentInfo colorAttachmentInfo{};
 		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
-		colorAttachmentInfo.imageView = swapchainViews[currentImageIndex];
+		colorAttachmentInfo.imageView = fxColorViews[currentImageIndex];
 		colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 		colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -264,9 +315,11 @@ namespace EngineCore
 		depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
+		const auto extent = getViewportExtent();
+
 		VkRenderingInfo renderingInfo{};
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
-		renderingInfo.renderArea = {{0, 0}, swapchain->getExtent()};
+		renderingInfo.renderArea = {{0, 0}, extent };
 		renderingInfo.layerCount = 1;
 		renderingInfo.colorAttachmentCount = 1;
 		renderingInfo.pColorAttachments = &colorAttachmentInfo;
@@ -276,12 +329,59 @@ namespace EngineCore
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(swapchain->getExtent().width);
-		viewport.height = static_cast<float>(swapchain->getExtent().height);
+		viewport.width = static_cast<float>(extent.width);
+		viewport.height = static_cast<float>(extent.height);
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
-		VkRect2D scissor{{0, 0}, swapchain->getExtent()};
+		VkRect2D scissor{{0, 0}, extent };
+
+		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
+		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+
+		vkCmdBeginRendering(cmdBuffer, &renderingInfo);
+	}
+
+	void Renderer::beginRenderingPostFx(VkCommandBuffer cmdBuffer)
+	{
+		assert(isFrameStarted && "failed to begin rendering, no frame in progress");
+
+		auto fxImages = fxColorAttachment->getImages();
+		auto swapchainViews = swapchain->getSwapchainAttachment().getImageViews();
+
+		// transition FX intermediate attachment to shader read
+		transitionImageLayout(cmdBuffer,
+			fxImages[currentImageIndex],
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+
+		// transition swapchain image to color attachment
+		transitionImageLayout(cmdBuffer,
+			swapchain->getSwapChainImages()[currentImageIndex],
+			VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
+
+		VkRenderingAttachmentInfo colorAttachmentInfo{};
+		colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+		colorAttachmentInfo.imageView = swapchainViews[currentImageIndex];
+		colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE; // can overwrite entire screen
+		colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+		const auto extent = getSwapchainExtent(); // using full swapchain resolution, as this is the final pass
+
+		VkRenderingInfo renderingInfo{};
+		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+		renderingInfo.renderArea = { {0, 0}, extent };
+		renderingInfo.layerCount = 1;
+		renderingInfo.colorAttachmentCount = 1;
+		renderingInfo.pColorAttachments = &colorAttachmentInfo;
+		renderingInfo.pDepthAttachment = nullptr; // depth not needed unless explicitly testing against it
+
+		VkViewport viewport{ 0.0f, 0.0f, static_cast<float>(extent.width), static_cast<float>(extent.height), 0.0f, 1.0f };
+		VkRect2D scissor{ {0, 0}, extent };
 
 		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
@@ -352,5 +452,11 @@ namespace EngineCore
 	//VkRenderPass Renderer::getSwapchainRenderPass() const { return swapchain->getRenderPass(); }
 
 	float Renderer::getSwapchainAspectRatio() const { return swapchain->getExtentAspectRatio(); }
+
+	VkExtent2D Renderer::getViewportExtent() const
+	{
+		assert(viewportExtent.width > 0 && viewportExtent.height > 0);
+		return viewportExtent;
+	}
 
 }

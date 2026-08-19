@@ -165,12 +165,12 @@
     <ClInclude Include="..\src\core\draw\DrawIncludes.h" />
     <ClInclude Include="..\src\core\draw\FrameContext.h" />
     <ClInclude Include="..\src\core\draw\FxDrawer.h" />
-    <ClInclude Include="..\src\core\draw\InterfaceDrawer.h" />
     <ClInclude Include="..\src\core\draw\MeshDrawer.h" />
     <ClInclude Include="..\src\core\draw\planets\DisplacementBuffer.h" />
     <ClInclude Include="..\src\core\draw\planets\PlanetDrawer.h" />
     <ClInclude Include="..\src\core\draw\planets\TerrainPatch.h" />
     <ClInclude Include="..\src\core\draw\SkyDrawer.h" />
+    <ClInclude Include="..\src\core\draw\ViewportDrawer.h" />
     <ClInclude Include="..\src\core\engine\Camera.h" />
     <ClInclude Include="..\src\core\engine\Engine.h" />
     <ClInclude Include="..\src\core\engine\EngineClock.h" />
@@ -211,6 +211,7 @@
     <ClInclude Include="..\src\core\ui\Element.h" />
     <ClInclude Include="..\src\core\ui\Fonts.h" />
     <ClInclude Include="..\src\core\ui\TextBox.h" />
+    <ClInclude Include="..\src\core\ui\VirtualViewport.h" />
     <ClInclude Include="..\src\core\world\NodeContainer.h" />
     <ClInclude Include="..\src\core\world\Scene.h" />
     <ClInclude Include="..\src\core\world\Sector.h" />
@@ -360,12 +361,12 @@
     <ClCompile Include="..\src\core\draw\DebugDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\DrawBase.cpp" />
     <ClCompile Include="..\src\core\draw\FxDrawer.cpp" />
-    <ClCompile Include="..\src\core\draw\InterfaceDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\MeshDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\planets\DisplacementBuffer.cpp" />
     <ClCompile Include="..\src\core\draw\planets\PlanetDrawer.cpp" />
     <ClCompile Include="..\src\core\draw\planets\TerrainPatch.cpp" />
     <ClCompile Include="..\src\core\draw\SkyDrawer.cpp" />
+    <ClCompile Include="..\src\core\draw\ViewportDrawer.cpp" />
     <ClCompile Include="..\src\core\engine\Camera.cpp" />
     <ClCompile Include="..\src\core\engine\Engine.cpp" />
     <ClCompile Include="..\src\core\engine\interop\GameLoader.cpp" />
@@ -397,6 +398,7 @@
     <ClCompile Include="..\src\core\ui\Element.cpp" />
     <ClCompile Include="..\src\core\ui\Fonts.cpp" />
     <ClCompile Include="..\src\core\ui\TextBox.cpp" />
+    <ClCompile Include="..\src\core\ui\VirtualViewport.cpp" />
     <ClCompile Include="..\src\core\world\NodeContainer.cpp" />
     <ClCompile Include="..\src\core\world\Scene.cpp" />
     <ClCompile Include="..\src\core\world\Sector.cpp" />

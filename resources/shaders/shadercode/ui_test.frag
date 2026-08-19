@@ -15,7 +15,7 @@ layout (location = 0) out vec4 outColor;
 layout(std430, set = 0, binding = 0) uniform UBO1 
 {
 	mat4 projectionViewMatrix;
-    vec2 viewportExtent;
+    vec4 resolution; // viewport and swapchain resolutions in pixels
 } ubo1;
 
 // second scene-global descriptor set: unbounded texture array

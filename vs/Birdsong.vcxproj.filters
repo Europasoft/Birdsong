@@ -10,9 +10,6 @@
     <ClCompile Include="..\src\core\draw\SkyDrawer.cpp">
       <Filter>core\draw</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\draw\InterfaceDrawer.cpp">
-      <Filter>core\draw</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\draw\MeshDrawer.cpp">
       <Filter>core\draw</Filter>
     </ClCompile>
@@ -493,6 +490,12 @@
     <ClCompile Include="..\src\editor\EditorUI.cpp">
       <Filter>editor</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\core\ui\VirtualViewport.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\draw\ViewportDrawer.cpp">
+      <Filter>core\draw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\core\draw\DrawIncludes.h">
@@ -505,9 +508,6 @@
       <Filter>core\draw</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\draw\SkyDrawer.h">
-      <Filter>core\draw</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\core\draw\InterfaceDrawer.h">
       <Filter>core\draw</Filter>
     </ClInclude>
     <ClInclude Include="..\src\core\draw\MeshDrawer.h">
@@ -1079,6 +1079,12 @@
     </ClInclude>
     <ClInclude Include="..\src\editor\EditorUI.h">
       <Filter>editor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\ui\VirtualViewport.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\core\draw\ViewportDrawer.h">
+      <Filter>core\draw</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

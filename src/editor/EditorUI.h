@@ -27,7 +27,7 @@ namespace Editor
 		EditorUI(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d);
 		~EditorUI();
 
-		void render(const EngineCore::FrameContext& f);
+		void render(EngineCore::EngineDevice& device, const EngineCore::FrameContext& f, const EngineCore::DrawContext& d);
 
 	protected:
 		std::unique_ptr<UI::RootElement> rootElement;

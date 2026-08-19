@@ -32,6 +32,7 @@ namespace EngineCore
 	class InterfaceDrawer;
 	class DebugDrawer;
 	class PlanetDrawer;
+	class ViewportDrawer;
 	class GameLoader;
 	class Camera;
 	struct FrameContext;
@@ -91,9 +92,9 @@ namespace EngineCore
 		std::unique_ptr<MeshDrawer> meshDrawer;
 		std::unique_ptr<SkyDrawer> skyDrawer;
 		std::unique_ptr<FxDrawer> fxDrawer;
-		std::unique_ptr<InterfaceDrawer> uiDrawer;
 		std::unique_ptr<DebugDrawer> debugDrawer;
 		std::unique_ptr<PlanetDrawer> planetDrawer;
+		std::unique_ptr<ViewportDrawer> viewportDrawer;
 
 		std::unique_ptr<GameLoader> gameLoader;
 		std::unique_ptr<WorldSystem::World> world;

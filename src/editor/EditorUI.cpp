@@ -5,6 +5,7 @@
 #include "core/ui/Box.h"
 #include "core/ui/Element.h"
 #include "core/ui/Fonts.h"
+#include "core/ui/VirtualViewport.h"
 
 namespace Editor
 {
@@ -16,7 +17,6 @@ namespace Editor
 	EditorUI::EditorUI(EngineDevice& device, const DrawContext& d)
 	{
 		loadDefaultFonts(device, d);
-		buildUI(device, d);
 	}
 
 	EditorUI::~EditorUI() = default;
@@ -25,6 +25,10 @@ namespace Editor
 	{
 		rootElement = RootElement::create(device);
 
+		auto& viewportElement = rootElement->addElement<VirtualViewport>();
+		viewportElement.init(d);
+
+		/*
 		HorizontalBox& box = rootElement->addElement<HorizontalBox>();
 		box.loadMaterial(device, d);
 		box.size = Vec2(0.66f);
@@ -61,10 +65,14 @@ namespace Editor
 		text2.alignHorizontal = UI::TextBox::EAlignH::CENTER;
 		text2.alignVertical = UI::TextBox::EAlignV::CENTER;
 		text2.setCornerRadius(35.f);
+		*/
 	}
 
-	void EditorUI::render(const FrameContext& f)
+	void EditorUI::render(EngineCore::EngineDevice& device, const EngineCore::FrameContext& f, const EngineCore::DrawContext& d)
 	{
+		if (not rootElement) 
+			buildUI(device, d);
+
 		rootElement->drawAll(f);
 	}
 

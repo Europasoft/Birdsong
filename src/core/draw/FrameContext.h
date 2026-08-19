@@ -11,6 +11,7 @@ namespace EngineCore
 {
 	class Renderer;
 	struct RenderingFormats;
+	class ViewportDrawer;
 
 	struct FrameContext
 	{
@@ -31,6 +32,8 @@ namespace EngineCore
 		WorldSystem::World* world;
 		RenderingFormats basePassFormats;
 		RenderingFormats fxPassFormats;
+		RenderingFormats postFxPassFormats;
 		VkSampleCountFlagBits samples;
+		ViewportDrawer* viewportDrawer;
 	};
 }

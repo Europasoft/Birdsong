@@ -169,6 +169,11 @@ namespace UI
 			&& (f.mousePosition.y >= pixelBoundsY.x) && (f.mousePosition.y <= pixelBoundsY.y);
 	}
 
+    const std::unique_ptr<EngineCore::InstanceBuffer<UIInst>>& Element::getHierarchyInstanceBuffer() const
+    {
+		return root->hierarchyInstanceBuffer;
+    }
+
 	bool Element::isRoot() const
 	{
 		return root == this;
