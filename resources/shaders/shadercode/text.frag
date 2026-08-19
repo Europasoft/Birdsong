@@ -8,6 +8,8 @@ layout(location = 0) in vec2 fragUV;
 
 layout (location = 0) out vec4 outColor;
 
+// scene-global descriptor set 0 is available but not needed here
+
 // second scene-global descriptor set: unbounded texture array
 layout(set = 1, binding = 0) uniform sampler2D globalTextures[];
 
@@ -16,9 +18,8 @@ struct GlyphInstanceData
 {
 	vec4 uvs;
 	vec4 vertexBounds;
-	vec2 basePos;
-	float fontScale;
-	uint textureIndex;
+	vec4 basePosFontScaleAndTextureIndex; // xy = basePos, z = fontScale, w = textureIndex
+	vec4 targetAttachmentResolution; // may be drawing to a smaller viewport or the full swapchain image
 };
 
 // glypth instance buffer passed by BDA
@@ -41,11 +42,13 @@ float median(float r, float g, float b)
 
 float sdfOpacity(GlyphInstanceData instance)
 {
-	vec4 s = texture(globalTextures[nonuniformEXT(instance.textureIndex)], fragUV); // sample SDF atlas texture
+    uint textureIndex = floatBitsToUint(instance.basePosFontScaleAndTextureIndex.w);
+
+	vec4 s = texture(globalTextures[nonuniformEXT(textureIndex)], fragUV); // sample SDF atlas texture
     float sd = median(s.r, s.g, s.b) - 0.5; // raw distance centred at 0
 
     // texture size in pixels
-    vec2 atlasSize = vec2(textureSize(globalTextures[nonuniformEXT(instance.textureIndex)], 0));
+    vec2 atlasSize = vec2(textureSize(globalTextures[nonuniformEXT(textureIndex)], 0));
 
     // screen-space scale factor, converts texels to screen pixels
     float pxRange = 9.0; // should match the sdfPixelRange used during atlas generation (see Fonts.h)

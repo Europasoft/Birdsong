@@ -46,7 +46,7 @@ namespace UI
 		std::vector<Line> processLines(const EngineCore::FrameContext& f, const PreDrawData& data) const;
 		void generateInstances(const std::vector<Line>& lines, const ScaledFontMetrics& metrics,
 							const EngineCore::FrameContext& f, const PreDrawData& data);
-		uint32_t addGlyphToInstanceBuffer(const UI::GlyphInfo& g, float offset, const Vec2& basePosition);
+		uint32_t addGlyphToInstanceBuffer(const UI::GlyphInfo& g, float offset, const Vec2& basePosition, const EngineCore::FrameContext& f);
 		float getAdvanceForChar(size_t i, const GlyphInfo& g, const EngineCore::FrameContext& f) const;
 
 	protected:

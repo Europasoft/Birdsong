@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <cctype>
+#include <bit>
 
 namespace UI
 {
@@ -161,7 +162,7 @@ namespace UI
 			{
 				// add instance data for glyph to storage buffer
 				const GlyphInfo& g = font->getCharacter(text[i]);
-				const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, xOffset, linePos);
+				const uint32_t glyphInstanceID = addGlyphToInstanceBuffer(g, xOffset, linePos, f);
 
 				if (isFirstGlyph)
 				{
@@ -199,7 +200,7 @@ namespace UI
 		}
 	}
 
-	uint32_t TextBox::addGlyphToInstanceBuffer(const UI::GlyphInfo& g, float offset, const Vec2& basePosition)
+	uint32_t TextBox::addGlyphToInstanceBuffer(const UI::GlyphInfo& g, float offset, const Vec2& basePosition, const EngineCore::FrameContext& f)
 	{
 		EngineCore::ShaderInstanceData::TextGlyphInstanceData d = {};
 		d.uvs.x = g.u0;
@@ -210,10 +211,12 @@ namespace UI
 		d.vertexBounds.y = g.b;
 		d.vertexBounds.z = g.r;
 		d.vertexBounds.w = g.t;
-		d.basePos.x = basePosition.x + offset;
-		d.basePos.y = basePosition.y;
-		d.fontScale = fontScale;
-		d.textureIndex = font->getTextureIndex();
+		d.basePosFontScaleAndTextureIndex.x = basePosition.x + offset;
+		d.basePosFontScaleAndTextureIndex.y = basePosition.y;
+		d.basePosFontScaleAndTextureIndex.z = fontScale;
+		d.basePosFontScaleAndTextureIndex.w = std::bit_cast<float>(font->getTextureIndex());
+		d.targetAttachmentResolution.x = f.viewport.extent.x;
+		d.targetAttachmentResolution.y = f.viewport.extent.y;
 		return root->getTextGlyphInstanceBuffer().addInstanceData(d);
 	}
 

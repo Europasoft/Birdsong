@@ -9,12 +9,7 @@ layout(location = 1) out vec4 vertexColor;
 layout(location = 2) out vec2 boxSize; // size in pixels
 layout(location = 3) out vec4 boxCornerRadii;
 
-// SCENE GLOBAL DESCRIPTOR SET
-layout(std430, set = 0, binding = 0) uniform UBO1 
-{
-	mat4 projectionViewMatrix;
-    vec4 resolution; // viewport and swapchain resolutions in pixels;
-} ubo1;
+// scene-global descriptor set 0 is available but not needed here
 
 // second scene-global descriptor set: unbounded texture array
 layout(set = 1, binding = 0) uniform sampler2D globalTextures[];
@@ -25,6 +20,7 @@ struct UIInstanceData
 	vec4 positionAndSize;
 	vec4 backgroundColor;
 	vec4 cornerRadius;
+	vec4 targetAttachmentResolution; // may be drawing to a smaller viewport or the full swapchain image
 };
 
 // UI element instance buffer passed by BDA
@@ -43,6 +39,7 @@ layout(push_constant) uniform PushConstants
 void main() 
 {
 	UIInstanceData instance = push.uiInstanceBuffer.instances[push.instanceID];
+	vec2 attachmentResolution = instance.targetAttachmentResolution.xy;
 	vec2 position = instance.positionAndSize.xy;
 	vec2 size = instance.positionAndSize.zw;
 	
@@ -73,9 +70,7 @@ void main()
         vec2(1.0, 0.0)
     )[gl_VertexIndex];
 
-
-	vec2 viewportResolution = vec2(1920, 1080);
-	// TODO: when rendering editor UI, the full swapchain extent should be used instead of viewport extent
-	boxSize = size * viewportResolution; // pass size in actual screen pixels to fragment shader
+	// when rendering editor UI, the full swapchain extent is used instead of viewport extent
+	boxSize = size * attachmentResolution; // pass size in actual screen pixels to fragment shader
 	boxCornerRadii = instance.cornerRadius;
 }

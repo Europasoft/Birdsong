@@ -7,12 +7,7 @@
 
 layout(location = 0) out vec2 fragUV; // texture coordinate output
 
-// SCENE GLOBAL DESCRIPTOR SET
-layout(std430, set = 0, binding = 0) uniform UBO1 
-{
-	mat4 projectionViewMatrix;
-    vec2 viewportExtent;
-} ubo1;
+// scene-global descriptor set 0 is available but not needed here
 
 // second scene-global descriptor set: unbounded texture array
 layout(set = 1, binding = 0) uniform sampler2D globalTextures[];
@@ -22,9 +17,8 @@ struct GlyphInstanceData
 {
 	vec4 uvs;
 	vec4 vertexBounds;
-	vec2 basePos;
-	float fontScale;
-	uint textureIndex;
+	vec4 basePosFontScaleAndTextureIndex; // xy = basePos, z = fontScale, w = textureIndex
+	vec4 targetAttachmentResolution; // may be drawing to a smaller viewport or the full swapchain image
 };
 
 // glypth instance buffer passed by BDA
@@ -43,13 +37,17 @@ layout(push_constant) uniform PushConstants
 void main()
 {
 	GlyphInstanceData instance = push.glyphInstanceBuffer.instances[push.instanceID];
+	vec2 basePos = instance.basePosFontScaleAndTextureIndex.xy;
+	float fontScale = instance.basePosFontScaleAndTextureIndex.z;
+	uint textureIndex = floatBitsToUint(instance.basePosFontScaleAndTextureIndex.w);
+	vec2 attachmentResolution = instance.targetAttachmentResolution.xy;
 
 	float l = instance.vertexBounds.x;
 	float b = instance.vertexBounds.y;
 	float r = instance.vertexBounds.z;
 	float t = instance.vertexBounds.w;
 
-	vec2 ndcPerPixel = 2.0 / ubo1.viewportExtent;
+	vec2 ndcPerPixel = 2.0 / attachmentResolution;
 
 	vec2 vertices[6] = vec2[]
 	(
@@ -63,9 +61,9 @@ void main()
 	);
 
 	// convert basePos from [0..1] normalized space to [-1..1] NDC space
-    vec2 p = instance.basePos * 2.0 - 1.0;
+    vec2 p = basePos * 2.0 - 1.0;
     // add pixel offset converted to NDC space
-    vec2 position = p + vertices[gl_VertexIndex] * vec2(1.0, -1.0) * instance.fontScale * ndcPerPixel;
+    vec2 position = p + vertices[gl_VertexIndex] * vec2(1.0, -1.0) * fontScale * ndcPerPixel;
 
 	gl_Position = vec4(position, 0.0, 1.0);
 

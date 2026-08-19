@@ -126,6 +126,8 @@ namespace UI
 		d.cornerRadius.y = cornerRadiusTop.y;
 		d.cornerRadius.z = cornerRadiusBottom.x;
 		d.cornerRadius.w = cornerRadiusBottom.y;
+		d.targetAttachmentResolution.x = f.viewport.extent.x;
+		d.targetAttachmentResolution.y = f.viewport.extent.y;
 		instanceDataIndex = root->hierarchyInstanceBuffer->addInstanceData(d);
 	}
 

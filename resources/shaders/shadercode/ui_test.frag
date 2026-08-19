@@ -11,12 +11,7 @@ layout(location = 3) in vec4 boxCornerRadii;
 
 layout (location = 0) out vec4 outColor;
 
-// SCENE GLOBAL DESCRIPTOR SET
-layout(std430, set = 0, binding = 0) uniform UBO1 
-{
-	mat4 projectionViewMatrix;
-    vec4 resolution; // viewport and swapchain resolutions in pixels
-} ubo1;
+// scene-global descriptor set 0 is available but not needed here
 
 // second scene-global descriptor set: unbounded texture array
 layout(set = 1, binding = 0) uniform sampler2D globalTextures[];
