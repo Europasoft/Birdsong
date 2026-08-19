@@ -4,6 +4,7 @@
 #include "core/world/Scene.h"
 #include "core/engine/Camera.h"
 #include "core/gpu/Material.h"
+#include "core/types/CommonTypes.h"
 
 #include "core/types/vk.h"
 
@@ -13,6 +14,15 @@ namespace EngineCore
 	struct RenderingFormats;
 	class ViewportDrawer;
 
+	struct ViewportState
+	{
+		Vec2 extent; // either viewport extent, or window/swapchain extent (in final renderpass)
+		Vec2 position; // zero or position of the virtual viewport UI element (in pixels)
+
+		// C++20: const operator== allows automatic operator!= generation
+		bool operator==(const ViewportState& b) const noexcept { return extent == b.extent && position == b.position; }
+	};
+
 	struct FrameContext
 	{
 		VkCommandBuffer commandBuffer;
@@ -21,7 +31,7 @@ namespace EngineCore
 		WorldSystem::World* world;
 		WorldSystem::Scene* scene;
 		Camera* camera;
-		VkExtent2D viewportExtent;
+		ViewportState viewport;
 		Vec264 mousePosition;
 		bool leftClick, rightClick;
 	};
@@ -34,6 +44,6 @@ namespace EngineCore
 		RenderingFormats fxPassFormats;
 		RenderingFormats postFxPassFormats;
 		VkSampleCountFlagBits samples;
-		ViewportDrawer* viewportDrawer;
 	};
+
 }

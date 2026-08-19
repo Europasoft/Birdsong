@@ -73,7 +73,9 @@ void main()
         vec2(1.0, 0.0)
     )[gl_VertexIndex];
 
+
+	vec2 viewportResolution = vec2(1920, 1080);
 	// TODO: when rendering editor UI, the full swapchain extent should be used instead of viewport extent
-	boxSize = size * ubo1.resolution.xy; // pass size in actual screen pixels to fragment shader
+	boxSize = size * viewportResolution; // pass size in actual screen pixels to fragment shader
 	boxCornerRadii = instance.cornerRadius;
 }

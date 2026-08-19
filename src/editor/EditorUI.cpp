@@ -14,19 +14,19 @@ namespace Editor
 
 	static std::string_view editorDefaultFontPath = "fonts/InterDisplay-Regular.ttf";
 
-	EditorUI::EditorUI(EngineDevice& device, const DrawContext& d)
-	{
-		loadDefaultFonts(device, d);
-	}
-
 	EditorUI::~EditorUI() = default;
 
-	void EditorUI::buildUI(EngineDevice& device, const DrawContext& d)
+	EditorUI::EditorUI(EngineCore::EngineDevice& device)
 	{
 		rootElement = RootElement::create(device);
 
-		auto& viewportElement = rootElement->addElement<VirtualViewport>();
-		viewportElement.init(d);
+		editorStackElement = &rootElement->addElement<VerticalBox>();
+		editorStackElement->position = Vec2(0.01f);
+		editorStackElement->size = Vec2(0.98f, 0.1f);
+		editorStackElement->pivotPoint = Vec2(0.f);
+		editorStackElement->backgroundColor = Vec(0.1f, 0.1f, 0.6f);
+
+		viewportElement = &editorStackElement->addElement<VirtualViewport>();
 
 		/*
 		HorizontalBox& box = rootElement->addElement<HorizontalBox>();
@@ -68,12 +68,25 @@ namespace Editor
 		*/
 	}
 
-	void EditorUI::render(EngineCore::EngineDevice& device, const EngineCore::FrameContext& f, const EngineCore::DrawContext& d)
+	void EditorUI::loadMaterials(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d)
 	{
-		if (not rootElement) 
-			buildUI(device, d);
+		DrawContext dd = d;
+		dd.samples = VK_SAMPLE_COUNT_1_BIT; // editor UI is drawn directly to the swapchain, no MSAA
+
+		editorStackElement->loadMaterial(device, dd);
+	}
+
+	void EditorUI::render(EngineDevice& device, const FrameContext& f, const DrawContext& d)
+	{
+		if (not editorDefaultFont) loadDefaultFonts(device, d);
 
 		rootElement->drawAll(f);
+	}
+
+	const EngineCore::ViewportState& EditorUI::getViewportState() const
+	{
+		assert(viewportElement);
+		return viewportElement->getViewportState();
 	}
 
 	void EditorUI::loadDefaultFonts(EngineDevice& device, const DrawContext& d)
@@ -81,4 +94,7 @@ namespace Editor
 		auto& texMgr = d.world->getScene().getTextureManager();
 		editorDefaultFont = Font::load(device, editorDefaultFontPath, texMgr);
 	}
+
+	
+
 }

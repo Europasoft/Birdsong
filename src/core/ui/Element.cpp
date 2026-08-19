@@ -163,8 +163,8 @@ namespace UI
 
 	bool Element::cursorHitTest(const EngineCore::FrameContext& f, Vec2 renderPosition, Vec2 renderSize) const
 	{
-		const Vec2 pixelBoundsX = Vec2(renderPosition.x, renderPosition.x + renderSize.x) * f.viewportExtent.width;
-		const Vec2 pixelBoundsY = Vec2(renderPosition.y, renderPosition.y + renderSize.y) * f.viewportExtent.height;
+		const Vec2 pixelBoundsX = Vec2(renderPosition.x, renderPosition.x + renderSize.x) * f.viewport.extent.x;
+		const Vec2 pixelBoundsY = Vec2(renderPosition.y, renderPosition.y + renderSize.y) * f.viewport.extent.y;
 		return (f.mousePosition.x >= pixelBoundsX.x) && (f.mousePosition.x <= pixelBoundsX.y)
 			&& (f.mousePosition.y >= pixelBoundsY.x) && (f.mousePosition.y <= pixelBoundsY.y);
 	}

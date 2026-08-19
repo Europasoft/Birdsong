@@ -49,7 +49,7 @@ namespace UI
 
 		if (not (text.size() && font && textMaterial)) return;
 
-		const ScaledFontMetrics metrics = font->getScaledMetrics(f.viewportExtent.height, fontScale);
+		const ScaledFontMetrics metrics = font->getScaledMetrics(f.viewport.extent.y, fontScale);
 		std::vector<Line> lines = processLines(f, data);
 		generateInstances(lines, metrics, f, data);
 	}
@@ -221,7 +221,7 @@ namespace UI
 	{
 		const float kerning = (i == text.size() - 1) ? 0.f : font->getKerning(text[i], text[i + 1]);
 		// convert (advance + kerning) to normalized [0, 1] width
-		return (g.advance + kerning) * fontScale / f.viewportExtent.width; 
+		return (g.advance + kerning) * fontScale / f.viewport.extent.x;
 	}
 
 

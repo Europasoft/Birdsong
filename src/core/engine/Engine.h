@@ -37,6 +37,7 @@ namespace EngineCore
 	class Camera;
 	struct FrameContext;
 	struct DrawContext;
+	struct ViewportState;
 
 	// base class for an object representing the entire engine
 	class EngineApplication
@@ -51,11 +52,16 @@ namespace EngineCore
 		static constexpr int WIDTH = 1920;
 		static constexpr int HEIGHT = 1080;
 
+		static constexpr bool enableEditor() { return true; }
+
 		// begins the main window event loop
 		void startExecution();
 
 		const EngineRenderSettings& getRenderSettings() const { return renderSettings; }
 		Renderer& getRenderer();
+
+		enum class EGetViewport : uint32_t { VIEWPORT, FULL_SWAPCHAIN };
+		ViewportState getViewportState(EGetViewport m = EGetViewport::VIEWPORT) const;
 
 	private:
 		friend class GameLoader;
@@ -68,7 +74,7 @@ namespace EngineCore
 		void onSwapchainCreated();
 
 		void mainLoop();
-		void render(const FrameContext& frame);
+		void render(FrameContext& frame);
 		void moveCamera(Camera& camera);
 		void inputTick(double delta);
 

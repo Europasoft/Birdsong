@@ -20,6 +20,7 @@
 #include "core/include/shared/Transform.h"
 #include "core/nodes/MeshCache.h"
 #include "core/types/Math.h"
+#include "core/draw/FrameContext.h"
 
 
 #include "deps/box3d-cpp/include/b3cpp.h"
@@ -108,10 +109,10 @@ namespace WorldSystem
 		glm::mat4 pvm{ 1.f };
 		pvm = cam.getProjectionViewMatrix();
 		glm::vec4 res{ 0.f };
-		const auto viewport = engine.renderer->getViewportExtent();
+		const auto viewport = engine.getViewportState().extent;
 		const auto full = engine.renderer->getSwapchainExtent();
-		res.x = viewport.width;
-		res.y = viewport.height;
+		res.x = viewport.x;
+		res.y = viewport.y;
 		res.z = full.width;
 		res.w = full.height;
 		sceneGlobalDescriptorSet->writeUBOMember(0, pvm, EngineCore::UBO_Layout::ElementAccessor{ 0, 0, 0 }, frameIndex);

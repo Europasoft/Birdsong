@@ -16,19 +16,25 @@
 
 namespace UI
 {
-	VirtualViewport::VirtualViewport() = default;
+	VirtualViewport::VirtualViewport()
+	{
+		// set the extent and size once at start (testing)
+		viewportState = EngineCore::ViewportState
+		{
+			.extent = Vec2(900, 900),
+			.position = Vec2(0.f, 0.f)
+		};
+	}
 
 	VirtualViewport::~VirtualViewport() = default;
 
-	void VirtualViewport::init(const EngineCore::DrawContext& d)
-	{
-		renderer = d.renderer;
-		drawer = d.viewportDrawer;
-		reportViewportShapeChanged(); // set the extent and size once before rendering first frame
-	}
-
 	void VirtualViewport::loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d)
 	{
+	}
+
+	const EngineCore::ViewportState& VirtualViewport::getViewportState() const
+	{
+		return viewportState; // in pixels
 	}
 
 	void VirtualViewport::preDraw(const EngineCore::FrameContext& f, const PreDrawData& data, Vec2 renderPosition)
@@ -37,18 +43,7 @@ namespace UI
 
 	void VirtualViewport::draw(const EngineCore::FrameContext& f, EngineCore::Material*& m)
 	{
-		reportViewportShapeChanged(); // TODO: only call when element resized
-	}
-
-	void VirtualViewport::reportViewportShapeChanged()
-	{
-		assert(renderer && drawer);
-		if (renderer && drawer)
-		{
-			// TODO: temporarily hardcoded. also figure out how to create/recreate the attachment images at the right resolution!
-			renderer->setViewportExtent({ 1400, 900 });
-			drawer->setPositionAndSize({ 0, 0 }, { 1400, 900 });
-		}
+		// TODO: change viewportState when element resized
 	}
 
 }

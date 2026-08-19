@@ -42,19 +42,20 @@ namespace EngineCore
 		std::cout << "Engine working directory: '" << std::filesystem::current_path().string() << "'\n";
 		window = std::make_unique<EngineWindow>(WIDTH, HEIGHT, "Vulkan Window");
 		device = std::make_unique<EngineDevice>(*window);
-		renderer = std::make_unique<Renderer>(*window, *device, renderSettings);
+		editor = std::make_unique<Editor::Editor>(*device);
+		renderer = std::make_unique<Renderer>(*window, *device, *this);
+		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
 		world = std::make_unique<WorldSystem::World>(*device, *this);
 		gameLoader = std::make_unique<GameLoader>(this);
-		editor = std::make_unique<Editor::Editor>();
+
 		try
 		{
 			gameLoader->loadDll("Game");
 		}
 		catch (...) { std::cout << "Failed to load Game DLL"; }
 
-		renderer->swapchainCreatedCallback = std::bind(&EngineApplication::onSwapchainCreated, this);
-
 		setupDrawers();
+	
 		setupDefaultInputs();
 
 		// keep running until application is closed
@@ -76,7 +77,7 @@ namespace EngineCore
 			f.scene = &f.world->getScene();
 			f.camera = &f.scene->getCurrentCamera();
 			f.delta = engineClock.measureFrameDelta(f.bufferIndex);
-			f.viewportExtent = renderer->getViewportExtent();
+			f.viewport = getViewportState(EGetViewport::VIEWPORT);
 			f.mousePosition = window->input.getMousePosition();
 			f.leftClick = window->input.wasMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT);
 			f.rightClick = window->input.wasMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT);
@@ -115,9 +116,8 @@ namespace EngineCore
 		fxDrawer = std::make_unique<FxDrawer>(*device, *drawContext);
 		debugDrawer = std::make_unique<DebugDrawer>(*device, *drawContext);
 		//planetDrawer = std::make_unique<PlanetDrawer>(*device, *world, baseFormats, renderSettings.sampleCountMSAA);
-		editor->initEditorUI(*device, *drawContext);
 		viewportDrawer = std::make_unique<ViewportDrawer>(*device, *drawContext);
-		drawContext->viewportDrawer = viewportDrawer.get();
+		editor->loadUIMaterials(*device, *drawContext);
 	}
 
 	void EngineApplication::setupDefaultInputs()
@@ -140,7 +140,7 @@ namespace EngineCore
 		setupDrawers();
 	}
 
-	void EngineApplication::render(const FrameContext& f)
+	void EngineApplication::render(FrameContext& f)
 	{
 		f.scene->updateDescriptors(f.bufferIndex, f.delta);
 		f.scene->updateInstanceData(f.bufferIndex);
@@ -162,15 +162,24 @@ namespace EngineCore
 
 		debugDrawer->render(f);
 
-		editor->renderUI(*device.get(), f, *drawContext);
-
 		renderer->endRendering(f.commandBuffer);
 
 		// RENDER FX PASS
 		fxDrawer->render(f);
 
-		// RENDER VIEWPORT (POST-FX PASS)
+		// POST-FX PASS START
+		f.viewport = getViewportState(EGetViewport::FULL_SWAPCHAIN); // final pass uses full resolution
+		renderer->beginRenderingPostFx(f.commandBuffer);
+
+		// render viewport
 		viewportDrawer->render(f);
+
+		// render editor UI
+		if (editor->hasUI())
+			editor->renderUI(*device.get(), f, *drawContext);
+
+		// POST-FX PASS END
+		renderer->endRendering(f.commandBuffer);
 
 		// submit command buffer
 		renderer->endFrame(); 
@@ -188,6 +197,27 @@ namespace EngineCore
 		{
 			device->waitIdle();
 			window->toggleFullscreen();
+		}
+	}
+
+	ViewportState EngineApplication::getViewportState(EGetViewport m) const
+	{
+		// this is the single source of truth for viewport resolution
+		if (enableEditor() && editor->hasUI() && m == EGetViewport::VIEWPORT)
+		{
+			// the editor UI must be initialized to get a virtual viewport state
+			return editor->getViewportState();
+		}
+		else
+		{
+			// just use full window/swapchain resolution if a virtual viewport isn't used
+			// make sure the swapchain is initialized before this
+			const auto fullRes = renderer->getSwapchainExtent();
+			return ViewportState
+			{
+				.extent = Vec2(fullRes.width, fullRes.height),
+				.position = Vec2(0.f, 0.f)
+			};
 		}
 	}
 

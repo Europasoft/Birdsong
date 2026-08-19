@@ -1,5 +1,7 @@
 #pragma once
 #include "core/ui/Element.h"
+#include "core/types/CommonTypes.h"
+#include "core/draw/FrameContext.h"
 
 #include <string>
 
@@ -8,8 +10,6 @@ namespace EngineCore
 	struct FrameContext;
 	struct DrawContext;
 	class Material;
-	class Renderer;
-	class ViewportDrawer;
 }
 
 namespace UI
@@ -21,17 +21,17 @@ namespace UI
 	public:
 		VirtualViewport();
 		virtual ~VirtualViewport();
-		void init(const EngineCore::DrawContext& d);
+		void init();
 
 		virtual void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d) override;
+
+		const EngineCore::ViewportState& getViewportState() const;
 
 	protected:
 		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data, Vec2 renderPosition) override;
 		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m) override;
-		void reportViewportShapeChanged();
 
-		EngineCore::Renderer* renderer = nullptr;
-		EngineCore::ViewportDrawer* drawer = nullptr;
+		EngineCore::ViewportState viewportState{}; // extent and position based on the shape of this UI element
 
 	};
 

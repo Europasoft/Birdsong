@@ -2,6 +2,7 @@
 #include "core/gpu/Swapchain.h"
 #include "core/render/Attachment.h"
 #include "core/gpu/Material.h" // for RenderingFormats
+#include "core/draw/FrameContext.h"
 
 #include <memory>
 #include <vector>
@@ -13,11 +14,12 @@ namespace EngineCore
 	class EngineDevice;
 	class EngineWindow;
 	struct EngineRenderSettings;
+	class EngineApplication;
 
 	class Renderer
 	{
 	public:
-		Renderer(EngineWindow& window, EngineDevice& device, EngineRenderSettings& renderSettings);
+		Renderer(EngineWindow& window, EngineDevice& device, EngineApplication& engine);
 		~Renderer();
 		Renderer(const Renderer&) = delete;
 		Renderer& operator=(const Renderer&) = delete;
@@ -45,8 +47,8 @@ namespace EngineCore
 
 		float getSwapchainAspectRatio() const;
 		VkExtent2D getSwapchainExtent() const { return swapchain->getExtent(); }
-		VkExtent2D getViewportExtent() const;
-		void setViewportExtent(VkExtent2D ext) { viewportExtent = ext; }
+		bool getNewViewportState();
+		void getInitialViewportState();
 
 		// returns a command buffer to record commands into
 		VkCommandBuffer beginFrame();
@@ -69,8 +71,8 @@ namespace EngineCore
 		void createCommandBuffers();
 		void freeCommandBuffers();
 
-		// constructs attachments and swapchain
-		void create();
+		// reconstructs attachments and swapchain
+		void recreate();
 		
 		void createSwapchain();
 		void createAttachments();
@@ -79,7 +81,7 @@ namespace EngineCore
 			attachments.push_back(std::make_unique<Attachment>(device, p, inputAttachment, sampled));
 			return *attachments.back(); 
 		}
-
+		
 		// image layout transition helper
 		friend struct ImageLayoutChanger;
 		static void transitionImageLayout(VkCommandBuffer cmdBuffer, VkImage image, 
@@ -105,10 +107,13 @@ namespace EngineCore
 		const Attachment* depthResolveAttachment = nullptr;
 		const Attachment* fxColorAttachment = nullptr;
 
-		VkExtent2D viewportExtent = { 1400, 900 };
+		ViewportState viewportState{};
+		VkExtent2D viewportExtent{ 0, 0 };
+
 		EngineWindow& window;
 		EngineDevice& device;
-		EngineRenderSettings& renderSettings;
+		const EngineRenderSettings& renderSettings;
+		const EngineApplication& engine;
 		std::unique_ptr<EngineSwapChain> swapchain;
 		std::vector<VkCommandBuffer> commandBuffers;
 		// index of the current swapchain image

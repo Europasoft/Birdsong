@@ -12,10 +12,12 @@
 
 namespace EngineCore
 {
-	Renderer::Renderer(EngineWindow& window, EngineDevice& device, EngineRenderSettings& renderSettings)
-							: window{window}, device{device}, renderSettings{renderSettings}
+	Renderer::Renderer(EngineWindow& window, EngineDevice& device, EngineApplication& engine)
+		: window{window}, device{device}, engine{engine}, renderSettings{engine.getRenderSettings()}
 	{
-		create();
+		createSwapchain();
+		getInitialViewportState(); // gets attachment resolution (swapchain extent, or editor virtual viewport)
+		createAttachments();
 		createCommandBuffers();
 	}
 
@@ -41,12 +43,13 @@ namespace EngineCore
 		commandBuffers.clear();
 	}
 
-	void Renderer::create()
+	void Renderer::recreate()
 	{
 		currentFrameIndex = 0;
 		createSwapchain();
 		createAttachments();
-		if (swapchainCreatedCallback) { swapchainCreatedCallback(); }
+		if (swapchainCreatedCallback)
+			swapchainCreatedCallback();
 	}
 
 	void Renderer::createSwapchain()
@@ -73,11 +76,9 @@ namespace EngineCore
 
 	void Renderer::createAttachments() 
 	{
-		// clear previous attachments
-		attachments.clear();
-
-		// attachment resolution may be smaller than swapchain when in editor
-		const auto extent = getViewportExtent();
+		// attachment resolution may be smaller than swapchain when in editor (controlled by a VirtualViewport in EngineUI)
+		const auto extent = viewportExtent;
+		assert(extent.width > 0 && extent.height > 0);
 
 		AttachmentProperties color = swapchain->getAttachmentProperties();
 		color.type = AttachmentType::COLOR;
@@ -98,6 +99,9 @@ namespace EngineCore
 
 		AttachmentProperties fxColor = resolve;
 		fxColor.type = AttachmentType::COLOR; // non-MSAA color target
+
+		// clear previous attachments
+		attachments.clear();
 
 		// create attachments and store pointers for rendering
 		colorAttachment = &addAttachment(color, false, false);
@@ -249,7 +253,8 @@ namespace EngineCore
 		depthAttachmentInfo.resolveImageView = depthResolveViews[currentImageIndex];
 		depthAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-		const auto extent = getViewportExtent();
+		const auto extent = viewportExtent;
+		assert(extent.width > 0 && extent.height > 0);
 
 		VkRenderingInfo renderingInfo{};
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -315,7 +320,7 @@ namespace EngineCore
 		depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
 		depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
-		const auto extent = getViewportExtent();
+		const auto extent = viewportExtent;
 
 		VkRenderingInfo renderingInfo{};
 		renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -402,7 +407,7 @@ namespace EngineCore
 		auto result = swapchain->acquireNextImage(&currentImageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) 
 		{ 
-			create(); // recreate swapchain and renderpasses
+			recreate(); // recreate swapchain and renderpasses
 			return nullptr; 
 		} 
 		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { throw std::runtime_error("failed to acquire swapchain image"); }
@@ -434,10 +439,12 @@ namespace EngineCore
 		{ throw std::runtime_error("failed to record command buffer"); }
 
 		auto result = swapchain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || window.wasWindowResized())
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
+			 window.wasWindowResized() || getNewViewportState())
 		{
+			// if viewport state changed or window was resized at end of frame, recreate swapchain and attachments
 			window.resetWindowResizedFlag();
-			create();
+			recreate();
 		}
 		else if (result != VK_SUCCESS)
 		{
@@ -453,10 +460,36 @@ namespace EngineCore
 
 	float Renderer::getSwapchainAspectRatio() const { return swapchain->getExtentAspectRatio(); }
 
-	VkExtent2D Renderer::getViewportExtent() const
+	bool Renderer::getNewViewportState()
 	{
-		assert(viewportExtent.width > 0 && viewportExtent.height > 0);
-		return viewportExtent;
+		if (not EngineApplication::enableEditor()) return false; // without editor just keep using full swapchain resolution
+
+		// retrieve updated viewport resolution
+		const auto newViewportState = engine.getViewportState();
+		if (newViewportState != viewportState)
+		{
+			viewportState = newViewportState; // renderer remembers latest viewport state
+			viewportExtent.width = newViewportState.extent.x;
+			viewportExtent.height = newViewportState.extent.y;
+			return true; // must recreate attachments with new size
+		}
+		return false;
+	}
+
+	void Renderer::getInitialViewportState()
+	{
+		// safe to call in constructor, unlike getNewViewportState
+		if (not EngineApplication::enableEditor())
+		{
+			// editor is not used, so the full swapchain extent can be used always
+			// (do not use EngineApplication::getViewportState here, as Renderer's ctor may not have finished)
+			viewportExtent = getSwapchainExtent();
+		}
+		else
+		{
+			// trusting that EngineApplication::getViewportState does not touch this->swapchain (potentially not fully constructed)
+			getNewViewportState();
+		}
 	}
 
 }

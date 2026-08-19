@@ -45,34 +45,27 @@ namespace EngineCore
 
 	void ViewportDrawer::render(const FrameContext& f)
 	{
+		assert(f.viewport.extent.x > 0.1f);
+		if (f.viewport.extent.x <= 0.1f) return;
+
 		const auto& frameIndex = d.renderer->getFrameIndex();
 		const auto& imageIndex = d.renderer->getSwapImageIndex();
-
-		d.renderer->beginRenderingPostFx(f.commandBuffer); // POST-FX PASS START
 
 		bindDescriptorSets(f.commandBuffer, viewportMaterial.get()->getPipelineLayout(), frameIndex, imageIndex);
 
 		viewportMaterial->bindToCommandBuffer(f.commandBuffer);
 
-		// viewport does not necessarily cover the entire window
+		// viewport does not necessarily cover the entire window (shape may come from VirtualViewport in EngineUI)
 		ShaderPushConstants::ViewportPushConstants push{};
-		push.positionAndSize.x = viewportPosition.x;
-		push.positionAndSize.y = viewportPosition.y;
-		push.positionAndSize.z = viewportSize.x;
-		push.positionAndSize.w = viewportSize.y;
+		push.positionAndSize.x = f.viewport.position.x;
+		push.positionAndSize.y = f.viewport.position.y;
+		push.positionAndSize.z = f.viewport.extent.x;
+		push.positionAndSize.w = f.viewport.extent.y;
 		assert(push.positionAndSize.z * push.positionAndSize.w > 0);
 		viewportMaterial->writePushConstants(f.commandBuffer, push);
 
 		// draw viewport
 		vkCmdDraw(f.commandBuffer, 6, 1, 0, 0);
-
-		d.renderer->endRendering(f.commandBuffer); // POST-FX PASS END
-	}
-
-	void ViewportDrawer::setPositionAndSize(Vec2 position, Vec2 size)
-	{
-		viewportPosition = position;
-		viewportSize = size;
 	}
 
 	void ViewportDrawer::bindDescriptorSets(VkCommandBuffer cmdBuffer, VkPipelineLayout pipelineLayout, uint32_t frameIndex, uint32_t swapImageIndex)
