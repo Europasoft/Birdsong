@@ -16,19 +16,78 @@ namespace Editor
 
 	EditorUI::~EditorUI() = default;
 
+	void editorElementDefaults(Element* e)
+	{
+		e->position = Vec2(0.f);
+		e->pivotPoint = Vec2(0.f);
+		e->size = Vec2(1.f);
+		e->cursorBehavior = Element::ECursorBehavior::IGNORE;
+		e->backgroundColor = Vec(0.1f);
+		e->backgroundOpacity = 0.f;
+		e->hoverBackgroundColor = Vec(0.16);
+	}
+
 	EditorUI::EditorUI(EngineCore::EngineDevice& device)
 	{
 		rootElement = RootElement::create(device);
 
-		editorStackElement = &rootElement->addElement<VerticalBox>();
-		editorStackElement->position = Vec2(0.01f);
-		editorStackElement->size = Vec2(0.66f, 0.66f);
-		editorStackElement->pivotPoint = Vec2(0.f);
-		editorStackElement->backgroundColor = Vec(0.1f, 0.1f, 0.6f);
-		editorStackElement->backgroundOpacity = 0.2f;
+		const float topBarHeight = 0.02f;
+		const float bottomBarHeight = 0.02f;
+		const float rightStackWidth = 0.2f;
+		const float leftStackWidth = 1.f - rightStackWidth;
+		const float viewportHeight = 0.75f;
+		const float contentBrowserHeight = 1.f - viewportHeight;
 
-		viewportElement = &editorStackElement->addElement<VirtualViewport>();
-		viewportElement->size = Vec2(1.f, 1.f);
+		// vertical stack that contains all editor elements
+		rootStackElement = &rootElement->addElement<VerticalBox>();
+		editorElementDefaults(rootStackElement);
+		rootStackElement->backgroundOpacity = 0.f;
+
+		// bar at the very top of the window surface
+		editorTopBar = &rootStackElement->addElement<HorizontalBox>();
+		editorElementDefaults(editorTopBar);
+		editorTopBar->size.y = topBarHeight;
+		editorTopBar->backgroundOpacity = 1.f;
+		editorTopBar->cursorBehavior = Element::ECursorBehavior::RESPOND_PASS;
+
+		// container for all the central editor elements
+		editorMainArea = &rootStackElement->addElement<HorizontalBox>();
+		editorElementDefaults(editorMainArea);
+		editorMainArea->size.y = 1.f - (topBarHeight + bottomBarHeight);
+		editorMainArea->backgroundOpacity = 0.f;
+
+
+		// vertical stack containing the viewport and asset browser
+		editorLeftStackElement = &editorMainArea->addElement<VerticalBox>();
+		editorElementDefaults(editorLeftStackElement);
+		editorLeftStackElement->size.x = leftStackWidth;
+
+		// vertical stack containing the right side menus
+		editorRightStackElement = &editorMainArea->addElement<VerticalBox>();
+		editorElementDefaults(editorRightStackElement);
+		editorRightStackElement->size.x = rightStackWidth;
+		editorRightStackElement->backgroundOpacity = 1.f;
+		editorRightStackElement->cursorBehavior = Element::ECursorBehavior::RESPOND_PASS;
+
+		// virtual viewport area cutout
+		viewportElement = &editorLeftStackElement->addElement<VirtualViewport>();
+		editorElementDefaults(viewportElement);
+		viewportElement->size.y = viewportHeight;
+
+		// bottom content browser
+		contentBrowserElement = &editorLeftStackElement->addElement<HorizontalBox>();
+		editorElementDefaults(contentBrowserElement);
+		contentBrowserElement->size.y = contentBrowserHeight;
+		contentBrowserElement->backgroundOpacity = 1.f;
+		contentBrowserElement->cursorBehavior = Element::ECursorBehavior::RESPOND_PASS;
+
+
+		// bar at the very bottom of the window surface
+		editorBottomBar = &rootStackElement->addElement<HorizontalBox>();
+		editorElementDefaults(editorBottomBar);
+		editorBottomBar->size.y = bottomBarHeight;
+		editorBottomBar->backgroundOpacity = 1.f;
+		editorBottomBar->cursorBehavior = Element::ECursorBehavior::RESPOND_PASS;
 
 		/*
 		HorizontalBox& box = rootElement->addElement<HorizontalBox>();
@@ -75,7 +134,13 @@ namespace Editor
 		DrawContext dd = d;
 		dd.samples = VK_SAMPLE_COUNT_1_BIT; // editor UI is drawn directly to the swapchain, no MSAA
 
-		editorStackElement->loadMaterial(device, dd);
+		rootStackElement->loadMaterial(device, dd);
+		editorTopBar->loadMaterial(device, dd);
+		editorBottomBar->loadMaterial(device, dd);
+		editorMainArea->loadMaterial(device, dd);
+		editorLeftStackElement->loadMaterial(device, dd);
+		editorRightStackElement->loadMaterial(device, dd);
+		contentBrowserElement->loadMaterial(device, dd);
 	}
 
 	void EditorUI::render(EngineDevice& device, const FrameContext& f, const DrawContext& d)

@@ -17,6 +17,7 @@ namespace UI
 	class RootElement;
 	class VerticalBox;
 	class VirtualViewport;
+	class HorizontalBox;
 	class Font;
 	struct GlyphInfo;
 	class TextBox;
@@ -39,8 +40,16 @@ namespace Editor
 	protected:
 		std::unique_ptr<UI::RootElement> rootElement;
 		std::shared_ptr<UI::Font> editorDefaultFont;
-		UI::VerticalBox* editorStackElement = nullptr;
+
+		UI::VerticalBox* rootStackElement = nullptr;
+		UI::HorizontalBox* editorTopBar = nullptr;
+		UI::HorizontalBox* editorBottomBar = nullptr;
+		UI::HorizontalBox* editorMainArea = nullptr;
+		UI::VerticalBox* editorLeftStackElement = nullptr;
+		UI::VerticalBox* editorRightStackElement = nullptr;
 		UI::VirtualViewport* viewportElement = nullptr;
+		UI::HorizontalBox* contentBrowserElement = nullptr;
+
 
 	protected:
 		void loadDefaultFonts(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d);

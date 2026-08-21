@@ -155,6 +155,7 @@ namespace UI
 
 	void Element::handleInput(const EngineCore::FrameContext& f, PreDrawData& currentData, Vec2 renderPosition)
 	{
+		if (cursorBehavior == ECursorBehavior::IGNORE) return;
 		currentData.hovered = cursorHitTest(f, renderPosition, currentData.size);
 		currentData.clicked = (currentData.hovered && f.leftClick);
 		if (currentData.clicked) 
