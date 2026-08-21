@@ -48,7 +48,7 @@ namespace UI
 	{
 		Element::preDraw(f, data, renderPosition);
 
-		if (not (text.size() && font && textMaterial)) return;
+		if (not (text.size() && font)) return;
 
 		const ScaledFontMetrics metrics = font->getScaledMetrics(f.viewport.extent.y, fontScale);
 		std::vector<Line> lines = processLines(f, data);

@@ -49,7 +49,20 @@ namespace Editor
 		UI::VerticalBox* editorRightStackElement = nullptr;
 		UI::VirtualViewport* viewportElement = nullptr;
 		UI::HorizontalBox* contentBrowserElement = nullptr;
+		UI::TextBox* topBarTitleText = nullptr;
 
+		void createEditorMainArea();
+		void createEditorRightStack();
+		void createEditorLeftStack();
+		void createEditorTopBar();
+		void createEditorBottomBar();
+
+		float topBarHeight;
+		float bottomBarHeight;
+		float rightStackWidth;
+		float leftStackWidth;
+		float viewportHeight;
+		float contentBrowserHeight;
 
 	protected:
 		void loadDefaultFonts(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d);

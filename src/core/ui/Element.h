@@ -66,6 +66,7 @@ namespace UI
 
 	public:
 		virtual void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d);
+		virtual void loadMaterialsRecursive(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d);
 		bool isRoot() const;
 		bool isNextToRoot() const;
 		bool isLeaf() const;
@@ -120,6 +121,7 @@ namespace UI
 
 		EngineCore::InstanceBuffer<GlyphInst>& getTextGlyphInstanceBuffer() const;
 
+		void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d) override {}; // no-op
 	protected:
 		friend Element;
 		uint32_t numElements = 0;

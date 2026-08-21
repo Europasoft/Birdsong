@@ -47,6 +47,15 @@ namespace UI
 		material->finalize();
 	}
 
+	void Element::loadMaterialsRecursive(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d)
+	{
+		loadMaterial(device, d);
+		for (auto& e : nested)
+		{
+			e->loadMaterialsRecursive(device, d);
+		}
+	}
+
 	void RootElement::drawAll(const EngineCore::FrameContext& f)
 	{
 		PreDrawData data =
