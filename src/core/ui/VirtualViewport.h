@@ -21,15 +21,18 @@ namespace UI
 	public:
 		VirtualViewport();
 		virtual ~VirtualViewport();
-		void init();
-
-		virtual void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d) override;
 
 		const EngineCore::ViewportState& getViewportState() const;
 
+		void preDrawRecursive(const EngineCore::FrameContext& f, const PreDrawData& parentData) override;
+
+		// the viewport element doesn't draw anything on its own, it only makes space for the content
+		void loadMaterial(EngineCore::EngineDevice& device, const EngineCore::DrawContext& d) override {}; // no-op
+
 	protected:
-		virtual void preDraw(const EngineCore::FrameContext& f, const PreDrawData& data, Vec2 renderPosition) override;
-		virtual void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m) override;
+		void draw(const EngineCore::FrameContext& f, EngineCore::Material*& m) override {}; // no-op
+		
+		void handleInput(const EngineCore::FrameContext& f, PreDrawData& currentData, Vec2 renderPosition) override;
 
 		EngineCore::ViewportState viewportState{}; // extent and position based on the shape of this UI element
 

@@ -168,13 +168,13 @@ namespace EngineCore
 		fxDrawer->render(f);
 
 		// POST-FX PASS START
-		f.viewport = getViewportState(EGetViewport::FULL_SWAPCHAIN); // final pass uses full resolution
 		renderer->beginRenderingPostFx(f.commandBuffer);
 
 		// render viewport
 		viewportDrawer->render(f);
 
 		// render editor UI
+		f.viewport = getViewportState(EGetViewport::FULL_SWAPCHAIN); // editor UI draws to full swapchain resolution
 		if (editor->hasUI())
 			editor->renderUI(*device.get(), f, *drawContext);
 

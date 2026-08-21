@@ -22,11 +22,13 @@ namespace Editor
 
 		editorStackElement = &rootElement->addElement<VerticalBox>();
 		editorStackElement->position = Vec2(0.01f);
-		editorStackElement->size = Vec2(0.98f, 0.1f);
+		editorStackElement->size = Vec2(0.66f, 0.66f);
 		editorStackElement->pivotPoint = Vec2(0.f);
 		editorStackElement->backgroundColor = Vec(0.1f, 0.1f, 0.6f);
+		editorStackElement->backgroundOpacity = 0.2f;
 
 		viewportElement = &editorStackElement->addElement<VirtualViewport>();
+		viewportElement->size = Vec2(1.f, 1.f);
 
 		/*
 		HorizontalBox& box = rootElement->addElement<HorizontalBox>();
